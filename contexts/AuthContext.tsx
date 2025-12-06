@@ -61,6 +61,7 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
 
   const isAdmin = session?.user.role === "admin";
   const isCrew = session?.user.role === "crew";
+  const isCustomer = session?.user.role === "customer";
   const isAuthenticated = !!session;
 
   return {
@@ -69,6 +70,7 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
     isAuthenticated,
     isAdmin,
     isCrew,
+    isCustomer,
     user: session?.user ?? null,
     organization: session?.organization ?? null,
     login,

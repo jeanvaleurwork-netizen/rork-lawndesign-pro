@@ -12,6 +12,10 @@ import {
   getEstimatesRoute,
   createEstimateRoute,
   updateEstimateRoute,
+  getCustomerJobsRoute,
+  getCustomerEstimatesRoute,
+  approveEstimateRoute,
+  uploadCustomerDocumentRoute,
 } from "./routes/data/route";
 import {
   createAdminRoute,
@@ -23,6 +27,8 @@ import {
   crewSignupWithInviteRoute,
   getInviteCodesRoute,
   getOrganizationCrewRoute,
+  customerLoginRoute,
+  createCustomerRoute,
 } from "./routes/auth/route";
 import {
   analyzeJobCostRoute,
@@ -82,6 +88,8 @@ export const appRouter = createTRPCRouter({
     crewSignupWithInvite: crewSignupWithInviteRoute,
     getInviteCodes: getInviteCodesRoute,
     getOrganizationCrew: getOrganizationCrewRoute,
+    customerLogin: customerLoginRoute,
+    createCustomer: createCustomerRoute,
   }),
   gemini: createTRPCRouter({
     analyzeJobCost: analyzeJobCostRoute,
@@ -112,6 +120,10 @@ export const appRouter = createTRPCRouter({
     getEstimates: getEstimatesRoute,
     createEstimate: createEstimateRoute,
     updateEstimate: updateEstimateRoute,
+    getCustomerJobs: getCustomerJobsRoute,
+    getCustomerEstimates: getCustomerEstimatesRoute,
+    approveEstimate: approveEstimateRoute,
+    uploadCustomerDocument: uploadCustomerDocumentRoute,
   }),
   pagosAI: createTRPCRouter({
     analyzePaymentPatterns: analyzePaymentPatternsRoute,

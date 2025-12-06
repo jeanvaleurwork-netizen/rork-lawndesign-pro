@@ -281,3 +281,56 @@ export const updateEstimateRoute = publicProcedure
     console.log("[Backend] Estimate updated successfully");
     return estimates[estimateIndex];
   });
+
+export const getCustomerJobsRoute = publicProcedure
+  .input(z.object({ clientId: z.string() }))
+  .query(({ input }) => {
+    console.log("[Backend] Getting jobs for customer:", input.clientId);
+    return jobs.filter((j) => j.clientId === input.clientId);
+  });
+
+export const getCustomerEstimatesRoute = publicProcedure
+  .input(z.object({ clientId: z.string() }))
+  .query(({ input }) => {
+    console.log("[Backend] Getting estimates for customer:", input.clientId);
+    return estimates.filter((e) => e.clientId === input.clientId);
+  });
+
+export const approveEstimateRoute = publicProcedure
+  .input(z.object({ estimateId: z.string(), clientId: z.string() }))
+  .mutation(({ input }) => {
+    console.log("[Backend] Customer approving estimate:", input.estimateId);
+
+    const estimateIndex = estimates.findIndex((e) => e.id === input.estimateId && e.clientId === input.clientId);
+    if (estimateIndex === -1) {
+      throw new Error("Estimate not found or unauthorized");
+    }
+
+    estimates[estimateIndex].status = "approved";
+    console.log("[Backend] Estimate approved by customer");
+    return estimates[estimateIndex];
+  });
+
+export const uploadCustomerDocumentRoute = publicProcedure
+  .input(
+    z.object({
+      clientId: z.string(),
+      jobId: z.string().optional(),
+      documentUrl: z.string(),
+      documentType: z.string(),
+      description: z.string().optional(),
+    })
+  )
+  .mutation(({ input }) => {
+    console.log("[Backend] Customer uploading document:", input.documentType);
+
+    return {
+      id: generateId(),
+      clientId: input.clientId,
+      jobId: input.jobId,
+      documentUrl: input.documentUrl,
+      documentType: input.documentType,
+      description: input.description || "",
+      uploadedDate: new Date().toISOString(),
+    };
+  });

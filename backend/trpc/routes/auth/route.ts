@@ -374,3 +374,85 @@ export const getOrganizationCrewRoute = publicProcedure
       createdAt: crew.createdAt,
     }));
   });
+
+export const customerLoginRoute = publicProcedure
+  .input(
+    z.object({
+      email: z.string().email(),
+      password: z.string(),
+    })
+  )
+  .mutation(({ input }): AuthSession => {
+    console.log("[Backend] Customer login attempt:", input.email);
+
+    const user = users.find((u) => u.email === input.email && u.role === "customer");
+    if (!user) {
+      throw new Error("Invalid credentials or user not found");
+    }
+
+    const organization = organizations.find((o) => o.id === user.organizationId);
+    if (!organization) {
+      throw new Error("Organization not found");
+    }
+
+    console.log("[Backend] Customer login successful:", user.email);
+
+    return {
+      user,
+      organization,
+      token: `token_${user.id}`,
+    };
+  });
+
+export const createCustomerRoute = publicProcedure
+  .input(
+    z.object({
+      name: z.string(),
+      email: z.string().email(),
+      phone: z.string(),
+      password: z.string().min(6),
+      organizationId: z.string(),
+      clientId: z.string().optional(),
+    })
+  )
+  .mutation(({ input }): AuthSession => {
+    console.log("[Backend] Creating customer account:", input.email);
+
+    const existingUser = users.find((u) => u.email === input.email);
+    if (existingUser) {
+      throw new Error("Email already registered");
+    }
+
+    const organization = organizations.find((o) => o.id === input.organizationId);
+    if (!organization) {
+      throw new Error("Organization not found");
+    }
+
+    const userId = generateId();
+    const nameParts = input.name.split(" ");
+    const firstName = nameParts[0] || "";
+    const lastName = nameParts.slice(1).join(" ") || "";
+
+    const user: User = {
+      id: userId,
+      email: input.email,
+      firstName,
+      lastName,
+      name: input.name,
+      phone: input.phone,
+      role: "customer",
+      organizationId: input.organizationId,
+      companyId: input.organizationId,
+      createdAt: new Date().toISOString(),
+    };
+
+    users.push(user);
+
+    console.log("[Backend] Customer created successfully:", user.email);
+
+    return {
+      user,
+      organization,
+      token: `token_${userId}`,
+    };
+  });

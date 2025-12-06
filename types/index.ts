@@ -510,7 +510,7 @@ export interface ExternalReport {
   rawData?: any;
 }
 
-export type UserRole = "admin" | "crew" | "manager";
+export type UserRole = "admin" | "crew" | "manager" | "customer";
 
 export type TradeType = 
   | "landscaping"

@@ -5,7 +5,7 @@ import { Shield } from "lucide-react-native";
 
 interface RoleGuardProps {
   children: React.ReactNode;
-  allowedRoles: ("admin" | "manager" | "crew")[];
+  allowedRoles: ("admin" | "manager" | "crew" | "customer")[];
   fallback?: React.ReactNode;
 }
 
