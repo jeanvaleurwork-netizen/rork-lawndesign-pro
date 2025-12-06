@@ -1,0 +1,48 @@
+import { DesignTemplate } from "@/types";
+
+export const mockTemplates: DesignTemplate[] = [
+  {
+    id: "t1",
+    style: "Modern Entertainment Yard",
+    sizeCategory: "medium",
+    layout: {},
+    materials: ["Premium Sod", "Paver Patio", "Outdoor Kitchen", "String Lights"],
+    previewImage: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&q=80",
+    priceRangeMin: 15000,
+    priceRangeMax: 30000,
+    subtitle: "Best for 1,800–3,000 sq ft homes",
+  },
+  {
+    id: "t2",
+    style: "Low Maintenance Garden",
+    sizeCategory: "small",
+    layout: {},
+    materials: ["Artificial Turf", "River Rock", "Native Plants", "Drip Irrigation"],
+    previewImage: "https://images.unsplash.com/photo-1597218868981-1b68e15f0065?w=800&q=80",
+    priceRangeMin: 8000,
+    priceRangeMax: 15000,
+    subtitle: "Simple upkeep, clean design",
+  },
+  {
+    id: "t3",
+    style: "Tropical Paradise",
+    sizeCategory: "large",
+    layout: {},
+    materials: ["Palm Trees", "Tropical Plants", "Pool Deck", "Water Feature"],
+    previewImage: "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?w=800&q=80",
+    priceRangeMin: 35000,
+    priceRangeMax: 60000,
+    subtitle: "Luxury outdoor living space",
+  },
+  {
+    id: "t4",
+    style: "Family Play Yard",
+    sizeCategory: "medium",
+    layout: {},
+    materials: ["Sport Turf", "Play Area", "Safety Surfacing", "Shade Trees"],
+    previewImage: "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=800&q=80",
+    priceRangeMin: 12000,
+    priceRangeMax: 25000,
+    subtitle: "Kid-friendly & durable",
+  },
+];
