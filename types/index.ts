@@ -434,7 +434,199 @@ export interface InsuranceClaimReport {
   reportPdfUrl?: string;
 }
 
+export type ContractType = "MSA" | "PROJECT_CONTRACT" | "WORK_ORDER";
+export type ContractStatus = "DRAFT" | "SENT" | "VIEWED" | "SIGNED" | "DECLINED" | "CANCELLED";
+export type SignedByRole = "CLIENT" | "CONTRACTOR" | "SUBCONTRACTOR";
+export type SignatureType = "typed" | "drawn" | "uploaded";
+export type ChangeOrderReason = "HIDDEN_CONDITION" | "CLIENT_REQUEST" | "MATERIAL_CHANGE" | "INSPECTION" | "OTHER";
+export type ChangeOrderStatus = "DRAFT" | "SENT" | "APPROVED" | "DECLINED";
+export type MaterialApprovalStatus = "PENDING" | "APPROVED" | "DECLINED";
+export type SubcontractorRateType = "PER_JOB" | "HOURLY" | "DAILY";
+export type SubcontractorBillingSchedule = "WEEKLY" | "ON_COMPLETION";
+export type LienWaiverType = "CONDITIONAL" | "UNCONDITIONAL";
+export type CertificateStatus = "DRAFT" | "SENT" | "SIGNED";
+export type WarrantyStatus = "ACTIVE" | "EXPIRED";
+
+export interface ContractVariables {
+  company_name?: string;
+  company_phone?: string;
+  company_email?: string;
+  company_license?: string;
+  company_address?: string;
+  client_name?: string;
+  client_property_address?: string;
+  client_phone?: string;
+  client_email?: string;
+  project_name?: string;
+  project_address?: string;
+  project_start_date?: string;
+  project_end_date?: string;
+  project_duration_text?: string;
+  contract_total_amount?: string;
+  scope_of_work?: string;
+  deposit_amount?: string;
+  progress_payment_amount?: string;
+  warranty_years?: string;
+  warranty_days?: string;
+  current_date?: string;
+  payment_schedule_table?: string;
+  trade_specific_clauses?: string;
+  risk_clauses?: string;
+  work_order_number?: string;
+  work_description?: string;
+  work_order_total_amount?: string;
+  change_order_description?: string;
+  labor_amount?: string;
+  material_amount?: string;
+  change_order_total?: string;
+  revised_end_date?: string;
+  completion_date?: string;
+  final_balance_due?: string;
+  warranty_end_date?: string;
+  material_item?: string;
+  material_brand?: string;
+  material_color_finish?: string;
+  material_model_number?: string;
+  material_quantity?: string;
+  subcontractor_name?: string;
+  subcontractor_phone?: string;
+  subcontractor_scope?: string;
+  subcontractor_rate?: string;
+  subcontractor_rate_type?: string;
+  billing_schedule?: string;
+  payment_amount?: string;
+  payment_through_date?: string;
+}
+
 export interface Contract {
+  id: string;
+  companyId: string;
+  projectId?: string;
+  clientId: string;
+  type: ContractType;
+  title: string;
+  bodyHtml: string;
+  status: ContractStatus;
+  totalAmount: number;
+  startDateEstimated?: string;
+  endDateEstimated?: string;
+  publicSigningToken?: string;
+  signedAt?: string;
+  createdByUserId: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ContractSignature {
+  id: string;
+  contractId: string;
+  signedByRole: SignedByRole;
+  signedByName: string;
+  signedByEmail: string;
+  signedAt: string;
+  ipAddress?: string;
+  userAgent?: string;
+  signatureType: SignatureType;
+  signatureData?: string;
+}
+
+export interface ContractChangeOrder {
+  id: string;
+  companyId: string;
+  projectId: string;
+  contractId: string;
+  description: string;
+  reason: ChangeOrderReason;
+  additionalLaborAmount: number;
+  additionalMaterialAmount: number;
+  totalChangeAmount: number;
+  revisedContractAmount: number;
+  oldEndDate?: string;
+  newEndDate?: string;
+  status: ChangeOrderStatus;
+  publicSigningToken?: string;
+  signedAt?: string;
+  createdAt: string;
+}
+
+export interface CompletionCertificate {
+  id: string;
+  companyId: string;
+  projectId: string;
+  clientId: string;
+  contractId?: string;
+  completionDate: string;
+  finalAmountDue: number;
+  notes?: string;
+  status: CertificateStatus;
+  publicSigningToken?: string;
+  signedAt?: string;
+  createdAt: string;
+}
+
+export interface ContractWarranty {
+  id: string;
+  companyId: string;
+  projectId: string;
+  clientId: string;
+  workmanshipYears: number;
+  startDate: string;
+  endDate: string;
+  notes?: string;
+  status: WarrantyStatus;
+  createdAt: string;
+}
+
+export interface MaterialApproval {
+  id: string;
+  companyId: string;
+  projectId: string;
+  clientId: string;
+  itemName: string;
+  brand: string;
+  colorFinish?: string;
+  modelNumber?: string;
+  quantity: string;
+  notes?: string;
+  status: MaterialApprovalStatus;
+  approvedAt?: string;
+  publicSigningToken?: string;
+  createdAt: string;
+}
+
+export interface SubcontractorAgreement {
+  id: string;
+  companyId: string;
+  projectId: string;
+  subcontractorId: string;
+  subcontractorName: string;
+  scopeOfWork: string;
+  rateType: SubcontractorRateType;
+  rateAmount: number;
+  billingSchedule: SubcontractorBillingSchedule;
+  bodyHtml: string;
+  status: ChangeOrderStatus;
+  publicSigningToken?: string;
+  signedAt?: string;
+  createdAt: string;
+}
+
+export interface LienWaiver {
+  id: string;
+  companyId: string;
+  projectId: string;
+  clientId: string;
+  contractId?: string;
+  type: LienWaiverType;
+  amount: number;
+  effectiveThroughDate: string;
+  bodyHtml: string;
+  status: CertificateStatus;
+  signedAt?: string;
+  createdAt: string;
+}
+
+export interface Contract_OLD {
   id: string;
   clientId: string;
   jobId?: string;
