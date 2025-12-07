@@ -22,25 +22,11 @@ import {
 
 import Colors from "@/constants/colors";
 
-interface MockContract {
-  id: string;
-  companyId: string;
-  projectId?: string;
-  clientId: string;
+import { Contract, ContractStatus } from '@/types';
+
+type MockContract = Contract & {
   clientName: string;
-  type: "MSA" | "PROJECT_CONTRACT" | "WORK_ORDER";
-  title: string;
-  bodyHtml: string;
-  status: "DRAFT" | "SENT" | "VIEWED" | "SIGNED" | "DECLINED" | "CANCELLED";
-  totalAmount: number;
-  startDateEstimated?: string;
-  endDateEstimated?: string;
-  publicSigningToken?: string;
-  signedAt?: string;
-  createdByUserId: string;
-  createdAt: string;
-  updatedAt: string;
-}
+};
 
 const mockContracts: MockContract[] = [
   {
@@ -71,7 +57,7 @@ export default function ContractsScreen() {
     contract.clientName.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const getStatusColor = (status: MockContract["status"]) => {
+  const getStatusColor = (status: ContractStatus) => {
     switch (status) {
       case "DRAFT":
         return Colors.light.muted;
@@ -89,7 +75,7 @@ export default function ContractsScreen() {
     }
   };
 
-  const getStatusBg = (status: MockContract["status"]) => {
+  const getStatusBg = (status: ContractStatus) => {
     switch (status) {
       case "DRAFT":
         return Colors.light.background;

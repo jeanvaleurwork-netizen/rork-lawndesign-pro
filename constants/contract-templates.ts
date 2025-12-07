@@ -80,7 +80,7 @@ Property Address: {{client_property_address}}
 <hr/>
 
 <h3>CONTRACT AMOUNT:</h3>
-<p><strong>TOTAL PROJECT COST: ${'{{contract_total_amount}}'}</strong></p>
+<p><strong>TOTAL PROJECT COST: \${{contract_total_amount}}</strong></p>
 
 <hr/>
 
@@ -242,7 +242,7 @@ Property: {{client_property_address}}
 <p>{{work_description}}</p>
 
 <h3>Pricing:</h3>
-<p><strong>${'{{work_order_total_amount}}'}</strong></p>
+<p><strong>\${{work_order_total_amount}}</strong></p>
 
 <h3>Payment Terms:</h3>
 <p>Due at completion unless stated otherwise.</p>
@@ -260,20 +260,20 @@ Contractor Signature: _____________ Date: ______
 export const CHANGE_ORDER_TEMPLATE = `
 <h2>CHANGE ORDER — Project: {{project_name}}</h2>
 
-<p><strong>Original Contract Total:</strong> ${'{{contract_total_amount}}'}</p>
+<p><strong>Original Contract Total:</strong> \${{contract_total_amount}}</p>
 
 <h3>Change Description:</h3>
 <p>{{change_order_description}}</p>
 
 <h3>Cost Breakdown:</h3>
 <p>
-Additional Labor: ${'{{labor_amount}}'}<br/>
-Additional Materials: ${'{{material_amount}}'}<br/>
-<strong>TOTAL CHANGE ORDER AMOUNT: ${'{{change_order_total}}'}</strong>
+Additional Labor: \${{labor_amount}}<br/>
+Additional Materials: \${{material_amount}}<br/>
+<strong>TOTAL CHANGE ORDER AMOUNT: \${{change_order_total}}</strong>
 </p>
 
 <h3>Revised Contract Total:</h3>
-<p><strong>${'{{revised_contract_amount}}'}</strong></p>
+<p><strong>\${{revised_contract_amount}}</strong></p>
 
 <h3>Revised Completion Date:</h3>
 <p>{{revised_end_date}}</p>
@@ -296,7 +296,7 @@ export const COMPLETION_CERTIFICATE_TEMPLATE = `
 <p>{{completion_date}}</p>
 
 <h3>Outstanding Balance Due:</h3>
-<p><strong>${'{{final_balance_due}}'}</strong></p>
+<p><strong>\${{final_balance_due}}</strong></p>
 
 <h3>Client Acknowledges:</h3>
 <ul>
@@ -377,7 +377,7 @@ Phone: {{subcontractor_phone}}
 <p>{{subcontractor_scope}}</p>
 
 <h3>Rate:</h3>
-<p><strong>${'{{subcontractor_rate}}'}</strong> ({'{{subcontractor_rate_type}}'})</p>
+<p><strong>\${{subcontractor_rate}}</strong> ({{subcontractor_rate_type}})</p>
 
 <h3>Billing Schedule:</h3>
 <p>{{billing_schedule}}</p>
@@ -399,7 +399,7 @@ Contractor:    __________ Date:_______
 export const LIEN_WAIVER_CONDITIONAL_TEMPLATE = `
 <h2>LIEN WAIVER (Conditional) — Project: {{project_name}}</h2>
 
-<p>Upon receipt of payment: <strong>${'{{payment_amount}}'}</strong></p>
+<p>Upon receipt of payment: <strong>\${{payment_amount}}</strong></p>
 <p>Contractor waives lien rights up to <strong>{{payment_through_date}}</strong></p>
 
 <p>Contractor Signature: _________ Date: _______</p>
@@ -408,7 +408,7 @@ export const LIEN_WAIVER_CONDITIONAL_TEMPLATE = `
 export const LIEN_WAIVER_UNCONDITIONAL_TEMPLATE = `
 <h2>LIEN WAIVER (Unconditional) — Project: {{project_name}}</h2>
 
-<p>Payment Confirmed: <strong>${'{{payment_amount}}'}</strong></p>
+<p>Payment Confirmed: <strong>\${{payment_amount}}</strong></p>
 <p>Contractor permanently waives lien rights up to <strong>{{payment_through_date}}</strong></p>
 
 <p>Contractor Signature: _________ Date: _______</p>
