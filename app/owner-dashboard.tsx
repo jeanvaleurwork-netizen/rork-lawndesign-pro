@@ -384,11 +384,13 @@ export default function OwnerDashboardScreen() {
             style={styles.actionCard}
             onPress={() => router.push("/admin-console-home" as any)}
           >
-            <Text style={styles.actionCardTitle}>Open Mission Control</Text>
-            <Text style={styles.actionCardSubtitle}>
-              View contracts, alerts, and complete business overview
-            </Text>
-            <ChevronRight color={Colors.light.primary} size={24} />
+            <View style={styles.actionCardContent}>
+              <Text style={styles.actionCardTitle}>Open Mission Control</Text>
+              <Text style={styles.actionCardSubtitle}>
+                View contracts, alerts, and complete business overview
+              </Text>
+            </View>
+            <ChevronRight color="#FFF" size={24} />
           </TouchableOpacity>
         </View>
       </ScrollView>
@@ -647,6 +649,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 20,
   },
+  actionCardContent: {
+    flex: 1,
+    marginRight: 12,
+  },
   actionCardTitle: {
     fontSize: 18,
     fontWeight: "700" as const,
@@ -657,7 +663,6 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: "#FFF",
     opacity: 0.9,
-    flex: 1,
   },
   filterButton: {
     width: 40,
