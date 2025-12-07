@@ -1,6 +1,6 @@
 import { Hono } from "hono";
 import { cors } from "hono/cors";
-import { trpcServer } from "@hono/trpc-server";
+import { fetchRequestHandler } from "@trpc/server/adapters/fetch";
 import { appRouter } from "./trpc/app-router";
 import { createContext } from "./trpc/create-context";
 
@@ -60,17 +60,19 @@ console.log("[Hono] Registering tRPC server at /api/trpc");
 console.log("[Hono] Router procedures:", Object.keys((appRouter as any)._def.procedures || {}));
 console.log("[Hono] Router has aiIntake:", Boolean((appRouter as any).aiIntake));
 
-app.use(
-  "/api/trpc/*",
-  trpcServer({
+app.all("/api/trpc/*", async (c) => {
+  const response = await fetchRequestHandler({
+    endpoint: "/api/trpc",
+    req: c.req.raw,
     router: appRouter,
     createContext,
     onError: ({ error, path }) => {
-      console.error("[tRPC Server Error]", path, error);
-      console.error("[tRPC Server Error] Full error:", JSON.stringify(error, null, 2));
+      console.error("[tRPC Server Error] Path:", path);
+      console.error("[tRPC Server Error] Error:", error);
     },
-  })
-);
+  });
+  return response;
+});
 
 app.get("/", (c) => {
   console.log("[Hono] Health check at /");
