@@ -2643,7 +2643,8 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     padding: 16,
-    borderBottomWidth: 1,
+    paddingBottom: 12,
+    borderBottomWidth: 0,
     borderBottomColor: Colors.light.border,
   },
   contractCardHeaderLeft: {
@@ -2688,12 +2689,12 @@ const styles = StyleSheet.create({
     alignItems: "center" as const,
     gap: 10,
     paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingVertical: 14,
     marginHorizontal: 16,
-    marginTop: 12,
-    marginBottom: 8,
+    marginTop: 0,
+    marginBottom: 0,
     backgroundColor: Colors.light.background,
-    borderRadius: 12,
+    borderRadius: 0,
   },
   contractTypeIndicator: {
     width: 4,
@@ -2707,6 +2708,7 @@ const styles = StyleSheet.create({
   },
   contractCardBody: {
     padding: 16,
+    paddingTop: 12,
   },
   contractInfoSection: {
     gap: 10,
