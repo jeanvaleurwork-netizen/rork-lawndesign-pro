@@ -437,7 +437,7 @@ Property: {{client_property_address}}
 
 <h3>RATES:</h3>
 <ul>
-<li>Labor: ${{labor_rate}}/hour</li>
+<li>Labor: \${{labor_rate}}/hour</li>
 <li>Materials: Cost + {{material_markup}}% markup</li>
 <li>Equipment: Actual cost</li>
 </ul>
@@ -446,7 +446,7 @@ Property: {{client_property_address}}
 <p>Invoices submitted weekly/monthly. Payment due within {{payment_terms}} days.</p>
 
 <h3>ESTIMATED BUDGET:</h3>
-<p>Not to exceed: ${{contract_total_amount}} without written approval</p>
+<p>Not to exceed: \${{contract_total_amount}} without written approval</p>
 
 <h3>SIGNATURES:</h3>
 <p>
@@ -468,7 +468,7 @@ export const FIXED_PRICE_TEMPLATE = `
 <p>{{scope_of_work}}</p>
 
 <h3>TOTAL FIXED PRICE:</h3>
-<p><strong>${{contract_total_amount}}</strong></p>
+<p><strong>\${{contract_total_amount}}</strong></p>
 <p>This price includes ALL labor, materials, equipment, permits, and fees.</p>
 <p>No additional charges unless covered by approved Change Order.</p>
 
@@ -509,7 +509,7 @@ export const COST_PLUS_TEMPLATE = `
 </ul>
 
 <h3>ESTIMATED TOTAL:</h3>
-<p>${{contract_total_amount}} (estimate only, final based on actual costs)</p>
+<p>\${{contract_total_amount}} (estimate only, final based on actual costs)</p>
 
 <h3>PAYMENT:</h3>
 <p>Invoiced weekly based on costs incurred plus fee.</p>
@@ -536,7 +536,7 @@ export const LUMP_SUM_TEMPLATE = `
 <p>{{scope_of_work}}</p>
 
 <h3>LUMP SUM PRICE:</h3>
-<p><strong>${{contract_total_amount}}</strong></p>
+<p><strong>\${{contract_total_amount}}</strong></p>
 <p>Contractor agrees to complete ALL work for this single fixed sum.</p>
 
 <h3>INCLUSIONS:</h3>
@@ -580,7 +580,7 @@ export const UNIT_PRICE_TEMPLATE = `
 <p>Final price = Actual quantities × Unit prices</p>
 
 <h3>ESTIMATED TOTAL:</h3>
-<p>${{contract_total_amount}} (based on estimated quantities)</p>
+<p>\${{contract_total_amount}} (based on estimated quantities)</p>
 
 <h3>PAYMENT:</h3>
 <p>Monthly invoicing based on work completed and measured.</p>
@@ -617,7 +617,7 @@ End: {{project_end_date}}<br/>
 Auto-renewal: {{auto_renewal}}</p>
 
 <h3>PRICING:</h3>
-<p><strong>${{monthly_rate}}/month</strong></p>
+<p><strong>\${{monthly_rate}}/month</strong></p>
 <p>Payment due: {{payment_due_date}} of each month</p>
 
 <h3>CANCELLATION:</h3>
@@ -653,12 +653,12 @@ export const MAINTENANCE_AGREEMENT_TEMPLATE = `
 <ul>
 <li>Routine inspections</li>
 <li>Preventive maintenance</li>
-<li>Minor repairs (up to ${{minor_repair_limit}})</li>
+<li>Minor repairs (up to \${{minor_repair_limit}})</li>
 <li>Priority scheduling</li>
 </ul>
 
 <h3>ANNUAL FEE:</h3>
-<p><strong>${{contract_total_amount}}</strong></p>
+<p><strong>\${{contract_total_amount}}</strong></p>
 <p>Payment: {{payment_schedule}}</p>
 
 <h3>TERM:</h3>
@@ -688,14 +688,14 @@ License: {{company_license}}</p>
 <h3>PHASES:</h3>
 <h4>Phase 1: Design Development</h4>
 <p>Preliminary designs, drawings, specifications<br/>
-Fee: ${{design_fee}}</p>
+Fee: \${{design_fee}}</p>
 
 <h4>Phase 2: Construction</h4>
 <p>Build per approved design<br/>
-Fee: ${{construction_amount}}</p>
+Fee: \${{construction_amount}}</p>
 
 <h3>TOTAL CONTRACT PRICE:</h3>
-<p><strong>${{contract_total_amount}}</strong></p>
+<p><strong>\${{contract_total_amount}}</strong></p>
 
 <h3>OWNER APPROVALS:</h3>
 <p>Owner must approve design before construction begins.</p>
@@ -726,7 +726,7 @@ export const SUPPLY_AGREEMENT_TEMPLATE = `
 <p>{{scope_of_work}}</p>
 
 <h3>PRICING:</h3>
-<p><strong>Total: ${{contract_total_amount}}</strong></p>
+<p><strong>Total: \${{contract_total_amount}}</strong></p>
 <p>{{payment_terms}}</p>
 
 <h3>DELIVERY:</h3>
@@ -766,11 +766,11 @@ Return: {{rental_end_date}}<br/>
 Duration: {{rental_duration}}</p>
 
 <h3>RENTAL RATE:</h3>
-<p>${{daily_rate}}/day or ${{weekly_rate}}/week<br/>
-<strong>Total: ${{contract_total_amount}}</strong></p>
+<p>\${{daily_rate}}/day or \${{weekly_rate}}/week<br/>
+<strong>Total: \${{contract_total_amount}}</strong></p>
 
 <h3>DEPOSIT:</h3>
-<p>Security deposit: ${{security_deposit}}<br/>
+<p>Security deposit: \${{security_deposit}}<br/>
 Refundable upon return in good condition</p>
 
 <h3>RENTER RESPONSIBILITIES:</h3>
@@ -782,7 +782,7 @@ Refundable upon return in good condition</p>
 </ul>
 
 <h3>LATE FEES:</h3>
-<p>${{late_fee_rate}}/day for late returns</p>
+<p>\${{late_fee_rate}}/day for late returns</p>
 
 <h3>SIGNATURES:</h3>
 <p>
@@ -871,7 +871,7 @@ Duration: {{project_duration_text}}<br/>
 Completion: {{project_end_date}}</p>
 
 <h3>INVESTMENT:</h3>
-<p><strong>Total Project Cost: ${{contract_total_amount}}</strong></p>
+<p><strong>Total Project Cost: \${{contract_total_amount}}</strong></p>
 <div>{{payment_schedule_table}}</div>
 
 <h3>WHY CHOOSE US:</h3>
@@ -912,7 +912,7 @@ export const LETTER_OF_INTENT_TEMPLATE = `
 
 <h3>PROPOSED TERMS:</h3>
 <ul>
-<li><strong>Estimated Cost:</strong> ${{contract_total_amount}}</li>
+<li><strong>Estimated Cost:</strong> \${{contract_total_amount}}</li>
 <li><strong>Estimated Timeline:</strong> {{project_duration_text}}</li>
 <li><strong>Start Date:</strong> {{project_start_date}}</li>
 </ul>
@@ -932,7 +932,7 @@ export const LETTER_OF_INTENT_TEMPLATE = `
 <p>The parties agree to negotiate exclusively for {{exclusivity_days}} days from this date.</p>
 
 <h3>DEPOSIT:</h3>
-<p>Upon execution of this LOI, Client will provide a good faith deposit of ${{deposit_amount}}, refundable if formal contract is not executed.</p>
+<p>Upon execution of this LOI, Client will provide a good faith deposit of \${{deposit_amount}}, refundable if formal contract is not executed.</p>
 
 <p>If these terms are acceptable, please sign below.</p>
 
