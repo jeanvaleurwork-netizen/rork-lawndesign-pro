@@ -44,6 +44,9 @@ import {
   Info,
   Award,
   ClipboardCheck,
+  Plus,
+  Building2,
+  Hammer,
 } from "lucide-react-native";
 
 import Colors from "@/constants/colors";
@@ -963,12 +966,19 @@ export default function CustomerPortalScreen() {
         {activeTab === "contracts" && (
           <View style={styles.contentContainer}>
             <View style={styles.contractsHeader}>
-              <View>
+              <View style={{ flex: 1 }}>
                 <Text style={styles.contractsHeaderTitle}>Your Contracts</Text>
                 <Text style={styles.contractsHeaderSubtitle}>
                   {mockContracts.length} total contract{mockContracts.length !== 1 ? 's' : ''}
                 </Text>
               </View>
+              <TouchableOpacity 
+                style={styles.createContractButton}
+                onPress={() => router.push('/contract-editor')}
+              >
+                <Plus color="#FFF" size={20} />
+                <Text style={styles.createContractButtonText}>Create</Text>
+              </TouchableOpacity>
             </View>
 
             {mockContracts.map((contract) => {
@@ -1006,17 +1016,20 @@ export default function CustomerPortalScreen() {
                   </View>
                 </View>
 
-                <View style={styles.contractTypeBadgeLarge}>
-                  <View style={[
-                    styles.contractTypeIndicator,
-                    { backgroundColor: typeColor }
-                  ]} />
-                  <Text style={[
-                    styles.contractTypeText,
-                    { color: typeColor }
-                  ]}>
-                    {getContractTypeLabel(contract.type)}
-                  </Text>
+                <View style={styles.contractTypeSection}>
+                  <View style={styles.contractTypeBadgeLarge}>
+                    <View style={[
+                      styles.contractTypeIndicator,
+                      { backgroundColor: typeColor }
+                    ]} />
+                    <Text style={[
+                      styles.contractTypeText,
+                      { color: typeColor }
+                    ]}>
+                      {getContractTypeLabel(contract.type)}
+                    </Text>
+                  </View>
+                  <Text style={styles.contractTitle}>{contract.title}</Text>
                 </View>
 
                 <View style={styles.contractCardBody}>
@@ -2630,6 +2643,25 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: Colors.light.muted,
   },
+  createContractButton: {
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    gap: 8,
+    backgroundColor: Colors.light.primary,
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 12,
+    shadowColor: Colors.light.primary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  createContractButtonText: {
+    fontSize: 15,
+    fontWeight: "700" as const,
+    color: "#FFF",
+  },
   contractCard: {
     backgroundColor: Colors.light.card,
     borderRadius: 16,
@@ -2684,17 +2716,24 @@ const styles = StyleSheet.create({
     textTransform: "uppercase" as const,
     letterSpacing: 0.5,
   },
+  contractTypeSection: {
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+    backgroundColor: Colors.light.background,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.light.border,
+  },
   contractTypeBadgeLarge: {
     flexDirection: "row" as const,
     alignItems: "center" as const,
     gap: 10,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    marginHorizontal: 16,
-    marginTop: 0,
-    marginBottom: 0,
-    backgroundColor: Colors.light.background,
-    borderRadius: 0,
+    marginBottom: 8,
+  },
+  contractTitle: {
+    fontSize: 18,
+    fontWeight: "700" as const,
+    color: Colors.light.text,
+    marginTop: 4,
   },
   contractTypeIndicator: {
     width: 4,
@@ -2708,7 +2747,7 @@ const styles = StyleSheet.create({
   },
   contractCardBody: {
     padding: 16,
-    paddingTop: 12,
+    paddingTop: 0,
   },
   contractInfoSection: {
     gap: 10,
