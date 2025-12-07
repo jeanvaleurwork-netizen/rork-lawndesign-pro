@@ -38,7 +38,11 @@ export default function CrewInvitesScreen() {
   const generateInviteMutation = trpc.auth.generateInviteCode.useMutation();
   const inviteCodesQuery = trpc.auth.getInviteCodes.useQuery(
     { userId: user?.id || "" },
-    { enabled: !!user?.id && user.role === "admin" }
+    { 
+      enabled: !!user?.id && user.role === "admin",
+      retry: 3,
+      retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 5000),
+    }
   );
 
   const handleGenerateInvite = async () => {
@@ -172,6 +176,19 @@ export default function CrewInvitesScreen() {
             <Text style={styles.sectionTitle}>Active Invites ({activeInvites.length})</Text>
             {inviteCodesQuery.isLoading ? (
               <ActivityIndicator color={Colors.light.primary} size="large" />
+            ) : inviteCodesQuery.isError ? (
+              <View style={styles.errorState}>
+                <Text style={styles.errorText}>Backend is starting up...</Text>
+                <Text style={styles.errorSubtext}>
+                  Please wait a moment and the data will load automatically.
+                </Text>
+                <TouchableOpacity
+                  style={styles.retryButton}
+                  onPress={() => inviteCodesQuery.refetch()}
+                >
+                  <Text style={styles.retryButtonText}>Retry Now</Text>
+                </TouchableOpacity>
+              </View>
             ) : activeInvites.length === 0 ? (
               <View style={styles.emptyState}>
                 <Text style={styles.emptyText}>No active invites</Text>
@@ -702,5 +719,36 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: Colors.light.muted,
     textAlign: "center",
+  },
+  errorState: {
+    padding: 40,
+    alignItems: "center",
+    backgroundColor: Colors.light.card,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: Colors.light.border,
+  },
+  errorText: {
+    fontSize: 16,
+    fontWeight: "600" as const,
+    color: Colors.light.text,
+    marginBottom: 8,
+  },
+  errorSubtext: {
+    fontSize: 14,
+    color: Colors.light.muted,
+    textAlign: "center",
+    marginBottom: 16,
+  },
+  retryButton: {
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    backgroundColor: Colors.light.primary,
+    borderRadius: 8,
+  },
+  retryButtonText: {
+    fontSize: 14,
+    fontWeight: "600" as const,
+    color: "#FFF",
   },
 });
