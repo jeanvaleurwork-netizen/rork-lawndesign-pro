@@ -20,6 +20,13 @@ export default {
     designs: "Diseños",
     jobCosting: "Costos de Trabajo",
     receipts: "Recibos",
+    crew: "Equipo",
+    payroll: "Nómina",
+    analytics: "Análisis",
+    invoices: "Facturas",
+    jobs: "Trabajos",
+    timecards: "Tarjetas de Tiempo",
+    contracts: "Contratos",
   },
   home: {
     welcome: "Bienvenido a ProContractor",
