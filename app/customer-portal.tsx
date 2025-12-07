@@ -31,6 +31,13 @@ import {
   Phone,
   MapPin,
   X,
+  Sun,
+  Wind,
+  Droplets,
+  Star,
+  Share2,
+  ThumbsUp,
+  Activity,
 } from "lucide-react-native";
 
 import Colors from "@/constants/colors";
@@ -182,6 +189,7 @@ export default function CustomerPortalScreen() {
   const [activeTab, setActiveTab] = useState<"jobs" | "contracts" | "estimates" | "invoices">("jobs");
   const [selectedProject, setSelectedProject] = useState<ProjectDetails | null>(null);
   const [showProjectModal, setShowProjectModal] = useState<boolean>(false);
+  const [beforeAfterSlider] = useState<number>(50);
 
   const onRefresh = () => {
     setRefreshing(true);
@@ -335,6 +343,80 @@ export default function CustomerPortalScreen() {
         </View>
       </View>
 
+      <View style={styles.weatherWidget}>
+        <View style={styles.weatherHeader}>
+          <View style={styles.weatherLeft}>
+            <Sun color={"#F59E0B"} size={32} />
+            <View>
+              <Text style={styles.weatherTemp}>72°F</Text>
+              <Text style={styles.weatherCondition}>Sunny</Text>
+            </View>
+          </View>
+          <View style={styles.weatherDetails}>
+            <View style={styles.weatherDetailItem}>
+              <Wind color={Colors.light.muted} size={16} />
+              <Text style={styles.weatherDetailText}>8 mph</Text>
+            </View>
+            <View style={styles.weatherDetailItem}>
+              <Droplets color={Colors.light.muted} size={16} />
+              <Text style={styles.weatherDetailText}>45%</Text>
+            </View>
+          </View>
+        </View>
+        <View style={styles.weatherAlert}>
+          <CheckCircle color={Colors.light.success} size={16} />
+          <Text style={styles.weatherAlertText}>Perfect conditions for landscaping work today</Text>
+        </View>
+      </View>
+
+      <View style={styles.liveUpdatesSection}>
+        <View style={styles.liveUpdatesHeader}>
+          <View style={styles.liveIndicator}>
+            <View style={styles.liveIndicatorDot} />
+            <Text style={styles.liveIndicatorText}>Live Updates</Text>
+          </View>
+          <TouchableOpacity>
+            <Text style={styles.viewAllText}>View All</Text>
+          </TouchableOpacity>
+        </View>
+        <ScrollView 
+          horizontal 
+          showsHorizontalScrollIndicator={false}
+          style={styles.updatesScroll}
+        >
+          <View style={styles.updateCard}>
+            <View style={styles.updateCardHeader}>
+              <View style={[styles.updateIcon, { backgroundColor: `${Colors.light.success}15` }]}>
+                <Activity color={Colors.light.success} size={20} />
+              </View>
+              <Text style={styles.updateTime}>12 min ago</Text>
+            </View>
+            <Text style={styles.updateTitle}>Crew Arrived</Text>
+            <Text style={styles.updateDescription}>Green Team A checked in at your property</Text>
+          </View>
+          <View style={styles.updateCard}>
+            <View style={styles.updateCardHeader}>
+              <View style={[styles.updateIcon, { backgroundColor: `${Colors.light.primary}15` }]}>
+                <Camera color={Colors.light.primary} size={20} />
+              </View>
+              <Text style={styles.updateTime}>1 hour ago</Text>
+            </View>
+            <Text style={styles.updateTitle}>New Photos</Text>
+            <Text style={styles.updateDescription}>3 progress photos uploaded</Text>
+          </View>
+          <View style={styles.updateCard}>
+            <View style={styles.updateCardHeader}>
+              <View style={[styles.updateIcon, { backgroundColor: '#FEF3C7' }]}>
+                <CheckCircle color="#F59E0B" size={20} />
+              </View>
+              <Text style={styles.updateTime}>3 hours ago</Text>
+            </View>
+            <Text style={styles.updateTitle}>Milestone Complete</Text>
+            <Text style={styles.updateDescription}>Irrigation system installed</Text>
+          </View>
+        </ScrollView>
+      </View>
+
       <View style={styles.quickStats}>
         <View style={styles.statCard}>
           <View style={[styles.statIcon, { backgroundColor: `${Colors.light.primary}15` }]}>
@@ -433,6 +515,57 @@ export default function CustomerPortalScreen() {
         </View>
         {activeTab === "jobs" && (
           <View style={styles.contentContainer}>
+            <View style={styles.referralCard}>
+              <View style={styles.referralContent}>
+                <View style={styles.referralLeft}>
+                  <View style={styles.referralIcon}>
+                    <Star color="#F59E0B" size={24} />
+                  </View>
+                  <View>
+                    <Text style={styles.referralTitle}>Love your results?</Text>
+                    <Text style={styles.referralSubtitle}>Get $100 off your next project</Text>
+                  </View>
+                </View>
+                <TouchableOpacity style={styles.referralButton}>
+                  <Share2 color="#FFF" size={18} />
+                  <Text style={styles.referralButtonText}>Refer</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+
+            <View style={styles.crewTrackingCard}>
+              <View style={styles.crewTrackingHeader}>
+                <Text style={styles.crewTrackingTitle}>Crew En Route</Text>
+                <View style={styles.etaBadge}>
+                  <Clock color={Colors.light.primary} size={14} />
+                  <Text style={styles.etaText}>ETA: 15 min</Text>
+                </View>
+              </View>
+              <View style={styles.crewMemberInfo}>
+                <View style={styles.crewAvatar}>
+                  <User color={Colors.light.primary} size={24} />
+                </View>
+                <View style={styles.crewDetails}>
+                  <Text style={styles.crewName}>Mike Johnson</Text>
+                  <Text style={styles.crewRole}>Crew Leader - Green Team A</Text>
+                  <View style={styles.crewRating}>
+                    {[1,2,3,4,5].map((star) => (
+                      <Star key={star} color="#F59E0B" fill="#F59E0B" size={14} />
+                    ))}
+                    <Text style={styles.crewRatingText}>(4.9)</Text>
+                  </View>
+                </View>
+                <TouchableOpacity style={styles.crewCallButton}>
+                  <Phone color={Colors.light.primary} size={20} />
+                </TouchableOpacity>
+              </View>
+              <View style={styles.progressTracker}>
+                <View style={styles.progressDot} />
+                <View style={styles.progressLine} />
+                <View style={[styles.progressDot, { backgroundColor: Colors.light.border }]} />
+                <Text style={styles.progressTrackerText}>Arriving at 123 Main St</Text>
+              </View>
+            </View>
             {mockJobs.map((job) => {
               const StatusIcon = getJobStatusIcon(job.status);
               return (
@@ -711,9 +844,54 @@ export default function CustomerPortalScreen() {
                 <Text style={styles.modalSectionTitle}>Project Photos</Text>
                 <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.photoScroll}>
                   {selectedProject.photos.map((photo, idx) => (
-                    <Image key={idx} source={{ uri: photo }} style={styles.projectPhoto} />
+                    <TouchableOpacity key={idx} style={styles.photoCard}>
+                      <Image source={{ uri: photo }} style={styles.projectPhoto} />
+                      <View style={styles.photoOverlay}>
+                        <Text style={styles.photoLabel}>{idx === 0 ? 'Before' : 'After'}</Text>
+                      </View>
+                    </TouchableOpacity>
                   ))}
                 </ScrollView>
+              </View>
+
+              <View style={styles.modalSection}>
+                <Text style={styles.modalSectionTitle}>Compare Progress</Text>
+                <View style={styles.beforeAfterContainer}>
+                  <View style={styles.imageSliderContainer}>
+                    <Image 
+                      source={{ uri: selectedProject.photos[0] }} 
+                      style={styles.beforeAfterImage}
+                    />
+                    <View style={[styles.afterImageContainer, { width: `${beforeAfterSlider}%` }]}>
+                      <Image 
+                        source={{ uri: selectedProject.photos[1] || selectedProject.photos[0] }} 
+                        style={styles.beforeAfterImage}
+                      />
+                    </View>
+                    <View style={[styles.sliderHandle, { left: `${beforeAfterSlider}%` }]}>
+                      <View style={styles.sliderLine} />
+                    </View>
+                  </View>
+                  <View style={styles.beforeAfterLabels}>
+                    <Text style={styles.beforeAfterLabel}>Before</Text>
+                    <Text style={styles.beforeAfterLabel}>After</Text>
+                  </View>
+                </View>
+              </View>
+
+              <View style={styles.modalSection}>
+                <View style={styles.reviewPromptCard}>
+                  <View style={styles.reviewPromptHeader}>
+                    <ThumbsUp color={Colors.light.success} size={28} />
+                    <View style={styles.reviewPromptText}>
+                      <Text style={styles.reviewPromptTitle}>How are we doing?</Text>
+                      <Text style={styles.reviewPromptSubtitle}>Your feedback helps us improve</Text>
+                    </View>
+                  </View>
+                  <TouchableOpacity style={styles.reviewButton}>
+                    <Text style={styles.reviewButtonText}>Leave a Review</Text>
+                  </TouchableOpacity>
+                </View>
               </View>
 
               <View style={styles.modalSection}>
@@ -1345,11 +1523,6 @@ const styles = StyleSheet.create({
     fontWeight: "600" as const,
     textTransform: "capitalize" as const,
   },
-  updateCard: {
-    flexDirection: "row",
-    gap: 12,
-    marginBottom: 16,
-  },
   updateDot: {
     width: 10,
     height: 10,
@@ -1402,5 +1575,391 @@ const styles = StyleSheet.create({
   docDate: {
     fontSize: 13,
     color: Colors.light.muted,
+  },
+  weatherWidget: {
+    marginHorizontal: 20,
+    marginBottom: 16,
+    backgroundColor: Colors.light.card,
+    borderRadius: 16,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: Colors.light.border,
+  },
+  weatherHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 12,
+  },
+  weatherLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+  },
+  weatherTemp: {
+    fontSize: 24,
+    fontWeight: "700" as const,
+    color: Colors.light.text,
+  },
+  weatherCondition: {
+    fontSize: 14,
+    color: Colors.light.muted,
+  },
+  weatherDetails: {
+    flexDirection: "row",
+    gap: 16,
+  },
+  weatherDetailItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
+  weatherDetailText: {
+    fontSize: 13,
+    color: Colors.light.muted,
+    fontWeight: "600" as const,
+  },
+  weatherAlert: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    backgroundColor: `${Colors.light.success}08`,
+    padding: 10,
+    borderRadius: 8,
+  },
+  weatherAlertText: {
+    fontSize: 13,
+    color: Colors.light.success,
+    fontWeight: "600" as const,
+    flex: 1,
+  },
+  liveUpdatesSection: {
+    marginHorizontal: 20,
+    marginBottom: 16,
+  },
+  liveUpdatesHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 12,
+  },
+  liveIndicator: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  liveIndicatorDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: Colors.light.error,
+  },
+  liveIndicatorText: {
+    fontSize: 16,
+    fontWeight: "700" as const,
+    color: Colors.light.text,
+  },
+  viewAllText: {
+    fontSize: 14,
+    color: Colors.light.primary,
+    fontWeight: "600" as const,
+  },
+  updatesScroll: {
+    marginHorizontal: -20,
+    paddingHorizontal: 20,
+  },
+  updateCard: {
+    width: 200,
+    backgroundColor: Colors.light.card,
+    borderRadius: 12,
+    padding: 16,
+    marginRight: 12,
+    borderWidth: 1,
+    borderColor: Colors.light.border,
+  },
+  updateCardHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 12,
+  },
+  updateIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  updateTime: {
+    fontSize: 12,
+    color: Colors.light.muted,
+    fontWeight: "600" as const,
+  },
+  updateTitle: {
+    fontSize: 15,
+    fontWeight: "700" as const,
+    color: Colors.light.text,
+    marginBottom: 4,
+  },
+  updateDescription: {
+    fontSize: 13,
+    color: Colors.light.muted,
+    lineHeight: 18,
+  },
+  referralCard: {
+    backgroundColor: "#FEF3C7",
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: "#F59E0B",
+  },
+  referralContent: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  referralLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    flex: 1,
+  },
+  referralIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: "#FFF",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  referralTitle: {
+    fontSize: 16,
+    fontWeight: "700" as const,
+    color: "#92400E",
+    marginBottom: 2,
+  },
+  referralSubtitle: {
+    fontSize: 13,
+    color: "#B45309",
+  },
+  referralButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    backgroundColor: "#F59E0B",
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 8,
+  },
+  referralButtonText: {
+    fontSize: 14,
+    fontWeight: "700" as const,
+    color: "#FFF",
+  },
+  crewTrackingCard: {
+    backgroundColor: Colors.light.card,
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 16,
+    borderWidth: 2,
+    borderColor: Colors.light.primary,
+  },
+  crewTrackingHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 16,
+  },
+  crewTrackingTitle: {
+    fontSize: 17,
+    fontWeight: "700" as const,
+    color: Colors.light.text,
+  },
+  etaBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    backgroundColor: `${Colors.light.primary}15`,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 12,
+  },
+  etaText: {
+    fontSize: 13,
+    fontWeight: "700" as const,
+    color: Colors.light.primary,
+  },
+  crewMemberInfo: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    marginBottom: 16,
+  },
+  crewAvatar: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: `${Colors.light.primary}15`,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  crewDetails: {
+    flex: 1,
+  },
+  crewName: {
+    fontSize: 16,
+    fontWeight: "700" as const,
+    color: Colors.light.text,
+    marginBottom: 2,
+  },
+  crewRole: {
+    fontSize: 13,
+    color: Colors.light.muted,
+    marginBottom: 4,
+  },
+  crewRating: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 2,
+  },
+  crewRatingText: {
+    fontSize: 13,
+    color: Colors.light.muted,
+    marginLeft: 6,
+    fontWeight: "600" as const,
+  },
+  crewCallButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: `${Colors.light.primary}15`,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  progressTracker: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  progressDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: Colors.light.primary,
+  },
+  progressLine: {
+    width: 40,
+    height: 2,
+    backgroundColor: Colors.light.border,
+  },
+  progressTrackerText: {
+    fontSize: 13,
+    color: Colors.light.muted,
+    fontWeight: "600" as const,
+  },
+  beforeAfterContainer: {
+    borderRadius: 12,
+    overflow: "hidden",
+    backgroundColor: Colors.light.background,
+  },
+  imageSliderContainer: {
+    position: "relative" as const,
+    height: 300,
+  },
+  beforeAfterImage: {
+    width: "100%",
+    height: "100%",
+    resizeMode: "cover" as const,
+  },
+  afterImageContainer: {
+    position: "absolute" as const,
+    top: 0,
+    left: 0,
+    height: "100%",
+    overflow: "hidden",
+  },
+  sliderHandle: {
+    position: "absolute" as const,
+    top: 0,
+    height: "100%",
+    width: 4,
+    backgroundColor: "#FFF",
+    marginLeft: -2,
+  },
+  sliderLine: {
+    width: "100%",
+    height: "100%",
+    backgroundColor: "#FFF",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  beforeAfterLabels: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    padding: 12,
+    backgroundColor: Colors.light.card,
+  },
+  beforeAfterLabel: {
+    fontSize: 14,
+    fontWeight: "600" as const,
+    color: Colors.light.text,
+  },
+  photoCard: {
+    position: "relative" as const,
+  },
+  photoOverlay: {
+    position: "absolute" as const,
+    bottom: 12,
+    left: 12,
+    backgroundColor: "rgba(0,0,0,0.7)",
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 8,
+  },
+  photoLabel: {
+    fontSize: 13,
+    fontWeight: "700" as const,
+    color: "#FFF",
+  },
+  reviewPromptCard: {
+    backgroundColor: `${Colors.light.success}08`,
+    borderRadius: 12,
+    padding: 20,
+    borderWidth: 1,
+    borderColor: `${Colors.light.success}30`,
+  },
+  reviewPromptHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 16,
+    marginBottom: 16,
+  },
+  reviewPromptText: {
+    flex: 1,
+  },
+  reviewPromptTitle: {
+    fontSize: 18,
+    fontWeight: "700" as const,
+    color: Colors.light.text,
+    marginBottom: 4,
+  },
+  reviewPromptSubtitle: {
+    fontSize: 14,
+    color: Colors.light.muted,
+  },
+  reviewButton: {
+    backgroundColor: Colors.light.success,
+    paddingVertical: 14,
+    borderRadius: 10,
+    alignItems: "center",
+  },
+  reviewButtonText: {
+    fontSize: 16,
+    fontWeight: "700" as const,
+    color: "#FFF",
   },
 });
