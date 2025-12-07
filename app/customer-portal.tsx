@@ -43,21 +43,35 @@ import {
   Shield,
   Info,
   Award,
+  ClipboardCheck,
 } from "lucide-react-native";
 
 import Colors from "@/constants/colors";
+
+interface ChecklistItem {
+  id: string;
+  title: string;
+  description: string;
+  category: "parking" | "pets" | "access" | "preparation" | "safety";
+  required: boolean;
+  completed: boolean;
+  completedAt?: string;
+}
 
 interface CustomerJob {
   id: string;
   title: string;
   status: "scheduled" | "in-progress" | "completed";
   scheduledDate: string;
+  scheduledTime?: string;
   progress: number;
   photos: string[];
   address: string;
   nextMilestone?: string;
   crewName?: string;
   estimatedCompletion?: string;
+  preArrivalChecklist?: ChecklistItem[];
+  checklistCompletedAt?: string;
 }
 
 interface CustomerContract {
@@ -127,12 +141,14 @@ const mockJobs: CustomerJob[] = [
     title: "Front Yard Landscaping",
     status: "in-progress",
     scheduledDate: "2025-12-10",
+    scheduledTime: "9:00 AM",
     progress: 65,
     photos: ["https://images.unsplash.com/photo-1558904541-efa843a96f01?w=400"],
     address: "123 Main St",
     nextMilestone: "Install irrigation system",
     crewName: "Green Team A",
     estimatedCompletion: "2025-12-20",
+    preArrivalChecklist: [],
   },
 ];
 
@@ -667,11 +683,21 @@ export default function CustomerPortalScreen() {
             </View>
             <Text style={styles.quickActionText}>Reschedule</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.quickActionCard}>
+          <TouchableOpacity 
+            style={styles.quickActionCard}
+            onPress={() => router.push({
+              pathname: '/pre-arrival-checklist',
+              params: { 
+                jobId: 'J-001',
+                scheduledDate: '2025-12-10',
+                scheduledTime: '9:00 AM',
+              },
+            })}
+          >
             <View style={[styles.quickActionIcon, { backgroundColor: '#E0E7FF' }]}>
-              <FileText color="#6366F1" size={22} />
+              <ClipboardCheck color="#6366F1" size={22} />
             </View>
-            <Text style={styles.quickActionText}>Documents</Text>
+            <Text style={styles.quickActionText}>Checklist</Text>
           </TouchableOpacity>
         </View>
         </View>
@@ -729,6 +755,38 @@ export default function CustomerPortalScreen() {
                 </TouchableOpacity>
               </View>
             </View>
+
+            <TouchableOpacity 
+              style={styles.preArrivalChecklistCard}
+              onPress={() => router.push({
+                pathname: '/pre-arrival-checklist',
+                params: { 
+                  jobId: 'J-001',
+                  scheduledDate: '2025-12-10',
+                  scheduledTime: '9:00 AM',
+                },
+              })}
+            >
+              <View style={styles.checklistCardHeader}>
+                <View style={styles.checklistIconBadge}>
+                  <ClipboardCheck color={Colors.light.primary} size={24} />
+                </View>
+                <View style={styles.checklistCardHeaderText}>
+                  <Text style={styles.checklistCardTitle}>Pre-Arrival Checklist</Text>
+                  <Text style={styles.checklistCardSubtitle}>Help us prepare for your project</Text>
+                </View>
+              </View>
+              <View style={styles.checklistProgress}>
+                <View style={styles.checklistProgressBar}>
+                  <View style={[styles.checklistProgressFill, { width: '0%' }]} />
+                </View>
+                <Text style={styles.checklistProgressText}>0 of 8 items completed</Text>
+              </View>
+              <View style={styles.checklistCTA}>
+                <Text style={styles.checklistCTAText}>Complete Now</Text>
+                <ChevronRight color={Colors.light.primary} size={20} />
+              </View>
+            </TouchableOpacity>
 
             <View style={styles.crewTrackingCard}>
               <View style={styles.crewTrackingHeader}>
@@ -3115,6 +3173,76 @@ const styles = StyleSheet.create({
     borderColor: Colors.light.primary,
   },
   communicationSecondaryBtnText: {
+    fontSize: 15,
+    fontWeight: "700" as const,
+    color: Colors.light.primary,
+  },
+  preArrivalChecklistCard: {
+    backgroundColor: Colors.light.card,
+    borderRadius: 16,
+    padding: 20,
+    marginBottom: 16,
+    borderWidth: 2,
+    borderColor: Colors.light.primary,
+  },
+  checklistCardHeader: {
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    marginBottom: 16,
+    gap: 12,
+  },
+  checklistIconBadge: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: `${Colors.light.primary}15`,
+    alignItems: "center" as const,
+    justifyContent: "center" as const,
+  },
+  checklistCardHeaderText: {
+    flex: 1,
+  },
+  checklistCardTitle: {
+    fontSize: 18,
+    fontWeight: "700" as const,
+    color: Colors.light.text,
+    marginBottom: 4,
+  },
+  checklistCardSubtitle: {
+    fontSize: 14,
+    color: Colors.light.muted,
+    lineHeight: 20,
+  },
+  checklistProgress: {
+    marginBottom: 16,
+  },
+  checklistProgressBar: {
+    height: 8,
+    backgroundColor: Colors.light.background,
+    borderRadius: 4,
+    overflow: "hidden" as const,
+    marginBottom: 8,
+  },
+  checklistProgressFill: {
+    height: "100%",
+    backgroundColor: Colors.light.primary,
+    borderRadius: 4,
+  },
+  checklistProgressText: {
+    fontSize: 13,
+    color: Colors.light.muted,
+    fontWeight: "600" as const,
+  },
+  checklistCTA: {
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    justifyContent: "space-between" as const,
+    backgroundColor: `${Colors.light.primary}08`,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 10,
+  },
+  checklistCTAText: {
     fontSize: 15,
     fontWeight: "700" as const,
     color: Colors.light.primary,
