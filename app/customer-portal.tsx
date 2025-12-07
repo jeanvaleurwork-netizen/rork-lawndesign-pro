@@ -151,7 +151,75 @@ const mockJobs: CustomerJob[] = [
     nextMilestone: "Install irrigation system",
     crewName: "Green Team A",
     estimatedCompletion: "2025-12-20",
-    preArrivalChecklist: [],
+    preArrivalChecklist: [
+      {
+        id: "1",
+        title: "Move Vehicles",
+        description: "Please move all vehicles from the driveway and work area",
+        category: "parking" as const,
+        required: true,
+        completed: true,
+        completedAt: "2025-12-08T10:00:00Z",
+      },
+      {
+        id: "2",
+        title: "Secure Pets",
+        description: "Please secure all pets indoors or in a safe location away from the work area",
+        category: "pets" as const,
+        required: true,
+        completed: true,
+        completedAt: "2025-12-08T10:00:00Z",
+      },
+      {
+        id: "3",
+        title: "Unlock Gates/Doors",
+        description: "Ensure all gates and necessary doors are unlocked for crew access",
+        category: "access" as const,
+        required: true,
+        completed: true,
+        completedAt: "2025-12-08T10:00:00Z",
+      },
+      {
+        id: "4",
+        title: "Clear Work Area",
+        description: "Remove any outdoor furniture, decorations, or items from the work zone",
+        category: "preparation" as const,
+        required: true,
+        completed: false,
+      },
+      {
+        id: "5",
+        title: "Provide Parking Space",
+        description: "Ensure there's parking available for crew vehicles and equipment trailer",
+        category: "parking" as const,
+        required: true,
+        completed: false,
+      },
+      {
+        id: "6",
+        title: "Power Access",
+        description: "Outdoor electrical outlet should be accessible for crew equipment",
+        category: "preparation" as const,
+        required: false,
+        completed: false,
+      },
+      {
+        id: "7",
+        title: "Water Access",
+        description: "Outside water spigot should be accessible if needed",
+        category: "preparation" as const,
+        required: false,
+        completed: false,
+      },
+      {
+        id: "8",
+        title: "Remove Valuables",
+        description: "Remove or secure any valuable items near the work area",
+        category: "safety" as const,
+        required: true,
+        completed: false,
+      },
+    ],
   },
 ];
 
@@ -262,6 +330,7 @@ export default function CustomerPortalScreen() {
   const [selectedContract, setSelectedContract] = useState<CustomerContract | null>(null);
   const [showContractModal, setShowContractModal] = useState<boolean>(false);
   const [beforeAfterSlider] = useState<number>(50);
+  const [checklistItems, setChecklistItems] = useState<ChecklistItem[]>([]);
   const [showNotifications, setShowNotifications] = useState<boolean>(false);
 
   const onRefresh = () => {
@@ -815,9 +884,11 @@ export default function CustomerPortalScreen() {
               </View>
               <View style={styles.checklistProgress}>
                 <View style={styles.checklistProgressBar}>
-                  <View style={[styles.checklistProgressFill, { width: '0%' }]} />
+                  <View style={[styles.checklistProgressFill, { width: `${(mockJobs[0].preArrivalChecklist?.filter(i => i.completed).length || 0) / (mockJobs[0].preArrivalChecklist?.length || 1) * 100}%` }]} />
                 </View>
-                <Text style={styles.checklistProgressText}>0 of 8 items completed</Text>
+                <Text style={styles.checklistProgressText}>
+                  {mockJobs[0].preArrivalChecklist?.filter(i => i.completed).length || 0} of {mockJobs[0].preArrivalChecklist?.length || 0} items completed
+                </Text>
               </View>
               <View style={styles.checklistCTA}>
                 <Text style={styles.checklistCTAText}>Complete Now</Text>
@@ -2631,6 +2702,9 @@ const styles = StyleSheet.create({
     color: "#FFF",
   },
   contractsHeader: {
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    justifyContent: "space-between" as const,
     marginBottom: 20,
   },
   contractsHeaderTitle: {
