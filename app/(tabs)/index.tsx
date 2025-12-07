@@ -248,7 +248,7 @@ export default function HomeScreen() {
         )}
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Quick Actions</Text>
+          <Text style={styles.sectionTitle}>🔥 Most Used</Text>
           <View style={styles.actionGrid}>
             <AnimatedButton 
               style={styles.actionButton}
@@ -272,6 +272,31 @@ export default function HomeScreen() {
 
             <TouchableOpacity 
               style={styles.actionButton}
+              onPress={() => router.push("/pagos-ai-dashboard")}
+            >
+              <View style={[styles.actionIcon, { backgroundColor: "#8B5CF6" }]}>
+                <DollarSign color="#FFF" size={24} />
+              </View>
+              <Text style={styles.actionLabel}>Pagos AI</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity 
+              style={styles.actionButton}
+              onPress={() => router.push("/(tabs)/crew")}
+            >
+              <View style={[styles.actionIcon, { backgroundColor: "#F59E0B" }]}>
+                <Users color="#FFF" size={24} />
+              </View>
+              <Text style={styles.actionLabel}>Crew</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>📏 Measurement & Property</Text>
+          <View style={styles.actionGrid}>
+            <TouchableOpacity 
+              style={styles.actionButton}
               onPress={() => router.push("/measurement-hub" as any)}
             >
               <View style={[styles.actionIcon, { backgroundColor: Colors.light.secondary }]}>
@@ -289,7 +314,31 @@ export default function HomeScreen() {
               </View>
               <Text style={styles.actionLabel}>Backyard Measure</Text>
             </TouchableOpacity>
+
+            <TouchableOpacity 
+              style={styles.actionButton}
+              onPress={() => router.push("/property-scan")}
+            >
+              <View style={[styles.actionIcon, { backgroundColor: "#06B6D4" }]}>
+                <Sparkles color="#FFF" size={24} />
+              </View>
+              <Text style={styles.actionLabel}>Property Scan</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity 
+              style={styles.actionButton}
+              onPress={() => router.push("/damage-inspection")}
+            >
+              <View style={[styles.actionIcon, { backgroundColor: "#EF4444" }]}>
+                <AlertCircle color="#FFF" size={24} />
+              </View>
+              <Text style={styles.actionLabel}>Inspection</Text>
+            </TouchableOpacity>
           </View>
+        </View>
+
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>🤖 AI Assistants</Text>
           <View style={styles.actionGrid}>
             <TouchableOpacity 
               style={styles.actionButton}
@@ -303,26 +352,6 @@ export default function HomeScreen() {
 
             <TouchableOpacity 
               style={styles.actionButton}
-              onPress={() => router.push("/ai-intake-dashboard")}
-            >
-              <View style={[styles.actionIcon, { backgroundColor: "#3B82F6" }]}>
-                <MessageSquare color="#FFF" size={24} />
-              </View>
-              <Text style={styles.actionLabel}>AI Dashboard</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity 
-              style={styles.actionButton}
-              onPress={() => router.push("/crew-invites" as any)}
-            >
-              <View style={[styles.actionIcon, { backgroundColor: "#F59E0B" }]}>
-                <Plus color="#FFF" size={24} />
-              </View>
-              <Text style={styles.actionLabel}>Invite Crew</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity 
-              style={styles.actionButton}
               onPress={() => router.push("/ai-cost-analyzer")}
             >
               <View style={[styles.actionIcon, { backgroundColor: Colors.light.purple }]}>
@@ -330,38 +359,32 @@ export default function HomeScreen() {
               </View>
               <Text style={styles.actionLabel}>AI Cost</Text>
             </TouchableOpacity>
+
+            <TouchableOpacity 
+              style={styles.actionButton}
+              onPress={() => router.push("/ai-office")}
+            >
+              <View style={[styles.actionIcon, { backgroundColor: "#3B82F6" }]}>
+                <MessageSquare color="#FFF" size={24} />
+              </View>
+              <Text style={styles.actionLabel}>AI Office</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity 
+              style={styles.actionButton}
+              onPress={() => router.push("/ai-intake-dashboard")}
+            >
+              <View style={[styles.actionIcon, { backgroundColor: "#EC4899" }]}>
+                <BarChart3 color="#FFF" size={24} />
+              </View>
+              <Text style={styles.actionLabel}>AI Dashboard</Text>
+            </TouchableOpacity>
           </View>
+        </View>
+
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>💰 Financial & Reports</Text>
           <View style={styles.actionGrid}>
-            <TouchableOpacity 
-              style={styles.actionButton}
-              onPress={() => router.push("/trade-tools")}
-            >
-              <View style={[styles.actionIcon, { backgroundColor: "#EF4444" }]}>
-                <Plus color="#FFF" size={24} />
-              </View>
-              <Text style={styles.actionLabel}>Trade Tools</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity 
-              style={styles.actionButton}
-              onPress={() => router.push("/business-settings")}
-            >
-              <View style={[styles.actionIcon, { backgroundColor: "#06B6D4" }]}>
-                <Plus color="#FFF" size={24} />
-              </View>
-              <Text style={styles.actionLabel}>Settings</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity 
-              style={styles.actionButton}
-              onPress={() => router.push("/pagos-ai-dashboard")}
-            >
-              <View style={[styles.actionIcon, { backgroundColor: "#8B5CF6" }]}>
-                <DollarSign color="#FFF" size={24} />
-              </View>
-              <Text style={styles.actionLabel}>Pagos AI</Text>
-            </TouchableOpacity>
-
             <TouchableOpacity 
               style={styles.actionButton}
               onPress={() => router.push("/(tabs)/receipts")}
@@ -371,8 +394,7 @@ export default function HomeScreen() {
               </View>
               <Text style={styles.actionLabel}>Receipts</Text>
             </TouchableOpacity>
-          </View>
-          <View style={styles.actionGrid}>
+
             <TouchableOpacity 
               style={styles.actionButton}
               onPress={() => router.push("/analytics")}
@@ -385,22 +407,22 @@ export default function HomeScreen() {
 
             <TouchableOpacity 
               style={styles.actionButton}
-              onPress={() => router.push("/ai-office")}
+              onPress={() => router.push("/(tabs)/invoices")}
             >
-              <View style={[styles.actionIcon, { backgroundColor: Colors.light.purple }]}>
-                <Plus color="#FFF" size={24} />
+              <View style={[styles.actionIcon, { backgroundColor: "#F59E0B" }]}>
+                <FileText color="#FFF" size={24} />
               </View>
-              <Text style={styles.actionLabel}>AI Office</Text>
+              <Text style={styles.actionLabel}>Invoices</Text>
             </TouchableOpacity>
 
             <TouchableOpacity 
               style={styles.actionButton}
-              onPress={() => router.push("/(tabs)/crew")}
+              onPress={() => router.push("/contracts")}
             >
-              <View style={[styles.actionIcon, { backgroundColor: "#F59E0B" }]}>
-                <Users color="#FFF" size={24} />
+              <View style={[styles.actionIcon, { backgroundColor: "#8B5CF6" }]}>
+                <FileText color="#FFF" size={24} />
               </View>
-              <Text style={styles.actionLabel}>Crew</Text>
+              <Text style={styles.actionLabel}>Contracts</Text>
             </TouchableOpacity>
           </View>
         </View>
