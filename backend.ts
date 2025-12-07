@@ -1,7 +1,7 @@
 import app from "./backend/hono";
 
 console.log("\n" + "=".repeat(70));
-console.log("  ContractorOS Backend v7 - STARTING");
+console.log("  ContractorOS Backend v8 - STARTING");
 console.log("=".repeat(70));
 console.log("[Backend] Time:", new Date().toISOString());
 console.log("[Backend] Environment:", process.env.NODE_ENV || "development");
@@ -41,7 +41,19 @@ const routes = [
     "gemini.assistMeasurement (mutation)",
     "gemini.designBackyard (mutation)"
   ]},
-  { group: "Data", items: ["Jobs, Clients, Estimates CRUD operations"] },
+  { group: "Data", items: [
+    "data.getJobs (query) ✓",
+    "data.createJob (mutation) ✓",
+    "data.updateJob (mutation) ✓",
+    "data.deleteJob (mutation) ✓",
+    "data.getClients (query) ✓",
+    "data.createClient (mutation) ✓",
+    "data.updateClient (mutation) ✓",
+    "data.deleteClient (mutation) ✓",
+    "data.getEstimates (query) ✓",
+    "data.createEstimate (mutation) ✓",
+    "data.updateEstimate (mutation) ✓"
+  ] },
   { group: "AI Office", items: ["officeManager, imageAnalysis, jobCosting"] },
   { group: "Pagos AI", items: ["Payment analysis and predictions"] },
   { group: "Receipt AI", items: ["Receipt scanning and tax calculations"] }

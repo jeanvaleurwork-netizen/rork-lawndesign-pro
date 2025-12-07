@@ -5,13 +5,19 @@ import { appRouter } from "./trpc/app-router";
 import { createContext } from "./trpc/create-context";
 
 console.log("\n" + "=".repeat(60));
-console.log("[Hono] Creating Hono app instance v5");
+console.log("[Hono] Creating Hono app instance v6");
 console.log("[Hono] tRPC Router structure:", Object.keys(appRouter._def.procedures || {}));
 console.log("[Hono] Checking router._def:", Object.keys(appRouter._def));
 console.log("[Hono] Router type:", typeof appRouter);
 
 try {
   const router = appRouter as any;
+  if (router.data) {
+    console.log("[Hono] ✓ data router found");
+    console.log("[Hono] data procedures:", Object.keys(router.data._def?.procedures || {}));
+  } else {
+    console.log("[Hono] ✗ data router NOT found");
+  }
   if (router.aiIntake) {
     console.log("[Hono] ✓ aiIntake router found");
     console.log("[Hono] aiIntake procedures:", Object.keys(router.aiIntake._def?.procedures || {}));
@@ -97,6 +103,8 @@ app.get("/api", (c) => {
     routerInfo.ai = checkRouter('ai');
     routerInfo.pagosAI = checkRouter('pagosAI');
     routerInfo.receiptAI = checkRouter('receiptAI');
+    routerInfo.contracts = checkRouter('contracts');
+    routerInfo.smartContracts = checkRouter('smartContracts');
   } catch (e) {
     console.error("[Hono] Error extracting router info:", e);
   }
@@ -113,6 +121,8 @@ app.get("/api", (c) => {
       hasGemini: Boolean(router.gemini),
       hasAiIntake: Boolean(router.aiIntake),
       hasData: Boolean(router.data),
+      hasContracts: Boolean(router.contracts),
+      hasSmartContracts: Boolean(router.smartContracts),
     }
   });
 });
