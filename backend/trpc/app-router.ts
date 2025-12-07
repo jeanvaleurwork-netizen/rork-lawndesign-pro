@@ -66,6 +66,7 @@ import {
   calculateTaxProcedure,
 } from "./routes/receipt-ai/route";
 import { contractsRouter } from "./routes/contracts/route";
+import { smartContractsRouter } from "./routes/smart-contracts/route";
 
 console.log("[AppRouter] Initializing tRPC router");
 console.log("[AppRouter] Auth routes:", {
@@ -145,6 +146,7 @@ export const appRouter = createTRPCRouter({
     calculateTax: calculateTaxProcedure,
   }),
   contracts: contractsRouter,
+  smartContracts: smartContractsRouter,
 });
 
 console.log("[AppRouter] Router created successfully");

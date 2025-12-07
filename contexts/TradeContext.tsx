@@ -100,6 +100,12 @@ export const [TradeProvider, useTrade] = createContextHook(() => {
       pressure_washing: "Pressure Washing",
       renovation: "Renovation",
       general_contractor: "General Contractor",
+      concrete: "Concrete",
+      framing: "Framing",
+      flooring: "Flooring",
+      drywall: "Drywall",
+      masonry: "Masonry",
+      carpentry: "Carpentry",
     };
     return names[trade] || trade;
   };

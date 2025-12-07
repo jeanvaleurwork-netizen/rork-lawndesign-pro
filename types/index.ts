@@ -575,6 +575,73 @@ export interface ContractWarranty {
   notes?: string;
   status: WarrantyStatus;
   createdAt: string;
+  tradeType?: TradeType;
+  isDefault?: boolean;
+}
+
+export type RiskLevel = "SMALL" | "MEDIUM" | "LARGE" | "HIGH_RISK";
+export type PaymentStatus = "PENDING" | "PARTIAL" | "PAID" | "OVERDUE";
+export type ProjectStatus = "PENDING" | "SCHEDULED" | "IN_PROGRESS" | "COMPLETED" | "CANCELLED" | "ON_HOLD";
+
+export interface ProjectPayment {
+  id: string;
+  projectId: string;
+  label: string;
+  duePercent: number;
+  dueAmount: number;
+  dueDate?: string;
+  status: PaymentStatus;
+  paidAmount?: number;
+  paidAt?: string;
+  createdAt: string;
+}
+
+export interface ProjectForecast {
+  id: string;
+  projectId: string;
+  generatedAt: string;
+  forecastEndDate: string;
+  forecastDelayDays: number;
+  forecastCostOverrunPercent: number;
+  forecastNotes: string;
+  confidenceScore: number;
+}
+
+export interface ProjectMetricsDaily {
+  id: string;
+  projectId: string;
+  date: string;
+  cumulativeCost: number;
+  cumulativeRevenue: number;
+  cumulativeChangeOrders: number;
+  workCompletedPercent: number;
+}
+
+export interface SmartProject {
+  id: string;
+  businessId: string;
+  clientId: string;
+  clientName: string;
+  name: string;
+  address: string;
+  tradeType: TradeType;
+  riskLevel: RiskLevel;
+  estimatedDurationDays: number;
+  actualDurationDays?: number;
+  startDate: string;
+  endDate: string;
+  forecastEndDate?: string;
+  actualEndDate?: string;
+  forecastCostOverrunPercent: number;
+  forecastDelayDays: number;
+  projectProfitMarginPercent: number;
+  projectStatus: ProjectStatus;
+  projectStatusDetail?: string;
+  totalAmount: number;
+  scopeOfWork: string;
+  notes?: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface MaterialApproval {
@@ -716,7 +783,13 @@ export type TradeType =
   | "pool_service"
   | "pressure_washing"
   | "renovation"
-  | "general_contractor";
+  | "general_contractor"
+  | "concrete"
+  | "framing"
+  | "flooring"
+  | "drywall"
+  | "masonry"
+  | "carpentry";
 
 export interface Organization {
   id: string;
