@@ -21,6 +21,11 @@ import {
   Trash2,
   Calendar,
   DollarSign,
+  FileText,
+  Building2,
+  Hammer,
+  Shield,
+  Sparkles,
 } from "lucide-react-native";
 
 import Colors from "@/constants/colors";
@@ -148,7 +153,17 @@ export default function ContractEditorScreen() {
         <ScrollView style={styles.scrollView}>
           <View style={styles.content}>
             <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Contract Type</Text>
+              <View style={styles.typeHeaderContainer}>
+                <View>
+                  <Text style={styles.sectionTitle}>Choose Contract Type</Text>
+                  <Text style={styles.sectionSubtitle}>Select the type that best fits your project</Text>
+                </View>
+                <View style={styles.typeBadge}>
+                  <FileText color={Colors.light.primary} size={20} />
+                </View>
+              </View>
+              
+              <Text style={styles.categoryLabel}>POPULAR</Text>
               <View style={styles.typeSelector}>
                 <TouchableOpacity
                   style={[
@@ -158,6 +173,7 @@ export default function ContractEditorScreen() {
                   ]}
                   onPress={() => setContractType("MSA")}
                 >
+                  <Building2 color={contractType === "MSA" ? "#FFF" : Colors.light.primary} size={20} />
                   <Text
                     style={[
                       styles.typeButtonText,
@@ -175,13 +191,14 @@ export default function ContractEditorScreen() {
                   ]}
                   onPress={() => setContractType("PROJECT_CONTRACT")}
                 >
+                  <Hammer color={contractType === "PROJECT_CONTRACT" ? "#FFF" : Colors.light.primary} size={20} />
                   <Text
                     style={[
                       styles.typeButtonText,
                       contractType === "PROJECT_CONTRACT" && styles.typeButtonTextActive,
                     ]}
                   >
-                    Project Contract
+                    Project
                   </Text>
                 </TouchableOpacity>
                 <TouchableOpacity
@@ -192,6 +209,7 @@ export default function ContractEditorScreen() {
                   ]}
                   onPress={() => setContractType("WORK_ORDER")}
                 >
+                  <FileText color={contractType === "WORK_ORDER" ? "#FFF" : Colors.light.primary} size={20} />
                   <Text
                     style={[
                       styles.typeButtonText,
@@ -203,214 +221,350 @@ export default function ContractEditorScreen() {
                 </TouchableOpacity>
               </View>
               
+              <Text style={styles.categoryLabel}>PRICING MODELS</Text>
               <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.typeScrollView}>
                 <View style={styles.typeGrid}>
                   <TouchableOpacity
                     style={[
-                      styles.typeButton,
-                      contractType === "TIME_MATERIALS" && styles.typeButtonActive,
+                      styles.typeCardButton,
+                      contractType === "TIME_MATERIALS" && styles.typeCardButtonActive,
                     ]}
                     onPress={() => setContractType("TIME_MATERIALS")}
                   >
+                    <DollarSign color={contractType === "TIME_MATERIALS" ? "#FFF" : Colors.light.primary} size={24} />
                     <Text
                       style={[
-                        styles.typeButtonText,
-                        contractType === "TIME_MATERIALS" && styles.typeButtonTextActive,
+                        styles.typeCardButtonText,
+                        contractType === "TIME_MATERIALS" && styles.typeCardButtonTextActive,
                       ]}
                     >
                       Time & Materials
                     </Text>
+                    <Text
+                      style={[
+                        styles.typeCardButtonDesc,
+                        contractType === "TIME_MATERIALS" && styles.typeCardButtonDescActive,
+                      ]}
+                    >
+                      Hourly billing
+                    </Text>
                   </TouchableOpacity>
                   <TouchableOpacity
                     style={[
-                      styles.typeButton,
-                      contractType === "FIXED_PRICE" && styles.typeButtonActive,
+                      styles.typeCardButton,
+                      contractType === "FIXED_PRICE" && styles.typeCardButtonActive,
                     ]}
                     onPress={() => setContractType("FIXED_PRICE")}
                   >
+                    <Shield color={contractType === "FIXED_PRICE" ? "#FFF" : Colors.light.primary} size={24} />
                     <Text
                       style={[
-                        styles.typeButtonText,
-                        contractType === "FIXED_PRICE" && styles.typeButtonTextActive,
+                        styles.typeCardButtonText,
+                        contractType === "FIXED_PRICE" && styles.typeCardButtonTextActive,
                       ]}
                     >
                       Fixed Price
                     </Text>
+                    <Text
+                      style={[
+                        styles.typeCardButtonDesc,
+                        contractType === "FIXED_PRICE" && styles.typeCardButtonDescActive,
+                      ]}
+                    >
+                      Set total cost
+                    </Text>
                   </TouchableOpacity>
                   <TouchableOpacity
                     style={[
-                      styles.typeButton,
-                      contractType === "COST_PLUS" && styles.typeButtonActive,
+                      styles.typeCardButton,
+                      contractType === "COST_PLUS" && styles.typeCardButtonActive,
                     ]}
                     onPress={() => setContractType("COST_PLUS")}
                   >
+                    <Plus color={contractType === "COST_PLUS" ? "#FFF" : Colors.light.primary} size={24} />
                     <Text
                       style={[
-                        styles.typeButtonText,
-                        contractType === "COST_PLUS" && styles.typeButtonTextActive,
+                        styles.typeCardButtonText,
+                        contractType === "COST_PLUS" && styles.typeCardButtonTextActive,
                       ]}
                     >
                       Cost Plus
                     </Text>
+                    <Text
+                      style={[
+                        styles.typeCardButtonDesc,
+                        contractType === "COST_PLUS" && styles.typeCardButtonDescActive,
+                      ]}
+                    >
+                      Cost + markup
+                    </Text>
                   </TouchableOpacity>
                   <TouchableOpacity
                     style={[
-                      styles.typeButton,
-                      contractType === "LUMP_SUM" && styles.typeButtonActive,
+                      styles.typeCardButton,
+                      contractType === "LUMP_SUM" && styles.typeCardButtonActive,
                     ]}
                     onPress={() => setContractType("LUMP_SUM")}
                   >
+                    <DollarSign color={contractType === "LUMP_SUM" ? "#FFF" : Colors.light.primary} size={24} />
                     <Text
                       style={[
-                        styles.typeButtonText,
-                        contractType === "LUMP_SUM" && styles.typeButtonTextActive,
+                        styles.typeCardButtonText,
+                        contractType === "LUMP_SUM" && styles.typeCardButtonTextActive,
                       ]}
                     >
                       Lump Sum
                     </Text>
+                    <Text
+                      style={[
+                        styles.typeCardButtonDesc,
+                        contractType === "LUMP_SUM" && styles.typeCardButtonDescActive,
+                      ]}
+                    >
+                      Single payment
+                    </Text>
                   </TouchableOpacity>
                   <TouchableOpacity
                     style={[
-                      styles.typeButton,
-                      contractType === "UNIT_PRICE" && styles.typeButtonActive,
+                      styles.typeCardButton,
+                      contractType === "UNIT_PRICE" && styles.typeCardButtonActive,
                     ]}
                     onPress={() => setContractType("UNIT_PRICE")}
                   >
+                    <Building2 color={contractType === "UNIT_PRICE" ? "#FFF" : Colors.light.primary} size={24} />
                     <Text
                       style={[
-                        styles.typeButtonText,
-                        contractType === "UNIT_PRICE" && styles.typeButtonTextActive,
+                        styles.typeCardButtonText,
+                        contractType === "UNIT_PRICE" && styles.typeCardButtonTextActive,
                       ]}
                     >
                       Unit Price
                     </Text>
+                    <Text
+                      style={[
+                        styles.typeCardButtonDesc,
+                        contractType === "UNIT_PRICE" && styles.typeCardButtonDescActive,
+                      ]}
+                    >
+                      Per unit pricing
+                    </Text>
                   </TouchableOpacity>
+                </View>
+              </ScrollView>
+              
+              <Text style={styles.categoryLabel}>SERVICE AGREEMENTS</Text>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.typeScrollView}>
+                <View style={styles.typeGrid}>
                   <TouchableOpacity
                     style={[
-                      styles.typeButton,
-                      contractType === "SERVICE_AGREEMENT" && styles.typeButtonActive,
+                      styles.typeCardButton,
+                      contractType === "SERVICE_AGREEMENT" && styles.typeCardButtonActive,
                     ]}
                     onPress={() => setContractType("SERVICE_AGREEMENT")}
                   >
+                    <Sparkles color={contractType === "SERVICE_AGREEMENT" ? "#FFF" : Colors.light.primary} size={24} />
                     <Text
                       style={[
-                        styles.typeButtonText,
-                        contractType === "SERVICE_AGREEMENT" && styles.typeButtonTextActive,
+                        styles.typeCardButtonText,
+                        contractType === "SERVICE_AGREEMENT" && styles.typeCardButtonTextActive,
                       ]}
                     >
                       Service Agreement
                     </Text>
+                    <Text
+                      style={[
+                        styles.typeCardButtonDesc,
+                        contractType === "SERVICE_AGREEMENT" && styles.typeCardButtonDescActive,
+                      ]}
+                    >
+                      Ongoing service
+                    </Text>
                   </TouchableOpacity>
                   <TouchableOpacity
                     style={[
-                      styles.typeButton,
-                      contractType === "MAINTENANCE_AGREEMENT" && styles.typeButtonActive,
+                      styles.typeCardButton,
+                      contractType === "MAINTENANCE_AGREEMENT" && styles.typeCardButtonActive,
                     ]}
                     onPress={() => setContractType("MAINTENANCE_AGREEMENT")}
                   >
+                    <Shield color={contractType === "MAINTENANCE_AGREEMENT" ? "#FFF" : Colors.light.primary} size={24} />
                     <Text
                       style={[
-                        styles.typeButtonText,
-                        contractType === "MAINTENANCE_AGREEMENT" && styles.typeButtonTextActive,
+                        styles.typeCardButtonText,
+                        contractType === "MAINTENANCE_AGREEMENT" && styles.typeCardButtonTextActive,
                       ]}
                     >
                       Maintenance
                     </Text>
+                    <Text
+                      style={[
+                        styles.typeCardButtonDesc,
+                        contractType === "MAINTENANCE_AGREEMENT" && styles.typeCardButtonDescActive,
+                      ]}
+                    >
+                      Regular upkeep
+                    </Text>
                   </TouchableOpacity>
+                </View>
+              </ScrollView>
+              
+              <Text style={styles.categoryLabel}>SPECIALIZED</Text>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.typeScrollView}>
+                <View style={styles.typeGrid}>
                   <TouchableOpacity
                     style={[
-                      styles.typeButton,
-                      contractType === "DESIGN_BUILD" && styles.typeButtonActive,
+                      styles.typeCardButton,
+                      contractType === "DESIGN_BUILD" && styles.typeCardButtonActive,
                     ]}
                     onPress={() => setContractType("DESIGN_BUILD")}
                   >
+                    <Hammer color={contractType === "DESIGN_BUILD" ? "#FFF" : Colors.light.primary} size={24} />
                     <Text
                       style={[
-                        styles.typeButtonText,
-                        contractType === "DESIGN_BUILD" && styles.typeButtonTextActive,
+                        styles.typeCardButtonText,
+                        contractType === "DESIGN_BUILD" && styles.typeCardButtonTextActive,
                       ]}
                     >
                       Design-Build
                     </Text>
+                    <Text
+                      style={[
+                        styles.typeCardButtonDesc,
+                        contractType === "DESIGN_BUILD" && styles.typeCardButtonDescActive,
+                      ]}
+                    >
+                      Design + construction
+                    </Text>
                   </TouchableOpacity>
                   <TouchableOpacity
                     style={[
-                      styles.typeButton,
-                      contractType === "SUPPLY_AGREEMENT" && styles.typeButtonActive,
+                      styles.typeCardButton,
+                      contractType === "SUPPLY_AGREEMENT" && styles.typeCardButtonActive,
                     ]}
                     onPress={() => setContractType("SUPPLY_AGREEMENT")}
                   >
+                    <Building2 color={contractType === "SUPPLY_AGREEMENT" ? "#FFF" : Colors.light.primary} size={24} />
                     <Text
                       style={[
-                        styles.typeButtonText,
-                        contractType === "SUPPLY_AGREEMENT" && styles.typeButtonTextActive,
+                        styles.typeCardButtonText,
+                        contractType === "SUPPLY_AGREEMENT" && styles.typeCardButtonTextActive,
                       ]}
                     >
                       Supply Agreement
                     </Text>
+                    <Text
+                      style={[
+                        styles.typeCardButtonDesc,
+                        contractType === "SUPPLY_AGREEMENT" && styles.typeCardButtonDescActive,
+                      ]}
+                    >
+                      Materials only
+                    </Text>
                   </TouchableOpacity>
                   <TouchableOpacity
                     style={[
-                      styles.typeButton,
-                      contractType === "EQUIPMENT_RENTAL" && styles.typeButtonActive,
+                      styles.typeCardButton,
+                      contractType === "EQUIPMENT_RENTAL" && styles.typeCardButtonActive,
                     ]}
                     onPress={() => setContractType("EQUIPMENT_RENTAL")}
                   >
+                    <Hammer color={contractType === "EQUIPMENT_RENTAL" ? "#FFF" : Colors.light.primary} size={24} />
                     <Text
                       style={[
-                        styles.typeButtonText,
-                        contractType === "EQUIPMENT_RENTAL" && styles.typeButtonTextActive,
+                        styles.typeCardButtonText,
+                        contractType === "EQUIPMENT_RENTAL" && styles.typeCardButtonTextActive,
                       ]}
                     >
                       Equipment Rental
                     </Text>
+                    <Text
+                      style={[
+                        styles.typeCardButtonDesc,
+                        contractType === "EQUIPMENT_RENTAL" && styles.typeCardButtonDescActive,
+                      ]}
+                    >
+                      Rent equipment
+                    </Text>
                   </TouchableOpacity>
+                </View>
+              </ScrollView>
+              
+              <Text style={styles.categoryLabel}>LEGAL & PRELIMINARY</Text>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.typeScrollView}>
+                <View style={styles.typeGrid}>
                   <TouchableOpacity
                     style={[
-                      styles.typeButton,
-                      contractType === "NDA" && styles.typeButtonActive,
+                      styles.typeCardButton,
+                      contractType === "NDA" && styles.typeCardButtonActive,
                     ]}
                     onPress={() => setContractType("NDA")}
                   >
+                    <Shield color={contractType === "NDA" ? "#FFF" : Colors.light.primary} size={24} />
                     <Text
                       style={[
-                        styles.typeButtonText,
-                        contractType === "NDA" && styles.typeButtonTextActive,
+                        styles.typeCardButtonText,
+                        contractType === "NDA" && styles.typeCardButtonTextActive,
                       ]}
                     >
                       NDA
                     </Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={[
-                      styles.typeButton,
-                      contractType === "PROPOSAL" && styles.typeButtonActive,
-                    ]}
-                    onPress={() => setContractType("PROPOSAL")}
-                  >
                     <Text
                       style={[
-                        styles.typeButtonText,
-                        contractType === "PROPOSAL" && styles.typeButtonTextActive,
+                        styles.typeCardButtonDesc,
+                        contractType === "NDA" && styles.typeCardButtonDescActive,
                       ]}
                     >
-                      Proposal
+                      Confidentiality
                     </Text>
                   </TouchableOpacity>
                   <TouchableOpacity
                     style={[
-                      styles.typeButton,
-                      contractType === "LETTER_OF_INTENT" && styles.typeButtonActive,
+                      styles.typeCardButton,
+                      contractType === "PROPOSAL" && styles.typeCardButtonActive,
+                    ]}
+                    onPress={() => setContractType("PROPOSAL")}
+                  >
+                    <FileText color={contractType === "PROPOSAL" ? "#FFF" : Colors.light.primary} size={24} />
+                    <Text
+                      style={[
+                        styles.typeCardButtonText,
+                        contractType === "PROPOSAL" && styles.typeCardButtonTextActive,
+                      ]}
+                    >
+                      Proposal
+                    </Text>
+                    <Text
+                      style={[
+                        styles.typeCardButtonDesc,
+                        contractType === "PROPOSAL" && styles.typeCardButtonDescActive,
+                      ]}
+                    >
+                      Project quote
+                    </Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={[
+                      styles.typeCardButton,
+                      contractType === "LETTER_OF_INTENT" && styles.typeCardButtonActive,
                     ]}
                     onPress={() => setContractType("LETTER_OF_INTENT")}
                   >
+                    <FileText color={contractType === "LETTER_OF_INTENT" ? "#FFF" : Colors.light.primary} size={24} />
                     <Text
                       style={[
-                        styles.typeButtonText,
-                        contractType === "LETTER_OF_INTENT" && styles.typeButtonTextActive,
+                        styles.typeCardButtonText,
+                        contractType === "LETTER_OF_INTENT" && styles.typeCardButtonTextActive,
                       ]}
                     >
                       Letter of Intent
+                    </Text>
+                    <Text
+                      style={[
+                        styles.typeCardButtonDesc,
+                        contractType === "LETTER_OF_INTENT" && styles.typeCardButtonDescActive,
+                      ]}
+                    >
+                      Formal interest
                     </Text>
                   </TouchableOpacity>
                 </View>
@@ -654,11 +808,37 @@ const styles = StyleSheet.create({
   section: {
     marginBottom: 32,
   },
+  typeHeaderContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+    marginBottom: 20,
+  },
+  typeBadge: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: `${Colors.light.primary}15`,
+    alignItems: "center",
+    justifyContent: "center",
+  },
   sectionTitle: {
-    fontSize: 18,
+    fontSize: 22,
     fontWeight: "700" as const,
     color: Colors.light.text,
-    marginBottom: 16,
+    marginBottom: 4,
+  },
+  sectionSubtitle: {
+    fontSize: 14,
+    color: Colors.light.muted,
+  },
+  categoryLabel: {
+    fontSize: 11,
+    fontWeight: "700" as const,
+    color: Colors.light.muted,
+    letterSpacing: 1,
+    marginBottom: 12,
+    marginTop: 24,
   },
   sectionHeaderRow: {
     flexDirection: "row",
@@ -679,34 +859,79 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   typeScrollView: {
-    marginTop: 12,
+    marginTop: 0,
+    marginBottom: 8,
   },
   typeGrid: {
     flexDirection: "row",
-    gap: 10,
+    gap: 12,
     paddingRight: 20,
   },
   typeButton: {
-    paddingVertical: 14,
-    paddingHorizontal: 16,
-    borderRadius: 10,
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+    borderRadius: 12,
     backgroundColor: Colors.light.card,
     borderWidth: 2,
     borderColor: Colors.light.border,
     alignItems: "center",
-    minWidth: 140,
+    justifyContent: "center",
+    gap: 8,
   },
   typeButtonActive: {
     backgroundColor: Colors.light.primary,
     borderColor: Colors.light.primary,
+    shadowColor: Colors.light.primary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 4,
   },
   typeButtonText: {
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: "600" as const,
     color: Colors.light.text,
   },
   typeButtonTextActive: {
     color: "#FFF",
+  },
+  typeCardButton: {
+    width: 160,
+    paddingVertical: 20,
+    paddingHorizontal: 16,
+    borderRadius: 16,
+    backgroundColor: Colors.light.card,
+    borderWidth: 2,
+    borderColor: Colors.light.border,
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+  },
+  typeCardButtonActive: {
+    backgroundColor: Colors.light.primary,
+    borderColor: Colors.light.primary,
+    shadowColor: Colors.light.primary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  typeCardButtonText: {
+    fontSize: 14,
+    fontWeight: "700" as const,
+    color: Colors.light.text,
+    textAlign: "center",
+  },
+  typeCardButtonTextActive: {
+    color: "#FFF",
+  },
+  typeCardButtonDesc: {
+    fontSize: 11,
+    color: Colors.light.muted,
+    textAlign: "center",
+  },
+  typeCardButtonDescActive: {
+    color: "rgba(255, 255, 255, 0.8)",
   },
   formField: {
     marginBottom: 16,
