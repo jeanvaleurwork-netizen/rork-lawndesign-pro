@@ -16,83 +16,98 @@ import {
   Search,
   Edit2,
   Send,
-  CheckCircle,
   Clock,
   X,
 } from "lucide-react-native";
 
 import Colors from "@/constants/colors";
-import { Contract } from "@/types";
 
-const mockContracts: Contract[] = [
+interface MockContract {
+  id: string;
+  companyId: string;
+  projectId?: string;
+  clientId: string;
+  clientName: string;
+  type: "MSA" | "PROJECT_CONTRACT" | "WORK_ORDER";
+  title: string;
+  bodyHtml: string;
+  status: "DRAFT" | "SENT" | "VIEWED" | "SIGNED" | "DECLINED" | "CANCELLED";
+  totalAmount: number;
+  startDateEstimated?: string;
+  endDateEstimated?: string;
+  publicSigningToken?: string;
+  signedAt?: string;
+  createdByUserId: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+const mockContracts: MockContract[] = [
   {
     id: "C-001",
+    companyId: "1",
     clientId: "1",
     clientName: "John Smith",
-    contractType: "project",
-    scopeOfWork: "Complete lawn installation and landscaping for residential property",
-    terms: ["50% deposit required before starting work", "Final payment due upon completion"],
-    exclusions: ["Tree removal", "Underground utility work"],
-    warranties: ["1-year warranty on sod installation", "6-month warranty on plantings"],
-    disclaimers: ["Weather delays may affect completion timeline"],
+    type: "PROJECT_CONTRACT",
+    title: "Landscaping Project Contract",
+    bodyHtml: "<h2>Contract Details</h2><p>Complete lawn installation and landscaping for residential property</p>",
+    status: "SIGNED",
     totalAmount: 5500,
-    paymentSchedule: [
-      { id: "p1", description: "Deposit (50%)", amount: 2750, dueDate: "2025-12-01", status: "paid" },
-      { id: "p2", description: "Final Payment", amount: 2750, dueDate: "2025-12-15", status: "pending" },
-    ],
-    startDate: "2025-12-01",
-    completionDate: "2025-12-15",
-    status: "active",
+    startDateEstimated: "2025-12-01",
+    endDateEstimated: "2025-12-15",
+    createdByUserId: "1",
+    createdAt: "2025-11-15T00:00:00Z",
+    updatedAt: "2025-11-15T00:00:00Z",
   },
 ];
 
 export default function ContractsScreen() {
   const [searchQuery, setSearchQuery] = useState<string>("");
-  const [contracts] = useState<Contract[]>(mockContracts);
+  const [contracts] = useState<MockContract[]>(mockContracts);
   const [modalVisible, setModalVisible] = useState<boolean>(false);
-  const [selectedContract, setSelectedContract] = useState<Contract | null>(null);
+  const [selectedContract, setSelectedContract] = useState<MockContract | null>(null);
 
   const filteredContracts = contracts.filter((contract) =>
     contract.clientName.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const getStatusColor = (status: Contract["status"]) => {
+  const getStatusColor = (status: MockContract["status"]) => {
     switch (status) {
-      case "draft":
+      case "DRAFT":
         return Colors.light.muted;
-      case "sent":
+      case "SENT":
         return Colors.light.primary;
-      case "signed":
-      case "active":
+      case "SIGNED":
+      case "VIEWED":
         return Colors.light.success;
-      case "completed":
+      case "DECLINED":
         return Colors.light.muted;
-      case "cancelled":
+      case "CANCELLED":
         return Colors.light.error;
       default:
         return Colors.light.muted;
     }
   };
 
-  const getStatusBg = (status: Contract["status"]) => {
+  const getStatusBg = (status: MockContract["status"]) => {
     switch (status) {
-      case "draft":
+      case "DRAFT":
         return Colors.light.background;
-      case "sent":
+      case "SENT":
         return "#EBF5FF";
-      case "signed":
-      case "active":
+      case "SIGNED":
+      case "VIEWED":
         return "#D1FAE5";
-      case "completed":
+      case "DECLINED":
         return Colors.light.background;
-      case "cancelled":
+      case "CANCELLED":
         return "#FEE2E2";
       default:
         return Colors.light.background;
     }
   };
 
-  const handleViewContract = (contract: Contract) => {
+  const handleViewContract = (contract: MockContract) => {
     setSelectedContract(contract);
     setModalVisible(true);
   };
@@ -155,7 +170,7 @@ export default function ContractsScreen() {
               <Text style={styles.contractId}>{contract.id}</Text>
               <Text style={styles.clientName}>{contract.clientName}</Text>
               <Text style={styles.contractType} numberOfLines={1}>
-                {contract.contractType.charAt(0).toUpperCase() + contract.contractType.slice(1)} Contract
+                {contract.type === "MSA" ? "Master Service Agreement" : contract.type === "PROJECT_CONTRACT" ? "Project Contract" : "Work Order"}
               </Text>
 
               <View style={styles.amountRow}>
@@ -168,11 +183,13 @@ export default function ContractsScreen() {
               <View style={styles.dateRow}>
                 <Clock color={Colors.light.muted} size={14} />
                 <Text style={styles.dateText}>
-                  {new Date(contract.startDate).toLocaleDateString("en-US", {
-                    month: "short",
-                    day: "numeric",
-                    year: "numeric",
-                  })}
+                  {contract.startDateEstimated
+                    ? new Date(contract.startDateEstimated).toLocaleDateString("en-US", {
+                        month: "short",
+                        day: "numeric",
+                        year: "numeric",
+                      })
+                    : "N/A"}
                 </Text>
               </View>
             </TouchableOpacity>
@@ -201,42 +218,43 @@ export default function ContractsScreen() {
                   <Text style={styles.detailLabel}>Client:</Text>
                   <Text style={styles.detailValue}>{selectedContract.clientName}</Text>
 
-                  <Text style={styles.detailLabel}>Scope of Work:</Text>
-                  <Text style={styles.detailValue}>{selectedContract.scopeOfWork}</Text>
+                  <Text style={styles.detailLabel}>Contract Type:</Text>
+                  <Text style={styles.detailValue}>
+                    {selectedContract.type === "MSA"
+                      ? "Master Service Agreement"
+                      : selectedContract.type === "PROJECT_CONTRACT"
+                      ? "Project Contract"
+                      : "Work Order"}
+                  </Text>
 
-                  <Text style={styles.detailLabel}>Terms:</Text>
-                  {selectedContract.terms.map((term, index) => (
-                    <Text key={index} style={styles.bulletPoint}>
-                      • {term}
-                    </Text>
-                  ))}
+                  <Text style={styles.detailLabel}>Total Amount:</Text>
+                  <Text style={styles.detailValue}>
+                    ${selectedContract.totalAmount.toLocaleString()}
+                  </Text>
 
-                  <Text style={styles.detailLabel}>Exclusions:</Text>
-                  {selectedContract.exclusions.map((exclusion, index) => (
-                    <Text key={index} style={styles.bulletPoint}>
-                      • {exclusion}
-                    </Text>
-                  ))}
+                  {selectedContract.startDateEstimated && (
+                    <>
+                      <Text style={styles.detailLabel}>Start Date:</Text>
+                      <Text style={styles.detailValue}>
+                        {new Date(selectedContract.startDateEstimated).toLocaleDateString()}
+                      </Text>
+                    </>
+                  )}
 
-                  <Text style={styles.detailLabel}>Warranties:</Text>
-                  {selectedContract.warranties.map((warranty, index) => (
-                    <Text key={index} style={styles.bulletPoint}>
-                      • {warranty}
-                    </Text>
-                  ))}
+                  {selectedContract.endDateEstimated && (
+                    <>
+                      <Text style={styles.detailLabel}>Estimated Completion:</Text>
+                      <Text style={styles.detailValue}>
+                        {new Date(selectedContract.endDateEstimated).toLocaleDateString()}
+                      </Text>
+                    </>
+                  )}
 
-                  <Text style={styles.detailLabel}>Payment Schedule:</Text>
-                  {selectedContract.paymentSchedule.map((payment) => (
-                    <View key={payment.id} style={styles.paymentRow}>
-                      <View style={styles.paymentInfo}>
-                        <Text style={styles.paymentDescription}>{payment.description}</Text>
-                        <Text style={styles.paymentDue}>
-                          Due: {new Date(payment.dueDate).toLocaleDateString()}
-                        </Text>
-                      </View>
-                      <Text style={styles.paymentAmount}>${payment.amount.toLocaleString()}</Text>
-                    </View>
-                  ))}
+                  <Text style={styles.detailLabel}>Status:</Text>
+                  <Text style={styles.detailValue}>
+                    {selectedContract.status.charAt(0) +
+                      selectedContract.status.slice(1).toLowerCase()}
+                  </Text>
                 </View>
               </ScrollView>
             )}
