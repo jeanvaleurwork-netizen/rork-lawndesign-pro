@@ -8,8 +8,11 @@ import {
   SafeAreaView,
   Image,
   RefreshControl,
+  Linking,
+  Modal,
+  Pressable,
 } from "react-native";
-import { Stack } from "expo-router";
+import { Stack, router } from "expo-router";
 import {
   FileText,
   Camera,
@@ -21,6 +24,17 @@ import {
   ChevronRight,
   Home,
   User,
+  Upload,
+  Package,
+  Bell,
+  Settings,
+  Calendar,
+  TrendingUp,
+  FileCheck,
+  Phone,
+  Mail,
+  MapPin,
+  X,
 } from "lucide-react-native";
 
 import Colors from "@/constants/colors";
@@ -33,6 +47,9 @@ interface CustomerJob {
   progress: number;
   photos: string[];
   address: string;
+  nextMilestone?: string;
+  crewName?: string;
+  estimatedCompletion?: string;
 }
 
 interface CustomerContract {
@@ -41,6 +58,8 @@ interface CustomerContract {
   status: "pending" | "signed" | "active";
   amount: number;
   signedDate?: string;
+  warrantyYears?: number;
+  expiresAt?: string;
 }
 
 interface CustomerEstimate {
@@ -57,6 +76,33 @@ interface CustomerInvoice {
   amount: number;
   dueDate: string;
   status: "pending" | "paid" | "overdue";
+  paidAmount?: number;
+}
+
+interface PaymentMilestone {
+  id: string;
+  label: string;
+  dueAmount: number;
+  duePercent: number;
+  status: "pending" | "paid" | "overdue";
+  paidAt?: string;
+}
+
+interface ProjectDetails {
+  id: string;
+  name: string;
+  status: string;
+  progress: number;
+  startDate: string;
+  estimatedEndDate: string;
+  totalAmount: number;
+  paidAmount: number;
+  remainingAmount: number;
+  paymentMilestones: PaymentMilestone[];
+  nextPaymentDue?: PaymentMilestone;
+  photos: string[];
+  documents: { id: string; name: string; url: string; uploadedAt: string }[];
+  updates: { id: string; message: string; timestamp: string; type: string }[];
 }
 
 const mockJobs: CustomerJob[] = [
@@ -68,8 +114,42 @@ const mockJobs: CustomerJob[] = [
     progress: 65,
     photos: ["https://images.unsplash.com/photo-1558904541-efa843a96f01?w=400"],
     address: "123 Main St",
+    nextMilestone: "Install irrigation system",
+    crewName: "Green Team A",
+    estimatedCompletion: "2025-12-20",
   },
 ];
+
+const mockProjectDetails: ProjectDetails = {
+  id: "J-001",
+  name: "Front Yard Landscaping",
+  status: "in-progress",
+  progress: 65,
+  startDate: "2025-12-01",
+  estimatedEndDate: "2025-12-20",
+  totalAmount: 5500,
+  paidAmount: 1833,
+  remainingAmount: 3667,
+  paymentMilestones: [
+    { id: "PM-1", label: "Deposit", dueAmount: 1833, duePercent: 33, status: "paid", paidAt: "2025-11-25" },
+    { id: "PM-2", label: "Progress Payment", dueAmount: 1833, duePercent: 33, status: "pending" },
+    { id: "PM-3", label: "Final Payment", dueAmount: 1834, duePercent: 34, status: "pending" },
+  ],
+  nextPaymentDue: { id: "PM-2", label: "Progress Payment", dueAmount: 1833, duePercent: 33, status: "pending" },
+  photos: [
+    "https://images.unsplash.com/photo-1558904541-efa843a96f01?w=400",
+    "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?w=400",
+  ],
+  documents: [
+    { id: "DOC-1", name: "Project Contract.pdf", url: "/", uploadedAt: "2025-11-20" },
+    { id: "DOC-2", name: "Material Selections.pdf", url: "/", uploadedAt: "2025-12-01" },
+  ],
+  updates: [
+    { id: "U-1", message: "Irrigation lines installed. Starting landscape bed prep tomorrow.", timestamp: "2025-12-08", type: "progress" },
+    { id: "U-2", message: "Materials delivered on site.", timestamp: "2025-12-05", type: "materials" },
+    { id: "U-3", message: "Site preparation completed.", timestamp: "2025-12-01", type: "milestone" },
+  ],
+};
 
 const mockContracts: CustomerContract[] = [
   {
@@ -104,6 +184,8 @@ const mockInvoices: CustomerInvoice[] = [
 export default function CustomerPortalScreen() {
   const [refreshing, setRefreshing] = useState<boolean>(false);
   const [activeTab, setActiveTab] = useState<"jobs" | "contracts" | "estimates" | "invoices">("jobs");
+  const [selectedProject, setSelectedProject] = useState<ProjectDetails | null>(null);
+  const [showProjectModal, setShowProjectModal] = useState<boolean>(false);
 
   const onRefresh = () => {
     setRefreshing(true);
@@ -149,6 +231,27 @@ export default function CustomerPortalScreen() {
     }
   };
 
+  const handleViewProjectDetails = (jobId: string) => {
+    setSelectedProject(mockProjectDetails);
+    setShowProjectModal(true);
+  };
+
+  const handleCallContractor = () => {
+    Linking.openURL('tel:+15551234567');
+  };
+
+  const handleEmailContractor = () => {
+    Linking.openURL('mailto:info@contractor.com');
+  };
+
+  const handlePayNow = (invoiceId: string) => {
+    console.log('Opening payment for invoice:', invoiceId);
+  };
+
+  const handleUploadDocuments = () => {
+    router.push('/customer-dropbox');
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <Stack.Screen
@@ -160,30 +263,83 @@ export default function CustomerPortalScreen() {
       />
 
       <View style={styles.header}>
-        <View>
-          <Text style={styles.welcomeText}>Welcome Back!</Text>
-          <Text style={styles.customerName}>John Smith</Text>
+        <View style={styles.headerLeft}>
+          <View>
+            <Text style={styles.welcomeText}>Welcome Back</Text>
+            <Text style={styles.customerName}>John Smith</Text>
+          </View>
         </View>
-        <TouchableOpacity style={styles.avatarContainer}>
-          <User color={Colors.light.primary} size={24} />
-        </TouchableOpacity>
+        <View style={styles.headerRight}>
+          <TouchableOpacity style={styles.iconButton}>
+            <Bell color={Colors.light.text} size={22} />
+            <View style={styles.notificationBadge}>
+              <Text style={styles.notificationBadgeText}>2</Text>
+            </View>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.avatarContainer}>
+            <User color={Colors.light.primary} size={24} />
+          </TouchableOpacity>
+        </View>
       </View>
 
       <View style={styles.quickStats}>
         <View style={styles.statCard}>
-          <Home color={Colors.light.primary} size={20} />
+          <View style={[styles.statIcon, { backgroundColor: `${Colors.light.primary}15` }]}>
+            <Home color={Colors.light.primary} size={20} />
+          </View>
           <Text style={styles.statValue}>1</Text>
           <Text style={styles.statLabel}>Active Jobs</Text>
         </View>
         <View style={styles.statCard}>
-          <FileText color="#F59E0B" size={20} />
+          <View style={[styles.statIcon, { backgroundColor: '#FEF3C7' }]}>
+            <FileText color="#F59E0B" size={20} />
+          </View>
           <Text style={styles.statValue}>1</Text>
           <Text style={styles.statLabel}>Pending</Text>
         </View>
         <View style={styles.statCard}>
-          <DollarSign color={Colors.light.success} size={20} />
+          <View style={[styles.statIcon, { backgroundColor: `${Colors.light.success}15` }]}>
+            <DollarSign color={Colors.light.success} size={20} />
+          </View>
           <Text style={styles.statValue}>$2.7K</Text>
-          <Text style={styles.statLabel}>Due</Text>
+          <Text style={styles.statLabel}>Due Soon</Text>
+        </View>
+        <View style={styles.statCard}>
+          <View style={[styles.statIcon, { backgroundColor: '#E0E7FF' }]}>
+            <TrendingUp color="#6366F1" size={20} />
+          </View>
+          <Text style={styles.statValue}>65%</Text>
+          <Text style={styles.statLabel}>Progress</Text>
+        </View>
+      </View>
+
+      <View style={styles.quickActions}>
+        <Text style={styles.sectionTitle}>Quick Actions</Text>
+        <View style={styles.quickActionsGrid}>
+          <TouchableOpacity style={styles.quickActionCard} onPress={handleCallContractor}>
+            <View style={[styles.quickActionIcon, { backgroundColor: `${Colors.light.primary}15` }]}>
+              <Phone color={Colors.light.primary} size={22} />
+            </View>
+            <Text style={styles.quickActionText}>Call</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.quickActionCard} onPress={handleEmailContractor}>
+            <View style={[styles.quickActionIcon, { backgroundColor: '#E0E7FF' }]}>
+              <Mail color="#6366F1" size={22} />
+            </View>
+            <Text style={styles.quickActionText}>Email</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.quickActionCard} onPress={handleUploadDocuments}>
+            <View style={[styles.quickActionIcon, { backgroundColor: '#FEF3C7' }]}>
+              <Upload color="#F59E0B" size={22} />
+            </View>
+            <Text style={styles.quickActionText}>Upload</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.quickActionCard}>
+            <View style={[styles.quickActionIcon, { backgroundColor: `${Colors.light.success}15` }]}>
+              <Calendar color={Colors.light.success} size={22} />
+            </View>
+            <Text style={styles.quickActionText}>Schedule</Text>
+          </TouchableOpacity>
         </View>
       </View>
 
@@ -233,7 +389,11 @@ export default function CustomerPortalScreen() {
             {mockJobs.map((job) => {
               const StatusIcon = getJobStatusIcon(job.status);
               return (
-                <TouchableOpacity key={job.id} style={styles.jobCard}>
+                <TouchableOpacity 
+                  key={job.id} 
+                  style={styles.jobCard}
+                  onPress={() => handleViewProjectDetails(job.id)}
+                >
                   {job.photos[0] && (
                     <Image source={{ uri: job.photos[0] }} style={styles.jobImage} />
                   )}
@@ -260,13 +420,34 @@ export default function CustomerPortalScreen() {
                         </Text>
                       </View>
                     </View>
-                    <Text style={styles.jobAddress}>{job.address}</Text>
-                    <Text style={styles.jobDate}>
-                      Scheduled: {new Date(job.scheduledDate).toLocaleDateString()}
-                    </Text>
+                    
+                    <View style={styles.jobInfoRow}>
+                      <MapPin color={Colors.light.muted} size={14} />
+                      <Text style={styles.jobAddress}>{job.address}</Text>
+                    </View>
+                    
+                    {job.crewName && (
+                      <View style={styles.jobInfoRow}>
+                        <User color={Colors.light.muted} size={14} />
+                        <Text style={styles.jobMeta}>{job.crewName}</Text>
+                      </View>
+                    )}
+                    
+                    {job.estimatedCompletion && (
+                      <View style={styles.jobInfoRow}>
+                        <Calendar color={Colors.light.muted} size={14} />
+                        <Text style={styles.jobMeta}>
+                          Est. Completion: {new Date(job.estimatedCompletion).toLocaleDateString()}
+                        </Text>
+                      </View>
+                    )}
                     
                     {job.status === "in-progress" && (
-                      <View style={styles.progressContainer}>
+                      <View style={styles.progressSection}>
+                        <View style={styles.progressHeader}>
+                          <Text style={styles.progressLabel}>Project Progress</Text>
+                          <Text style={styles.progressPercent}>{job.progress}%</Text>
+                        </View>
                         <View style={styles.progressBar}>
                           <View
                             style={[
@@ -275,18 +456,24 @@ export default function CustomerPortalScreen() {
                             ]}
                           />
                         </View>
-                        <Text style={styles.progressText}>{job.progress}%</Text>
+                        {job.nextMilestone && (
+                          <Text style={styles.nextMilestone}>Next: {job.nextMilestone}</Text>
+                        )}
                       </View>
                     )}
 
                     <View style={styles.jobActions}>
                       <TouchableOpacity style={styles.actionBtn}>
                         <Camera color={Colors.light.primary} size={18} />
-                        <Text style={styles.actionBtnText}>View Photos</Text>
+                        <Text style={styles.actionBtnText}>Photos</Text>
                       </TouchableOpacity>
                       <TouchableOpacity style={styles.actionBtn}>
                         <MessageCircle color={Colors.light.primary} size={18} />
                         <Text style={styles.actionBtnText}>Message</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity style={styles.actionBtn}>
+                        <FileCheck color={Colors.light.primary} size={18} />
+                        <Text style={styles.actionBtnText}>Details</Text>
                       </TouchableOpacity>
                     </View>
                   </View>
@@ -373,7 +560,10 @@ export default function CustomerPortalScreen() {
                   </View>
                 </View>
                 {invoice.status === "pending" && (
-                  <TouchableOpacity style={styles.payBtn}>
+                  <TouchableOpacity 
+                    style={styles.payBtn}
+                    onPress={() => handlePayNow(invoice.id)}
+                  >
                     <Text style={styles.payBtnText}>Pay Now</Text>
                   </TouchableOpacity>
                 )}
@@ -382,6 +572,114 @@ export default function CustomerPortalScreen() {
           </View>
         )}
       </ScrollView>
+
+      <Modal
+        visible={showProjectModal}
+        animationType="slide"
+        presentationStyle="pageSheet"
+        onRequestClose={() => setShowProjectModal(false)}
+      >
+        <SafeAreaView style={styles.modalContainer}>
+          <View style={styles.modalHeader}>
+            <Text style={styles.modalTitle}>Project Details</Text>
+            <TouchableOpacity onPress={() => setShowProjectModal(false)}>
+              <X color={Colors.light.text} size={24} />
+            </TouchableOpacity>
+          </View>
+          
+          {selectedProject && (
+            <ScrollView style={styles.modalContent}>
+              <View style={styles.projectOverview}>
+                <Text style={styles.projectName}>{selectedProject.name}</Text>
+                <View style={styles.progressSection}>
+                  <View style={styles.progressHeader}>
+                    <Text style={styles.progressLabel}>Overall Progress</Text>
+                    <Text style={styles.progressPercentLarge}>{selectedProject.progress}%</Text>
+                  </View>
+                  <View style={styles.progressBarLarge}>
+                    <View style={[styles.progressFill, { width: `${selectedProject.progress}%` }]} />
+                  </View>
+                </View>
+              </View>
+
+              <View style={styles.modalSection}>
+                <Text style={styles.modalSectionTitle}>Payment Schedule</Text>
+                {selectedProject.paymentMilestones.map((milestone) => (
+                  <View key={milestone.id} style={styles.milestoneCard}>
+                    <View style={styles.milestoneLeft}>
+                      <View style={[
+                        styles.milestoneIcon,
+                        { backgroundColor: milestone.status === 'paid' ? `${Colors.light.success}15` : '#F3F4F6' }
+                      ]}>
+                        {milestone.status === 'paid' ? (
+                          <CheckCircle color={Colors.light.success} size={20} />
+                        ) : (
+                          <Clock color={Colors.light.muted} size={20} />
+                        )}
+                      </View>
+                      <View>
+                        <Text style={styles.milestoneLabel}>{milestone.label}</Text>
+                        <Text style={styles.milestoneAmount}>${milestone.dueAmount.toLocaleString()}</Text>
+                        {milestone.paidAt && (
+                          <Text style={styles.milestonePaidDate}>
+                            Paid: {new Date(milestone.paidAt).toLocaleDateString()}
+                          </Text>
+                        )}
+                      </View>
+                    </View>
+                    <Text style={[
+                      styles.milestoneStatus,
+                      { color: milestone.status === 'paid' ? Colors.light.success : '#F59E0B' }
+                    ]}>
+                      {milestone.status}
+                    </Text>
+                  </View>
+                ))}
+              </View>
+
+              <View style={styles.modalSection}>
+                <Text style={styles.modalSectionTitle}>Project Updates</Text>
+                {selectedProject.updates.map((update) => (
+                  <View key={update.id} style={styles.updateCard}>
+                    <View style={styles.updateDot} />
+                    <View style={styles.updateContent}>
+                      <Text style={styles.updateMessage}>{update.message}</Text>
+                      <Text style={styles.updateTimestamp}>
+                        {new Date(update.timestamp).toLocaleString()}
+                      </Text>
+                    </View>
+                  </View>
+                ))}
+              </View>
+
+              <View style={styles.modalSection}>
+                <Text style={styles.modalSectionTitle}>Project Photos</Text>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.photoScroll}>
+                  {selectedProject.photos.map((photo, idx) => (
+                    <Image key={idx} source={{ uri: photo }} style={styles.projectPhoto} />
+                  ))}
+                </ScrollView>
+              </View>
+
+              <View style={styles.modalSection}>
+                <Text style={styles.modalSectionTitle}>Documents</Text>
+                {selectedProject.documents.map((doc) => (
+                  <TouchableOpacity key={doc.id} style={styles.docCard}>
+                    <FileText color={Colors.light.primary} size={24} />
+                    <View style={styles.docInfo}>
+                      <Text style={styles.docName}>{doc.name}</Text>
+                      <Text style={styles.docDate}>
+                        {new Date(doc.uploadedAt).toLocaleDateString()}
+                      </Text>
+                    </View>
+                    <ChevronRight color={Colors.light.muted} size={20} />
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </ScrollView>
+          )}
+        </SafeAreaView>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -397,11 +695,41 @@ const styles = StyleSheet.create({
     alignItems: "center",
     padding: 20,
     paddingTop: 10,
+    backgroundColor: Colors.light.card,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.light.border,
+  },
+  headerLeft: {
+    flex: 1,
+  },
+  headerRight: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+  },
+  iconButton: {
+    position: "relative" as const,
+  },
+  notificationBadge: {
+    position: "absolute" as const,
+    top: -4,
+    right: -4,
+    backgroundColor: Colors.light.error,
+    borderRadius: 10,
+    width: 18,
+    height: 18,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  notificationBadgeText: {
+    color: "#FFF",
+    fontSize: 10,
+    fontWeight: "700" as const,
   },
   welcomeText: {
-    fontSize: 14,
+    fontSize: 13,
     color: Colors.light.muted,
-    marginBottom: 4,
+    marginBottom: 2,
   },
   customerName: {
     fontSize: 24,
@@ -419,10 +747,53 @@ const styles = StyleSheet.create({
   quickStats: {
     flexDirection: "row",
     paddingHorizontal: 20,
-    marginBottom: 20,
-    gap: 12,
+    marginTop: 20,
+    marginBottom: 16,
+    gap: 10,
   },
   statCard: {
+    flex: 1,
+    backgroundColor: Colors.light.card,
+    borderRadius: 12,
+    padding: 12,
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: Colors.light.border,
+  },
+  statIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 8,
+  },
+  statValue: {
+    fontSize: 20,
+    fontWeight: "700" as const,
+    color: Colors.light.text,
+    marginBottom: 2,
+  },
+  statLabel: {
+    fontSize: 11,
+    color: Colors.light.muted,
+    textAlign: "center" as const,
+  },
+  quickActions: {
+    paddingHorizontal: 20,
+    marginBottom: 20,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: "700" as const,
+    color: Colors.light.text,
+    marginBottom: 12,
+  },
+  quickActionsGrid: {
+    flexDirection: "row",
+    gap: 12,
+  },
+  quickActionCard: {
     flex: 1,
     backgroundColor: Colors.light.card,
     borderRadius: 12,
@@ -431,16 +802,18 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: Colors.light.border,
   },
-  statValue: {
-    fontSize: 24,
-    fontWeight: "700" as const,
-    color: Colors.light.text,
-    marginTop: 8,
+  quickActionIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 8,
   },
-  statLabel: {
-    fontSize: 12,
-    color: Colors.light.muted,
-    marginTop: 4,
+  quickActionText: {
+    fontSize: 13,
+    fontWeight: "600" as const,
+    color: Colors.light.text,
   },
   tabContainer: {
     flexDirection: "row",
@@ -519,22 +892,48 @@ const styles = StyleSheet.create({
     fontWeight: "600" as const,
     textTransform: "capitalize" as const,
   },
-  jobAddress: {
-    fontSize: 14,
-    color: Colors.light.muted,
-    marginBottom: 4,
-  },
-  jobDate: {
-    fontSize: 14,
-    color: Colors.light.muted,
-    marginBottom: 12,
-  },
-  progressContainer: {
+  jobInfoRow: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 12,
-    gap: 12,
+    gap: 6,
+    marginBottom: 6,
   },
+  jobAddress: {
+    fontSize: 14,
+    color: Colors.light.text,
+    flex: 1,
+  },
+  jobMeta: {
+    fontSize: 13,
+    color: Colors.light.muted,
+  },
+  progressSection: {
+    marginTop: 12,
+    marginBottom: 12,
+  },
+  progressHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 8,
+  },
+  progressLabel: {
+    fontSize: 13,
+    fontWeight: "600" as const,
+    color: Colors.light.text,
+  },
+  progressPercent: {
+    fontSize: 14,
+    fontWeight: "700" as const,
+    color: Colors.light.primary,
+  },
+  nextMilestone: {
+    fontSize: 12,
+    color: Colors.light.muted,
+    marginTop: 6,
+    fontStyle: "italic" as const,
+  },
+
   progressBar: {
     flex: 1,
     height: 8,
@@ -547,11 +946,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.light.success,
     borderRadius: 4,
   },
-  progressText: {
-    fontSize: 14,
-    fontWeight: "600" as const,
-    color: Colors.light.text,
-  },
+
   jobActions: {
     flexDirection: "row",
     gap: 12,
@@ -647,5 +1042,161 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "600" as const,
     color: "#FFF",
+  },
+  modalContainer: {
+    flex: 1,
+    backgroundColor: Colors.light.background,
+  },
+  modalHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.light.border,
+    backgroundColor: Colors.light.card,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: "700" as const,
+    color: Colors.light.text,
+  },
+  modalContent: {
+    flex: 1,
+  },
+  projectOverview: {
+    padding: 20,
+    backgroundColor: Colors.light.card,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.light.border,
+  },
+  projectName: {
+    fontSize: 24,
+    fontWeight: "700" as const,
+    color: Colors.light.text,
+    marginBottom: 16,
+  },
+  progressPercentLarge: {
+    fontSize: 28,
+    fontWeight: "700" as const,
+    color: Colors.light.primary,
+  },
+  progressBarLarge: {
+    height: 12,
+    backgroundColor: Colors.light.background,
+    borderRadius: 6,
+    overflow: "hidden",
+  },
+  modalSection: {
+    padding: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.light.border,
+  },
+  modalSectionTitle: {
+    fontSize: 18,
+    fontWeight: "700" as const,
+    color: Colors.light.text,
+    marginBottom: 16,
+  },
+  milestoneCard: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    backgroundColor: Colors.light.background,
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 12,
+  },
+  milestoneLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    flex: 1,
+  },
+  milestoneIcon: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  milestoneLabel: {
+    fontSize: 15,
+    fontWeight: "600" as const,
+    color: Colors.light.text,
+    marginBottom: 2,
+  },
+  milestoneAmount: {
+    fontSize: 18,
+    fontWeight: "700" as const,
+    color: Colors.light.text,
+  },
+  milestonePaidDate: {
+    fontSize: 12,
+    color: Colors.light.muted,
+    marginTop: 2,
+  },
+  milestoneStatus: {
+    fontSize: 13,
+    fontWeight: "600" as const,
+    textTransform: "capitalize" as const,
+  },
+  updateCard: {
+    flexDirection: "row",
+    gap: 12,
+    marginBottom: 16,
+  },
+  updateDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: Colors.light.primary,
+    marginTop: 6,
+  },
+  updateContent: {
+    flex: 1,
+  },
+  updateMessage: {
+    fontSize: 15,
+    color: Colors.light.text,
+    lineHeight: 22,
+    marginBottom: 4,
+  },
+  updateTimestamp: {
+    fontSize: 13,
+    color: Colors.light.muted,
+  },
+  photoScroll: {
+    marginHorizontal: -20,
+    paddingHorizontal: 20,
+  },
+  projectPhoto: {
+    width: 200,
+    height: 150,
+    borderRadius: 12,
+    marginRight: 12,
+    backgroundColor: Colors.light.background,
+  },
+  docCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: Colors.light.background,
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 12,
+    gap: 12,
+  },
+  docInfo: {
+    flex: 1,
+  },
+  docName: {
+    fontSize: 15,
+    fontWeight: "600" as const,
+    color: Colors.light.text,
+    marginBottom: 2,
+  },
+  docDate: {
+    fontSize: 13,
+    color: Colors.light.muted,
   },
 });
