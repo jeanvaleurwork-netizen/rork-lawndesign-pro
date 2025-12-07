@@ -434,7 +434,23 @@ export interface InsuranceClaimReport {
   reportPdfUrl?: string;
 }
 
-export type ContractType = "MSA" | "PROJECT_CONTRACT" | "WORK_ORDER";
+export type ContractType = 
+  | "MSA" 
+  | "PROJECT_CONTRACT" 
+  | "WORK_ORDER" 
+  | "TIME_MATERIALS" 
+  | "FIXED_PRICE" 
+  | "COST_PLUS" 
+  | "LUMP_SUM" 
+  | "UNIT_PRICE" 
+  | "SERVICE_AGREEMENT" 
+  | "MAINTENANCE_AGREEMENT" 
+  | "DESIGN_BUILD" 
+  | "SUPPLY_AGREEMENT" 
+  | "EQUIPMENT_RENTAL" 
+  | "NDA" 
+  | "PROPOSAL" 
+  | "LETTER_OF_INTENT";
 export type ContractStatus = "DRAFT" | "SENT" | "VIEWED" | "SIGNED" | "DECLINED" | "CANCELLED";
 export type SignedByRole = "CLIENT" | "CONTRACTOR" | "SUBCONTRACTOR";
 export type SignatureType = "typed" | "drawn" | "uploaded";

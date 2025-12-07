@@ -414,6 +414,538 @@ export const LIEN_WAIVER_UNCONDITIONAL_TEMPLATE = `
 <p>Contractor Signature: _________ Date: _______</p>
 `;
 
+export const TIME_MATERIALS_TEMPLATE = `
+<h2>TIME & MATERIALS CONTRACT — {{project_name}}</h2>
+
+<p>This Time & Materials Agreement ("Agreement") is made between:</p>
+
+<h3>CONTRACTOR:</h3>
+<p>
+{{company_name}}<br/>
+Phone: {{company_phone}}<br/>
+License #: {{company_license}}
+</p>
+
+<h3>CLIENT:</h3>
+<p>
+{{client_name}}<br/>
+Property: {{client_property_address}}
+</p>
+
+<h3>SCOPE:</h3>
+<p>{{scope_of_work}}</p>
+
+<h3>RATES:</h3>
+<ul>
+<li>Labor: ${{labor_rate}}/hour</li>
+<li>Materials: Cost + {{material_markup}}% markup</li>
+<li>Equipment: Actual cost</li>
+</ul>
+
+<h3>PAYMENT:</h3>
+<p>Invoices submitted weekly/monthly. Payment due within {{payment_terms}} days.</p>
+
+<h3>ESTIMATED BUDGET:</h3>
+<p>Not to exceed: ${{contract_total_amount}} without written approval</p>
+
+<h3>SIGNATURES:</h3>
+<p>
+Contractor: ____________ Date: _____<br/>
+Client: ________________ Date: _____
+</p>
+`;
+
+export const FIXED_PRICE_TEMPLATE = `
+<h2>FIXED PRICE CONTRACT — {{project_name}}</h2>
+
+<h3>CONTRACTOR:</h3>
+<p>{{company_name}}<br/>License: {{company_license}}</p>
+
+<h3>CLIENT:</h3>
+<p>{{client_name}}<br/>{{client_property_address}}</p>
+
+<h3>WORK TO BE PERFORMED:</h3>
+<p>{{scope_of_work}}</p>
+
+<h3>TOTAL FIXED PRICE:</h3>
+<p><strong>${{contract_total_amount}}</strong></p>
+<p>This price includes ALL labor, materials, equipment, permits, and fees.</p>
+<p>No additional charges unless covered by approved Change Order.</p>
+
+<h3>PAYMENT SCHEDULE:</h3>
+<div>{{payment_schedule_table}}</div>
+
+<h3>TIMELINE:</h3>
+<p>Start: {{project_start_date}}<br/>Completion: {{project_end_date}}</p>
+
+<h3>WARRANTY:</h3>
+<p>{{warranty_years}} year workmanship warranty</p>
+
+<h3>SIGNATURES:</h3>
+<p>
+Contractor: ____________ Date: _____<br/>
+Client: ________________ Date: _____
+</p>
+`;
+
+export const COST_PLUS_TEMPLATE = `
+<h2>COST PLUS CONTRACT — {{project_name}}</h2>
+
+<h3>PARTIES:</h3>
+<p><strong>Contractor:</strong> {{company_name}}<br/>
+<strong>Client:</strong> {{client_name}}</p>
+
+<h3>PROJECT:</h3>
+<p>{{scope_of_work}}</p>
+
+<h3>PRICING STRUCTURE:</h3>
+<p>Actual costs for labor, materials, and equipment PLUS {{contractor_fee_percent}}% contractor fee.</p>
+
+<h3>COST TRACKING:</h3>
+<ul>
+<li>All receipts and invoices provided weekly</li>
+<li>Transparent cost reporting</li>
+<li>Open book accounting</li>
+</ul>
+
+<h3>ESTIMATED TOTAL:</h3>
+<p>${{contract_total_amount}} (estimate only, final based on actual costs)</p>
+
+<h3>PAYMENT:</h3>
+<p>Invoiced weekly based on costs incurred plus fee.</p>
+
+<h3>SIGNATURES:</h3>
+<p>
+Contractor: ____________ Date: _____<br/>
+Client: ________________ Date: _____
+</p>
+`;
+
+export const LUMP_SUM_TEMPLATE = `
+<h2>LUMP SUM CONTRACT — {{project_name}}</h2>
+
+<h3>AGREEMENT DATE:</h3>
+<p>{{current_date}}</p>
+
+<h3>PARTIES:</h3>
+<p><strong>Contractor:</strong> {{company_name}}<br/>
+<strong>Owner:</strong> {{client_name}}<br/>
+<strong>Project Address:</strong> {{client_property_address}}</p>
+
+<h3>WORK DESCRIPTION:</h3>
+<p>{{scope_of_work}}</p>
+
+<h3>LUMP SUM PRICE:</h3>
+<p><strong>${{contract_total_amount}}</strong></p>
+<p>Contractor agrees to complete ALL work for this single fixed sum.</p>
+
+<h3>INCLUSIONS:</h3>
+<ul>
+<li>All labor and supervision</li>
+<li>All materials and equipment</li>
+<li>All permits and fees</li>
+<li>Cleanup and disposal</li>
+</ul>
+
+<h3>PAYMENT TERMS:</h3>
+<div>{{payment_schedule_table}}</div>
+
+<h3>SUBSTANTIAL COMPLETION:</h3>
+<p>{{project_end_date}}</p>
+
+<h3>SIGNATURES:</h3>
+<p>
+Contractor: ____________ Date: _____<br/>
+Owner: _________________ Date: _____
+</p>
+`;
+
+export const UNIT_PRICE_TEMPLATE = `
+<h2>UNIT PRICE CONTRACT — {{project_name}}</h2>
+
+<h3>CONTRACTOR:</h3>
+<p>{{company_name}}<br/>License: {{company_license}}</p>
+
+<h3>CLIENT:</h3>
+<p>{{client_name}}<br/>{{client_property_address}}</p>
+
+<h3>UNIT PRICES:</h3>
+<table>
+<tr><th>Item</th><th>Unit</th><th>Price/Unit</th></tr>
+{{unit_price_table}}
+</table>
+
+<h3>ESTIMATED QUANTITIES:</h3>
+<p>Actual quantities will be measured upon completion.</p>
+<p>Final price = Actual quantities × Unit prices</p>
+
+<h3>ESTIMATED TOTAL:</h3>
+<p>${{contract_total_amount}} (based on estimated quantities)</p>
+
+<h3>PAYMENT:</h3>
+<p>Monthly invoicing based on work completed and measured.</p>
+
+<h3>SIGNATURES:</h3>
+<p>
+Contractor: ____________ Date: _____<br/>
+Client: ________________ Date: _____
+</p>
+`;
+
+export const SERVICE_AGREEMENT_TEMPLATE = `
+<h2>SERVICE AGREEMENT</h2>
+
+<h3>SERVICE PROVIDER:</h3>
+<p>{{company_name}}<br/>
+Phone: {{company_phone}}<br/>
+Email: {{company_email}}</p>
+
+<h3>CLIENT:</h3>
+<p>{{client_name}}<br/>
+{{client_property_address}}<br/>
+Phone: {{client_phone}}</p>
+
+<h3>SERVICES PROVIDED:</h3>
+<p>{{scope_of_work}}</p>
+
+<h3>SERVICE FREQUENCY:</h3>
+<p>{{service_frequency}}</p>
+
+<h3>TERM:</h3>
+<p>Start: {{project_start_date}}<br/>
+End: {{project_end_date}}<br/>
+Auto-renewal: {{auto_renewal}}</p>
+
+<h3>PRICING:</h3>
+<p><strong>${{monthly_rate}}/month</strong></p>
+<p>Payment due: {{payment_due_date}} of each month</p>
+
+<h3>CANCELLATION:</h3>
+<p>Either party may cancel with {{cancellation_notice}} days written notice.</p>
+
+<h3>SIGNATURES:</h3>
+<p>
+Service Provider: ____________ Date: _____<br/>
+Client: _____________________ Date: _____
+</p>
+`;
+
+export const MAINTENANCE_AGREEMENT_TEMPLATE = `
+<h2>MAINTENANCE AGREEMENT</h2>
+
+<h3>SERVICE PROVIDER:</h3>
+<p>{{company_name}}<br/>{{company_phone}}</p>
+
+<h3>PROPERTY OWNER:</h3>
+<p>{{client_name}}<br/>{{client_property_address}}</p>
+
+<h3>MAINTENANCE SERVICES:</h3>
+<p>{{scope_of_work}}</p>
+
+<h3>SCHEDULE:</h3>
+<ul>
+<li>Regular maintenance visits: {{maintenance_frequency}}</li>
+<li>Emergency service included: {{emergency_included}}</li>
+<li>Response time: {{response_time}}</li>
+</ul>
+
+<h3>COVERAGE:</h3>
+<ul>
+<li>Routine inspections</li>
+<li>Preventive maintenance</li>
+<li>Minor repairs (up to ${{minor_repair_limit}})</li>
+<li>Priority scheduling</li>
+</ul>
+
+<h3>ANNUAL FEE:</h3>
+<p><strong>${{contract_total_amount}}</strong></p>
+<p>Payment: {{payment_schedule}}</p>
+
+<h3>TERM:</h3>
+<p>{{term_length}} with automatic renewal</p>
+
+<h3>SIGNATURES:</h3>
+<p>
+Service Provider: ____________ Date: _____<br/>
+Property Owner: _____________ Date: _____
+</p>
+`;
+
+export const DESIGN_BUILD_TEMPLATE = `
+<h2>DESIGN-BUILD CONTRACT — {{project_name}}</h2>
+
+<h3>DESIGN-BUILD CONTRACTOR:</h3>
+<p>{{company_name}}<br/>
+License: {{company_license}}</p>
+
+<h3>OWNER:</h3>
+<p>{{client_name}}<br/>{{client_property_address}}</p>
+
+<h3>PROJECT DESCRIPTION:</h3>
+<p>Contractor provides BOTH design and construction services for:</p>
+<p>{{scope_of_work}}</p>
+
+<h3>PHASES:</h3>
+<h4>Phase 1: Design Development</h4>
+<p>Preliminary designs, drawings, specifications<br/>
+Fee: ${{design_fee}}</p>
+
+<h4>Phase 2: Construction</h4>
+<p>Build per approved design<br/>
+Fee: ${{construction_amount}}</p>
+
+<h3>TOTAL CONTRACT PRICE:</h3>
+<p><strong>${{contract_total_amount}}</strong></p>
+
+<h3>OWNER APPROVALS:</h3>
+<p>Owner must approve design before construction begins.</p>
+<p>Design changes during construction may result in additional fees.</p>
+
+<h3>TIMELINE:</h3>
+<p>Design: {{design_duration}}<br/>
+Construction: {{construction_duration}}<br/>
+Total: {{project_duration_text}}</p>
+
+<h3>SIGNATURES:</h3>
+<p>
+Design-Build Contractor: ____________ Date: _____<br/>
+Owner: ______________________________ Date: _____
+</p>
+`;
+
+export const SUPPLY_AGREEMENT_TEMPLATE = `
+<h2>MATERIALS SUPPLY AGREEMENT</h2>
+
+<h3>SUPPLIER:</h3>
+<p>{{company_name}}<br/>{{company_phone}}</p>
+
+<h3>PURCHASER:</h3>
+<p>{{client_name}}<br/>{{client_property_address}}</p>
+
+<h3>MATERIALS TO BE SUPPLIED:</h3>
+<p>{{scope_of_work}}</p>
+
+<h3>PRICING:</h3>
+<p><strong>Total: ${{contract_total_amount}}</strong></p>
+<p>{{payment_terms}}</p>
+
+<h3>DELIVERY:</h3>
+<p>Delivery to: {{delivery_address}}<br/>
+Delivery date: {{delivery_date}}<br/>
+Delivery fee: {{delivery_fee}}</p>
+
+<h3>INSPECTION & ACCEPTANCE:</h3>
+<p>Purchaser has {{inspection_days}} days to inspect materials and report defects.</p>
+
+<h3>WARRANTY:</h3>
+<p>Materials warranted per manufacturer specifications.</p>
+
+<h3>SIGNATURES:</h3>
+<p>
+Supplier: ______________ Date: _____<br/>
+Purchaser: _____________ Date: _____
+</p>
+`;
+
+export const EQUIPMENT_RENTAL_TEMPLATE = `
+<h2>EQUIPMENT RENTAL AGREEMENT</h2>
+
+<h3>RENTAL COMPANY:</h3>
+<p>{{company_name}}<br/>{{company_phone}}</p>
+
+<h3>RENTER:</h3>
+<p>{{client_name}}<br/>{{client_property_address}}</p>
+
+<h3>EQUIPMENT:</h3>
+<p>{{equipment_description}}</p>
+<p>Serial/Model: {{equipment_serial}}</p>
+
+<h3>RENTAL PERIOD:</h3>
+<p>Pickup: {{rental_start_date}}<br/>
+Return: {{rental_end_date}}<br/>
+Duration: {{rental_duration}}</p>
+
+<h3>RENTAL RATE:</h3>
+<p>${{daily_rate}}/day or ${{weekly_rate}}/week<br/>
+<strong>Total: ${{contract_total_amount}}</strong></p>
+
+<h3>DEPOSIT:</h3>
+<p>Security deposit: ${{security_deposit}}<br/>
+Refundable upon return in good condition</p>
+
+<h3>RENTER RESPONSIBILITIES:</h3>
+<ul>
+<li>Operate equipment safely and properly</li>
+<li>Maintain insurance coverage</li>
+<li>Return equipment clean and in same condition</li>
+<li>Responsible for damage or loss</li>
+</ul>
+
+<h3>LATE FEES:</h3>
+<p>${{late_fee_rate}}/day for late returns</p>
+
+<h3>SIGNATURES:</h3>
+<p>
+Rental Company: ____________ Date: _____<br/>
+Renter: ___________________ Date: _____
+</p>
+`;
+
+export const NDA_TEMPLATE = `
+<h2>NON-DISCLOSURE AGREEMENT (NDA)</h2>
+
+<h3>EFFECTIVE DATE:</h3>
+<p>{{current_date}}</p>
+
+<h3>PARTIES:</h3>
+<p><strong>Disclosing Party:</strong> {{company_name}}<br/>
+<strong>Receiving Party:</strong> {{client_name}}</p>
+
+<h3>PURPOSE:</h3>
+<p>{{nda_purpose}}</p>
+
+<h3>CONFIDENTIAL INFORMATION:</h3>
+<p>Includes but not limited to:</p>
+<ul>
+<li>Business plans and strategies</li>
+<li>Pricing and cost information</li>
+<li>Customer lists</li>
+<li>Proprietary designs and methods</li>
+<li>Trade secrets</li>
+</ul>
+
+<h3>OBLIGATIONS:</h3>
+<p>Receiving Party agrees to:</p>
+<ul>
+<li>Keep confidential information strictly confidential</li>
+<li>Not disclose to third parties</li>
+<li>Use only for agreed purpose</li>
+<li>Return or destroy information upon request</li>
+</ul>
+
+<h3>TERM:</h3>
+<p>This agreement remains in effect for {{nda_term_years}} years from the effective date.</p>
+
+<h3>EXCLUSIONS:</h3>
+<p>Information that is:</p>
+<ul>
+<li>Publicly available</li>
+<li>Already known to Receiving Party</li>
+<li>Independently developed</li>
+<li>Legally obtained from third party</li>
+</ul>
+
+<h3>SIGNATURES:</h3>
+<p>
+Disclosing Party: ____________ Date: _____<br/>
+Receiving Party: _____________ Date: _____
+</p>
+`;
+
+export const PROPOSAL_TEMPLATE = `
+<h2>PROJECT PROPOSAL — {{project_name}}</h2>
+
+<h3>PREPARED FOR:</h3>
+<p>{{client_name}}<br/>
+{{client_property_address}}<br/>
+Date: {{current_date}}</p>
+
+<h3>PREPARED BY:</h3>
+<p>{{company_name}}<br/>
+{{company_phone}}<br/>
+{{company_email}}<br/>
+License: {{company_license}}</p>
+
+<h3>PROJECT OVERVIEW:</h3>
+<p>{{scope_of_work}}</p>
+
+<h3>SCOPE OF WORK:</h3>
+<p>{{detailed_scope}}</p>
+
+<h3>APPROACH & METHODOLOGY:</h3>
+<p>{{methodology}}</p>
+
+<h3>TIMELINE:</h3>
+<p>Start: {{project_start_date}}<br/>
+Duration: {{project_duration_text}}<br/>
+Completion: {{project_end_date}}</p>
+
+<h3>INVESTMENT:</h3>
+<p><strong>Total Project Cost: ${{contract_total_amount}}</strong></p>
+<div>{{payment_schedule_table}}</div>
+
+<h3>WHY CHOOSE US:</h3>
+<ul>
+<li>{{years_experience}} years experience</li>
+<li>Licensed and insured</li>
+<li>{{warranty_years}}-year warranty</li>
+<li>Professional crew</li>
+</ul>
+
+<h3>PROPOSAL VALIDITY:</h3>
+<p>This proposal is valid for {{proposal_validity_days}} days from date above.</p>
+
+<h3>ACCEPTANCE:</h3>
+<p>Client Signature: ___________________ Date: _____</p>
+<p>By signing, client accepts this proposal and authorizes work to begin.</p>
+`;
+
+export const LETTER_OF_INTENT_TEMPLATE = `
+<h2>LETTER OF INTENT</h2>
+
+<p>Date: {{current_date}}</p>
+
+<p>To: {{client_name}}<br/>
+{{client_property_address}}</p>
+
+<p>From: {{company_name}}<br/>
+{{company_address}}</p>
+
+<p>Re: <strong>{{project_name}}</strong></p>
+
+<p>Dear {{client_name}},</p>
+
+<p>This Letter of Intent ("LOI") confirms our mutual interest in proceeding with the above-referenced project.</p>
+
+<h3>PROJECT:</h3>
+<p>{{scope_of_work}}</p>
+
+<h3>PROPOSED TERMS:</h3>
+<ul>
+<li><strong>Estimated Cost:</strong> ${{contract_total_amount}}</li>
+<li><strong>Estimated Timeline:</strong> {{project_duration_text}}</li>
+<li><strong>Start Date:</strong> {{project_start_date}}</li>
+</ul>
+
+<h3>NEXT STEPS:</h3>
+<ol>
+<li>Finalize detailed scope of work</li>
+<li>Complete site surveys/inspections</li>
+<li>Prepare formal contract</li>
+<li>Obtain necessary permits</li>
+</ol>
+
+<h3>NON-BINDING:</h3>
+<p>This LOI expresses intent only and is non-binding. A formal contract will follow containing complete terms and conditions.</p>
+
+<h3>EXCLUSIVITY PERIOD:</h3>
+<p>The parties agree to negotiate exclusively for {{exclusivity_days}} days from this date.</p>
+
+<h3>DEPOSIT:</h3>
+<p>Upon execution of this LOI, Client will provide a good faith deposit of ${{deposit_amount}}, refundable if formal contract is not executed.</p>
+
+<p>If these terms are acceptable, please sign below.</p>
+
+<p>Sincerely,<br/>
+{{company_name}}</p>
+
+<h3>ACCEPTANCE:</h3>
+<p>
+{{company_name}}: ____________ Date: _____<br/>
+{{client_name}}: _____________ Date: _____
+</p>
+`;
+
 export function getContractTemplate(type: ContractType): string {
   switch (type) {
     case 'MSA':
@@ -422,6 +954,32 @@ export function getContractTemplate(type: ContractType): string {
       return PROJECT_CONTRACT_TEMPLATE;
     case 'WORK_ORDER':
       return WORK_ORDER_TEMPLATE;
+    case 'TIME_MATERIALS':
+      return TIME_MATERIALS_TEMPLATE;
+    case 'FIXED_PRICE':
+      return FIXED_PRICE_TEMPLATE;
+    case 'COST_PLUS':
+      return COST_PLUS_TEMPLATE;
+    case 'LUMP_SUM':
+      return LUMP_SUM_TEMPLATE;
+    case 'UNIT_PRICE':
+      return UNIT_PRICE_TEMPLATE;
+    case 'SERVICE_AGREEMENT':
+      return SERVICE_AGREEMENT_TEMPLATE;
+    case 'MAINTENANCE_AGREEMENT':
+      return MAINTENANCE_AGREEMENT_TEMPLATE;
+    case 'DESIGN_BUILD':
+      return DESIGN_BUILD_TEMPLATE;
+    case 'SUPPLY_AGREEMENT':
+      return SUPPLY_AGREEMENT_TEMPLATE;
+    case 'EQUIPMENT_RENTAL':
+      return EQUIPMENT_RENTAL_TEMPLATE;
+    case 'NDA':
+      return NDA_TEMPLATE;
+    case 'PROPOSAL':
+      return PROPOSAL_TEMPLATE;
+    case 'LETTER_OF_INTENT':
+      return LETTER_OF_INTENT_TEMPLATE;
     default:
       return '';
   }

@@ -153,6 +153,7 @@ export default function ContractEditorScreen() {
                 <TouchableOpacity
                   style={[
                     styles.typeButton,
+                    { flex: 1 },
                     contractType === "MSA" && styles.typeButtonActive,
                   ]}
                   onPress={() => setContractType("MSA")}
@@ -169,6 +170,7 @@ export default function ContractEditorScreen() {
                 <TouchableOpacity
                   style={[
                     styles.typeButton,
+                    { flex: 1 },
                     contractType === "PROJECT_CONTRACT" && styles.typeButtonActive,
                   ]}
                   onPress={() => setContractType("PROJECT_CONTRACT")}
@@ -185,6 +187,7 @@ export default function ContractEditorScreen() {
                 <TouchableOpacity
                   style={[
                     styles.typeButton,
+                    { flex: 1 },
                     contractType === "WORK_ORDER" && styles.typeButtonActive,
                   ]}
                   onPress={() => setContractType("WORK_ORDER")}
@@ -199,6 +202,219 @@ export default function ContractEditorScreen() {
                   </Text>
                 </TouchableOpacity>
               </View>
+              
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.typeScrollView}>
+                <View style={styles.typeGrid}>
+                  <TouchableOpacity
+                    style={[
+                      styles.typeButton,
+                      contractType === "TIME_MATERIALS" && styles.typeButtonActive,
+                    ]}
+                    onPress={() => setContractType("TIME_MATERIALS")}
+                  >
+                    <Text
+                      style={[
+                        styles.typeButtonText,
+                        contractType === "TIME_MATERIALS" && styles.typeButtonTextActive,
+                      ]}
+                    >
+                      Time & Materials
+                    </Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={[
+                      styles.typeButton,
+                      contractType === "FIXED_PRICE" && styles.typeButtonActive,
+                    ]}
+                    onPress={() => setContractType("FIXED_PRICE")}
+                  >
+                    <Text
+                      style={[
+                        styles.typeButtonText,
+                        contractType === "FIXED_PRICE" && styles.typeButtonTextActive,
+                      ]}
+                    >
+                      Fixed Price
+                    </Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={[
+                      styles.typeButton,
+                      contractType === "COST_PLUS" && styles.typeButtonActive,
+                    ]}
+                    onPress={() => setContractType("COST_PLUS")}
+                  >
+                    <Text
+                      style={[
+                        styles.typeButtonText,
+                        contractType === "COST_PLUS" && styles.typeButtonTextActive,
+                      ]}
+                    >
+                      Cost Plus
+                    </Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={[
+                      styles.typeButton,
+                      contractType === "LUMP_SUM" && styles.typeButtonActive,
+                    ]}
+                    onPress={() => setContractType("LUMP_SUM")}
+                  >
+                    <Text
+                      style={[
+                        styles.typeButtonText,
+                        contractType === "LUMP_SUM" && styles.typeButtonTextActive,
+                      ]}
+                    >
+                      Lump Sum
+                    </Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={[
+                      styles.typeButton,
+                      contractType === "UNIT_PRICE" && styles.typeButtonActive,
+                    ]}
+                    onPress={() => setContractType("UNIT_PRICE")}
+                  >
+                    <Text
+                      style={[
+                        styles.typeButtonText,
+                        contractType === "UNIT_PRICE" && styles.typeButtonTextActive,
+                      ]}
+                    >
+                      Unit Price
+                    </Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={[
+                      styles.typeButton,
+                      contractType === "SERVICE_AGREEMENT" && styles.typeButtonActive,
+                    ]}
+                    onPress={() => setContractType("SERVICE_AGREEMENT")}
+                  >
+                    <Text
+                      style={[
+                        styles.typeButtonText,
+                        contractType === "SERVICE_AGREEMENT" && styles.typeButtonTextActive,
+                      ]}
+                    >
+                      Service Agreement
+                    </Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={[
+                      styles.typeButton,
+                      contractType === "MAINTENANCE_AGREEMENT" && styles.typeButtonActive,
+                    ]}
+                    onPress={() => setContractType("MAINTENANCE_AGREEMENT")}
+                  >
+                    <Text
+                      style={[
+                        styles.typeButtonText,
+                        contractType === "MAINTENANCE_AGREEMENT" && styles.typeButtonTextActive,
+                      ]}
+                    >
+                      Maintenance
+                    </Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={[
+                      styles.typeButton,
+                      contractType === "DESIGN_BUILD" && styles.typeButtonActive,
+                    ]}
+                    onPress={() => setContractType("DESIGN_BUILD")}
+                  >
+                    <Text
+                      style={[
+                        styles.typeButtonText,
+                        contractType === "DESIGN_BUILD" && styles.typeButtonTextActive,
+                      ]}
+                    >
+                      Design-Build
+                    </Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={[
+                      styles.typeButton,
+                      contractType === "SUPPLY_AGREEMENT" && styles.typeButtonActive,
+                    ]}
+                    onPress={() => setContractType("SUPPLY_AGREEMENT")}
+                  >
+                    <Text
+                      style={[
+                        styles.typeButtonText,
+                        contractType === "SUPPLY_AGREEMENT" && styles.typeButtonTextActive,
+                      ]}
+                    >
+                      Supply Agreement
+                    </Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={[
+                      styles.typeButton,
+                      contractType === "EQUIPMENT_RENTAL" && styles.typeButtonActive,
+                    ]}
+                    onPress={() => setContractType("EQUIPMENT_RENTAL")}
+                  >
+                    <Text
+                      style={[
+                        styles.typeButtonText,
+                        contractType === "EQUIPMENT_RENTAL" && styles.typeButtonTextActive,
+                      ]}
+                    >
+                      Equipment Rental
+                    </Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={[
+                      styles.typeButton,
+                      contractType === "NDA" && styles.typeButtonActive,
+                    ]}
+                    onPress={() => setContractType("NDA")}
+                  >
+                    <Text
+                      style={[
+                        styles.typeButtonText,
+                        contractType === "NDA" && styles.typeButtonTextActive,
+                      ]}
+                    >
+                      NDA
+                    </Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={[
+                      styles.typeButton,
+                      contractType === "PROPOSAL" && styles.typeButtonActive,
+                    ]}
+                    onPress={() => setContractType("PROPOSAL")}
+                  >
+                    <Text
+                      style={[
+                        styles.typeButtonText,
+                        contractType === "PROPOSAL" && styles.typeButtonTextActive,
+                      ]}
+                    >
+                      Proposal
+                    </Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={[
+                      styles.typeButton,
+                      contractType === "LETTER_OF_INTENT" && styles.typeButtonActive,
+                    ]}
+                    onPress={() => setContractType("LETTER_OF_INTENT")}
+                  >
+                    <Text
+                      style={[
+                        styles.typeButtonText,
+                        contractType === "LETTER_OF_INTENT" && styles.typeButtonTextActive,
+                      ]}
+                    >
+                      Letter of Intent
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              </ScrollView>
             </View>
 
             <View style={styles.section}>
@@ -462,15 +678,23 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     gap: 10,
   },
+  typeScrollView: {
+    marginTop: 12,
+  },
+  typeGrid: {
+    flexDirection: "row",
+    gap: 10,
+    paddingRight: 20,
+  },
   typeButton: {
-    flex: 1,
     paddingVertical: 14,
-    paddingHorizontal: 12,
+    paddingHorizontal: 16,
     borderRadius: 10,
     backgroundColor: Colors.light.card,
     borderWidth: 2,
     borderColor: Colors.light.border,
     alignItems: "center",
+    minWidth: 140,
   },
   typeButtonActive: {
     backgroundColor: Colors.light.primary,
