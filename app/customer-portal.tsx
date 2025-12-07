@@ -38,6 +38,11 @@ import {
   Share2,
   ThumbsUp,
   Activity,
+  Download,
+  Eye,
+  Shield,
+  Info,
+  Award,
 } from "lucide-react-native";
 
 import Colors from "@/constants/colors";
@@ -57,12 +62,20 @@ interface CustomerJob {
 
 interface CustomerContract {
   id: string;
+  contractNumber: string;
+  clientName: string;
   title: string;
-  status: "pending" | "signed" | "active";
+  type: "project_contract" | "master_service" | "work_order" | "change_order" | "completion";
+  status: "pending" | "signed" | "active" | "expired";
   amount: number;
   signedDate?: string;
+  sentDate?: string;
   warrantyYears?: number;
   expiresAt?: string;
+  scopeOfWork?: string;
+  paymentSchedule?: { label: string; amount: number; status: string }[];
+  projectName?: string;
+  projectAddress?: string;
 }
 
 interface CustomerEstimate {
@@ -157,10 +170,48 @@ const mockProjectDetails: ProjectDetails = {
 const mockContracts: CustomerContract[] = [
   {
     id: "C-001",
-    title: "Master Service Agreement",
+    contractNumber: "C-001",
+    clientName: "John Smith",
+    title: "Project Contract",
+    type: "project_contract",
     status: "signed",
     amount: 5500,
-    signedDate: "2025-11-20",
+    signedDate: "2025-11-30",
+    sentDate: "2025-11-28",
+    warrantyYears: 2,
+    scopeOfWork: "Complete front yard landscaping including irrigation installation, sod, decorative rock, and perennial plantings.",
+    projectName: "Front Yard Landscaping",
+    projectAddress: "123 Main St",
+    paymentSchedule: [
+      { label: "Deposit", amount: 1833, status: "paid" },
+      { label: "Progress Payment", amount: 1833, status: "pending" },
+      { label: "Final Payment", amount: 1834, status: "pending" },
+    ],
+  },
+  {
+    id: "C-002",
+    contractNumber: "C-002",
+    clientName: "John Smith",
+    title: "Master Service Agreement",
+    type: "master_service",
+    status: "signed",
+    amount: 0,
+    signedDate: "2025-11-15",
+    sentDate: "2025-11-10",
+    scopeOfWork: "General terms and conditions for all landscaping services provided by LawnDesign Pro.",
+  },
+  {
+    id: "C-003",
+    contractNumber: "C-003",
+    clientName: "John Smith",
+    title: "Backyard Patio Proposal",
+    type: "project_contract",
+    status: "pending",
+    amount: 8500,
+    sentDate: "2025-12-05",
+    scopeOfWork: "Design and installation of 400 sq ft paver patio with retaining wall and outdoor lighting.",
+    projectName: "Backyard Patio Installation",
+    projectAddress: "123 Main St",
   },
 ];
 
@@ -189,6 +240,8 @@ export default function CustomerPortalScreen() {
   const [activeTab, setActiveTab] = useState<"jobs" | "contracts" | "estimates" | "invoices">("jobs");
   const [selectedProject, setSelectedProject] = useState<ProjectDetails | null>(null);
   const [showProjectModal, setShowProjectModal] = useState<boolean>(false);
+  const [selectedContract, setSelectedContract] = useState<CustomerContract | null>(null);
+  const [showContractModal, setShowContractModal] = useState<boolean>(false);
   const [beforeAfterSlider] = useState<number>(50);
 
   const onRefresh = () => {
@@ -263,6 +316,66 @@ export default function CustomerPortalScreen() {
 
   const handlePayNow = (invoiceId: string) => {
     console.log('Opening payment for invoice:', invoiceId);
+  };
+
+  const handleViewContract = (contract: CustomerContract) => {
+    setSelectedContract(contract);
+    setShowContractModal(true);
+  };
+
+  const handleDownloadContract = (contractId: string) => {
+    console.log('Downloading contract:', contractId);
+  };
+
+  const handleSignContract = (contractId: string) => {
+    console.log('Opening signature screen for contract:', contractId);
+  };
+
+  const getContractTypeLabel = (type: CustomerContract["type"]) => {
+    switch (type) {
+      case "project_contract":
+        return "Project Contract";
+      case "master_service":
+        return "Master Service";
+      case "work_order":
+        return "Work Order";
+      case "change_order":
+        return "Change Order";
+      case "completion":
+        return "Completion Certificate";
+      default:
+        return type;
+    }
+  };
+
+  const getContractStatusColor = (status: CustomerContract["status"]) => {
+    switch (status) {
+      case "signed":
+        return Colors.light.success;
+      case "active":
+        return Colors.light.primary;
+      case "pending":
+        return "#F59E0B";
+      case "expired":
+        return Colors.light.muted;
+      default:
+        return Colors.light.muted;
+    }
+  };
+
+  const getContractStatusLabel = (status: CustomerContract["status"]) => {
+    switch (status) {
+      case "signed":
+        return "Signed";
+      case "active":
+        return "Active";
+      case "pending":
+        return "Awaiting Signature";
+      case "expired":
+        return "Expired";
+      default:
+        return status;
+    }
   };
 
   const handleUploadDocuments = () => {
@@ -673,23 +786,166 @@ export default function CustomerPortalScreen() {
 
         {activeTab === "contracts" && (
           <View style={styles.contentContainer}>
+            <View style={styles.contractsHeader}>
+              <View>
+                <Text style={styles.contractsHeaderTitle}>Your Contracts</Text>
+                <Text style={styles.contractsHeaderSubtitle}>
+                  {mockContracts.length} total contract{mockContracts.length !== 1 ? 's' : ''}
+                </Text>
+              </View>
+            </View>
+
             {mockContracts.map((contract) => (
-              <TouchableOpacity key={contract.id} style={styles.listCard}>
-                <View style={styles.listCardLeft}>
-                  <FileText color={Colors.light.primary} size={24} />
-                  <View style={styles.listCardInfo}>
-                    <Text style={styles.listCardTitle}>{contract.title}</Text>
-                    <Text style={styles.listCardSubtitle}>
-                      ${contract.amount.toLocaleString()}
+              <TouchableOpacity 
+                key={contract.id} 
+                style={styles.contractCard}
+                onPress={() => handleViewContract(contract)}
+              >
+                <View style={styles.contractCardHeader}>
+                  <View style={styles.contractCardHeaderLeft}>
+                    <View style={[
+                      styles.contractTypeIcon,
+                      { backgroundColor: `${getContractStatusColor(contract.status)}15` }
+                    ]}>
+                      <FileText color={getContractStatusColor(contract.status)} size={20} />
+                    </View>
+                    <View style={styles.contractHeaderInfo}>
+                      <Text style={styles.contractNumber}>{contract.contractNumber}</Text>
+                      <Text style={styles.contractClientName}>{contract.clientName}</Text>
+                    </View>
+                  </View>
+                  <View style={[
+                    styles.contractStatusBadge,
+                    { backgroundColor: `${getContractStatusColor(contract.status)}15` }
+                  ]}>
+                    <Text style={[
+                      styles.contractStatusText,
+                      { color: getContractStatusColor(contract.status) }
+                    ]}>
+                      {getContractStatusLabel(contract.status)}
                     </Text>
-                    {contract.signedDate && (
-                      <Text style={styles.listCardDate}>
-                        Signed: {new Date(contract.signedDate).toLocaleDateString()}
-                      </Text>
-                    )}
                   </View>
                 </View>
-                <ChevronRight color={Colors.light.muted} size={20} />
+
+                <View style={styles.contractCardBody}>
+                  <View style={styles.contractInfoSection}>
+                    <View style={styles.contractInfoRow}>
+                      <FileCheck color={Colors.light.muted} size={16} />
+                      <Text style={styles.contractInfoLabel}>Type:</Text>
+                      <Text style={styles.contractInfoValue}>{getContractTypeLabel(contract.type)}</Text>
+                    </View>
+                    
+                    {contract.projectName && (
+                      <View style={styles.contractInfoRow}>
+                        <Home color={Colors.light.muted} size={16} />
+                        <Text style={styles.contractInfoLabel}>Project:</Text>
+                        <Text style={styles.contractInfoValue}>{contract.projectName}</Text>
+                      </View>
+                    )}
+                    
+                    {contract.amount > 0 && (
+                      <View style={styles.contractInfoRow}>
+                        <DollarSign color={Colors.light.muted} size={16} />
+                        <Text style={styles.contractInfoLabel}>Total Amount:</Text>
+                        <Text style={[styles.contractInfoValue, styles.contractAmount]}>
+                          ${contract.amount.toLocaleString()}
+                        </Text>
+                      </View>
+                    )}
+                    
+                    {contract.signedDate ? (
+                      <View style={styles.contractInfoRow}>
+                        <CheckCircle color={Colors.light.success} size={16} />
+                        <Text style={styles.contractInfoLabel}>Signed:</Text>
+                        <Text style={styles.contractInfoValue}>
+                          {new Date(contract.signedDate).toLocaleDateString()}
+                        </Text>
+                      </View>
+                    ) : contract.sentDate && (
+                      <View style={styles.contractInfoRow}>
+                        <Clock color={"#F59E0B"} size={16} />
+                        <Text style={styles.contractInfoLabel}>Sent:</Text>
+                        <Text style={styles.contractInfoValue}>
+                          {new Date(contract.sentDate).toLocaleDateString()}
+                        </Text>
+                      </View>
+                    )}
+
+                    {contract.warrantyYears && contract.warrantyYears > 0 && (
+                      <View style={styles.contractInfoRow}>
+                        <Shield color={Colors.light.primary} size={16} />
+                        <Text style={styles.contractInfoLabel}>Warranty:</Text>
+                        <Text style={styles.contractInfoValue}>
+                          {contract.warrantyYears} year{contract.warrantyYears !== 1 ? 's' : ''}
+                        </Text>
+                      </View>
+                    )}
+                  </View>
+
+                  {contract.scopeOfWork && (
+                    <View style={styles.scopeSection}>
+                      <Text style={styles.scopeLabel}>Scope of Work</Text>
+                      <Text style={styles.scopeText} numberOfLines={2}>
+                        {contract.scopeOfWork}
+                      </Text>
+                    </View>
+                  )}
+
+                  {contract.paymentSchedule && contract.paymentSchedule.length > 0 && (
+                    <View style={styles.paymentSchedulePreview}>
+                      <Text style={styles.paymentScheduleLabel}>Payment Schedule</Text>
+                      <View style={styles.paymentMilestones}>
+                        {contract.paymentSchedule.map((payment, idx) => (
+                          <View key={idx} style={styles.paymentMilestoneItem}>
+                            <View style={[
+                              styles.paymentMilestoneDot,
+                              { backgroundColor: payment.status === 'paid' ? Colors.light.success : Colors.light.border }
+                            ]} />
+                            <Text style={styles.paymentMilestoneText}>
+                              {payment.label}: ${payment.amount.toLocaleString()}
+                            </Text>
+                            <Text style={[
+                              styles.paymentMilestoneStatus,
+                              { color: payment.status === 'paid' ? Colors.light.success : Colors.light.muted }
+                            ]}>
+                              {payment.status}
+                            </Text>
+                          </View>
+                        ))}
+                      </View>
+                    </View>
+                  )}
+                </View>
+
+                <View style={styles.contractCardActions}>
+                  <TouchableOpacity 
+                    style={styles.contractActionBtn}
+                    onPress={() => handleViewContract(contract)}
+                  >
+                    <Eye color={Colors.light.primary} size={18} />
+                    <Text style={styles.contractActionBtnText}>View</Text>
+                  </TouchableOpacity>
+                  
+                  {contract.status === 'signed' && (
+                    <TouchableOpacity 
+                      style={styles.contractActionBtn}
+                      onPress={() => handleDownloadContract(contract.id)}
+                    >
+                      <Download color={Colors.light.primary} size={18} />
+                      <Text style={styles.contractActionBtnText}>Download</Text>
+                    </TouchableOpacity>
+                  )}
+                  
+                  {contract.status === 'pending' && (
+                    <TouchableOpacity 
+                      style={[styles.contractActionBtn, styles.contractActionBtnPrimary]}
+                      onPress={() => handleSignContract(contract.id)}
+                    >
+                      <FileCheck color="#FFF" size={18} />
+                      <Text style={[styles.contractActionBtnText, { color: '#FFF' }]}>Sign Now</Text>
+                    </TouchableOpacity>
+                  )}
+                </View>
               </TouchableOpacity>
             ))}
           </View>
@@ -909,6 +1165,217 @@ export default function CustomerPortalScreen() {
                   </TouchableOpacity>
                 ))}
               </View>
+            </ScrollView>
+          )}
+        </SafeAreaView>
+      </Modal>
+
+      <Modal
+        visible={showContractModal}
+        animationType="slide"
+        presentationStyle="pageSheet"
+        onRequestClose={() => setShowContractModal(false)}
+      >
+        <SafeAreaView style={styles.modalContainer}>
+          <View style={styles.modalHeader}>
+            <Text style={styles.modalTitle}>Contract Details</Text>
+            <TouchableOpacity onPress={() => setShowContractModal(false)}>
+              <X color={Colors.light.text} size={24} />
+            </TouchableOpacity>
+          </View>
+          
+          {selectedContract && (
+            <ScrollView style={styles.modalContent}>
+              <View style={styles.contractDetailHeader}>
+                <View style={styles.contractDetailHeaderRow}>
+                  <View>
+                    <Text style={styles.contractDetailNumber}>{selectedContract.contractNumber}</Text>
+                    <Text style={styles.contractDetailTitle}>{selectedContract.title}</Text>
+                  </View>
+                  <View style={[
+                    styles.contractStatusBadgeLarge,
+                    { backgroundColor: `${getContractStatusColor(selectedContract.status)}15` }
+                  ]}>
+                    <CheckCircle color={getContractStatusColor(selectedContract.status)} size={18} />
+                    <Text style={[
+                      styles.contractStatusTextLarge,
+                      { color: getContractStatusColor(selectedContract.status) }
+                    ]}>
+                      {getContractStatusLabel(selectedContract.status)}
+                    </Text>
+                  </View>
+                </View>
+              </View>
+
+              <View style={styles.modalSection}>
+                <Text style={styles.modalSectionTitle}>Contract Information</Text>
+                <View style={styles.contractDetailInfo}>
+                  <View style={styles.contractDetailRow}>
+                    <Text style={styles.contractDetailLabel}>Client Name</Text>
+                    <Text style={styles.contractDetailValue}>{selectedContract.clientName}</Text>
+                  </View>
+                  <View style={styles.contractDetailRow}>
+                    <Text style={styles.contractDetailLabel}>Contract Type</Text>
+                    <Text style={styles.contractDetailValue}>{getContractTypeLabel(selectedContract.type)}</Text>
+                  </View>
+                  {selectedContract.projectName && (
+                    <View style={styles.contractDetailRow}>
+                      <Text style={styles.contractDetailLabel}>Project Name</Text>
+                      <Text style={styles.contractDetailValue}>{selectedContract.projectName}</Text>
+                    </View>
+                  )}
+                  {selectedContract.projectAddress && (
+                    <View style={styles.contractDetailRow}>
+                      <Text style={styles.contractDetailLabel}>Project Location</Text>
+                      <Text style={styles.contractDetailValue}>{selectedContract.projectAddress}</Text>
+                    </View>
+                  )}
+                  {selectedContract.amount > 0 && (
+                    <View style={styles.contractDetailRow}>
+                      <Text style={styles.contractDetailLabel}>Total Amount</Text>
+                      <Text style={[styles.contractDetailValue, styles.contractDetailAmount]}>
+                        ${selectedContract.amount.toLocaleString()}
+                      </Text>
+                    </View>
+                  )}
+                  {selectedContract.signedDate && (
+                    <View style={styles.contractDetailRow}>
+                      <Text style={styles.contractDetailLabel}>Date Signed</Text>
+                      <Text style={styles.contractDetailValue}>
+                        {new Date(selectedContract.signedDate).toLocaleDateString('en-US', { 
+                          year: 'numeric', 
+                          month: 'long', 
+                          day: 'numeric' 
+                        })}
+                      </Text>
+                    </View>
+                  )}
+                  {selectedContract.warrantyYears && selectedContract.warrantyYears > 0 && (
+                    <View style={styles.contractDetailRow}>
+                      <Text style={styles.contractDetailLabel}>Warranty Period</Text>
+                      <Text style={styles.contractDetailValue}>
+                        {selectedContract.warrantyYears} year{selectedContract.warrantyYears !== 1 ? 's' : ''}
+                      </Text>
+                    </View>
+                  )}
+                </View>
+              </View>
+
+              {selectedContract.scopeOfWork && (
+                <View style={styles.modalSection}>
+                  <Text style={styles.modalSectionTitle}>Scope of Work</Text>
+                  <View style={styles.scopeDetailCard}>
+                    <Text style={styles.scopeDetailText}>{selectedContract.scopeOfWork}</Text>
+                  </View>
+                </View>
+              )}
+
+              {selectedContract.paymentSchedule && selectedContract.paymentSchedule.length > 0 && (
+                <View style={styles.modalSection}>
+                  <Text style={styles.modalSectionTitle}>Payment Schedule</Text>
+                  {selectedContract.paymentSchedule.map((payment, idx) => (
+                    <View key={idx} style={styles.paymentScheduleCard}>
+                      <View style={styles.paymentScheduleLeft}>
+                        <View style={[
+                          styles.paymentScheduleIcon,
+                          { backgroundColor: payment.status === 'paid' ? `${Colors.light.success}15` : '#F3F4F6' }
+                        ]}>
+                          {payment.status === 'paid' ? (
+                            <CheckCircle color={Colors.light.success} size={20} />
+                          ) : (
+                            <Clock color={Colors.light.muted} size={20} />
+                          )}
+                        </View>
+                        <View>
+                          <Text style={styles.paymentScheduleName}>{payment.label}</Text>
+                          <Text style={styles.paymentScheduleAmount}>${payment.amount.toLocaleString()}</Text>
+                        </View>
+                      </View>
+                      <View style={[
+                        styles.paymentScheduleStatusBadge,
+                        { backgroundColor: payment.status === 'paid' ? `${Colors.light.success}15` : '#FEF3C7' }
+                      ]}>
+                        <Text style={[
+                          styles.paymentScheduleStatusText,
+                          { color: payment.status === 'paid' ? Colors.light.success : '#F59E0B' }
+                        ]}>
+                          {payment.status}
+                        </Text>
+                      </View>
+                    </View>
+                  ))}
+                </View>
+              )}
+
+              {selectedContract.status === 'signed' && (
+                <View style={styles.modalSection}>
+                  <View style={styles.signatureCard}>
+                    <View style={styles.signatureHeader}>
+                      <Award color={Colors.light.success} size={28} />
+                      <View style={styles.signatureHeaderText}>
+                        <Text style={styles.signatureTitle}>Digitally Signed & Secured</Text>
+                        <Text style={styles.signatureDescription}>
+                          This contract was electronically signed on{' '}
+                          {selectedContract.signedDate && new Date(selectedContract.signedDate).toLocaleDateString()}
+                        </Text>
+                      </View>
+                    </View>
+                    <View style={styles.signatureFooter}>
+                      <Info color={Colors.light.muted} size={16} />
+                      <Text style={styles.signatureFooterText}>
+                        E-signatures are legally binding and equivalent to handwritten signatures
+                      </Text>
+                    </View>
+                  </View>
+                </View>
+              )}
+
+              <View style={styles.modalSection}>
+                <Text style={styles.modalSectionTitle}>Actions</Text>
+                <View style={styles.contractActionsGrid}>
+                  <TouchableOpacity 
+                    style={styles.contractActionCard}
+                    onPress={() => handleDownloadContract(selectedContract.id)}
+                  >
+                    <View style={styles.contractActionCardIcon}>
+                      <Download color={Colors.light.primary} size={24} />
+                    </View>
+                    <Text style={styles.contractActionCardText}>Download PDF</Text>
+                  </TouchableOpacity>
+                  
+                  <TouchableOpacity 
+                    style={styles.contractActionCard}
+                    onPress={handleEmailContractor}
+                  >
+                    <View style={styles.contractActionCardIcon}>
+                      <MessageCircle color={Colors.light.primary} size={24} />
+                    </View>
+                    <Text style={styles.contractActionCardText}>Contact Us</Text>
+                  </TouchableOpacity>
+                  
+                  <TouchableOpacity style={styles.contractActionCard}>
+                    <View style={styles.contractActionCardIcon}>
+                      <Share2 color={Colors.light.primary} size={24} />
+                    </View>
+                    <Text style={styles.contractActionCardText}>Share</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+
+              {selectedContract.status === 'pending' && (
+                <View style={styles.modalSection}>
+                  <TouchableOpacity 
+                    style={styles.signNowButton}
+                    onPress={() => handleSignContract(selectedContract.id)}
+                  >
+                    <FileCheck color="#FFF" size={24} />
+                    <Text style={styles.signNowButtonText}>Sign Contract Now</Text>
+                  </TouchableOpacity>
+                  <Text style={styles.signNowHelpText}>
+                    By signing, you agree to all terms and conditions outlined in this contract
+                  </Text>
+                </View>
+              )}
             </ScrollView>
           )}
         </SafeAreaView>
@@ -1961,5 +2428,423 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "700" as const,
     color: "#FFF",
+  },
+  contractsHeader: {
+    marginBottom: 20,
+  },
+  contractsHeaderTitle: {
+    fontSize: 22,
+    fontWeight: "700" as const,
+    color: Colors.light.text,
+    marginBottom: 4,
+  },
+  contractsHeaderSubtitle: {
+    fontSize: 14,
+    color: Colors.light.muted,
+  },
+  contractCard: {
+    backgroundColor: Colors.light.card,
+    borderRadius: 16,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: Colors.light.border,
+    overflow: "hidden",
+  },
+  contractCardHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.light.border,
+  },
+  contractCardHeaderLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    flex: 1,
+  },
+  contractTypeIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  contractHeaderInfo: {
+    flex: 1,
+  },
+  contractNumber: {
+    fontSize: 16,
+    fontWeight: "700" as const,
+    color: Colors.light.text,
+    marginBottom: 2,
+  },
+  contractClientName: {
+    fontSize: 14,
+    color: Colors.light.muted,
+  },
+  contractStatusBadge: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 12,
+  },
+  contractStatusText: {
+    fontSize: 13,
+    fontWeight: "700" as const,
+    textTransform: "uppercase" as const,
+    letterSpacing: 0.5,
+  },
+  contractCardBody: {
+    padding: 16,
+  },
+  contractInfoSection: {
+    gap: 10,
+  },
+  contractInfoRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  contractInfoLabel: {
+    fontSize: 14,
+    color: Colors.light.muted,
+    fontWeight: "600" as const,
+  },
+  contractInfoValue: {
+    fontSize: 14,
+    color: Colors.light.text,
+    flex: 1,
+  },
+  contractAmount: {
+    fontSize: 16,
+    fontWeight: "700" as const,
+    color: Colors.light.primary,
+  },
+  scopeSection: {
+    marginTop: 16,
+    paddingTop: 16,
+    borderTopWidth: 1,
+    borderTopColor: Colors.light.border,
+  },
+  scopeLabel: {
+    fontSize: 13,
+    fontWeight: "700" as const,
+    color: Colors.light.text,
+    marginBottom: 6,
+    textTransform: "uppercase" as const,
+    letterSpacing: 0.5,
+  },
+  scopeText: {
+    fontSize: 14,
+    color: Colors.light.muted,
+    lineHeight: 20,
+  },
+  paymentSchedulePreview: {
+    marginTop: 16,
+    paddingTop: 16,
+    borderTopWidth: 1,
+    borderTopColor: Colors.light.border,
+  },
+  paymentScheduleLabel: {
+    fontSize: 13,
+    fontWeight: "700" as const,
+    color: Colors.light.text,
+    marginBottom: 10,
+    textTransform: "uppercase" as const,
+    letterSpacing: 0.5,
+  },
+  paymentMilestones: {
+    gap: 8,
+  },
+  paymentMilestoneItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+  },
+  paymentMilestoneDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+  },
+  paymentMilestoneText: {
+    fontSize: 13,
+    color: Colors.light.text,
+    flex: 1,
+    fontWeight: "600" as const,
+  },
+  paymentMilestoneStatus: {
+    fontSize: 12,
+    fontWeight: "600" as const,
+    textTransform: "capitalize" as const,
+  },
+  contractCardActions: {
+    flexDirection: "row",
+    gap: 10,
+    padding: 16,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: Colors.light.border,
+  },
+  contractActionBtn: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 12,
+    backgroundColor: Colors.light.background,
+    borderRadius: 10,
+    gap: 8,
+    borderWidth: 1.5,
+    borderColor: Colors.light.border,
+  },
+  contractActionBtnPrimary: {
+    backgroundColor: Colors.light.primary,
+    borderColor: Colors.light.primary,
+  },
+  contractActionBtnText: {
+    fontSize: 14,
+    fontWeight: "700" as const,
+    color: Colors.light.text,
+  },
+  warrantyCard: {
+    flexDirection: "row",
+    backgroundColor: `${Colors.light.success}08`,
+    borderRadius: 16,
+    padding: 20,
+    gap: 16,
+    borderWidth: 1,
+    borderColor: `${Colors.light.success}30`,
+    marginTop: 8,
+  },
+  warrantyIcon: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: `${Colors.light.success}15`,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  warrantyInfo: {
+    flex: 1,
+  },
+  warrantyTitle: {
+    fontSize: 16,
+    fontWeight: "700" as const,
+    color: Colors.light.text,
+    marginBottom: 6,
+  },
+  warrantyDescription: {
+    fontSize: 14,
+    color: Colors.light.muted,
+    lineHeight: 20,
+  },
+  contractDetailHeader: {
+    padding: 20,
+    backgroundColor: Colors.light.card,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.light.border,
+  },
+  contractDetailHeaderRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+    gap: 16,
+  },
+  contractDetailNumber: {
+    fontSize: 14,
+    color: Colors.light.muted,
+    fontWeight: "600" as const,
+    marginBottom: 4,
+  },
+  contractDetailTitle: {
+    fontSize: 24,
+    fontWeight: "700" as const,
+    color: Colors.light.text,
+  },
+  contractStatusBadgeLarge: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 12,
+  },
+  contractStatusTextLarge: {
+    fontSize: 14,
+    fontWeight: "700" as const,
+    textTransform: "uppercase" as const,
+    letterSpacing: 0.5,
+  },
+  contractDetailInfo: {
+    backgroundColor: Colors.light.background,
+    borderRadius: 12,
+    padding: 16,
+    gap: 14,
+  },
+  contractDetailRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  contractDetailLabel: {
+    fontSize: 14,
+    color: Colors.light.muted,
+    fontWeight: "600" as const,
+  },
+  contractDetailValue: {
+    fontSize: 14,
+    color: Colors.light.text,
+    fontWeight: "600" as const,
+    textAlign: "right" as const,
+    flex: 1,
+  },
+  contractDetailAmount: {
+    fontSize: 20,
+    fontWeight: "700" as const,
+    color: Colors.light.primary,
+  },
+  scopeDetailCard: {
+    backgroundColor: Colors.light.background,
+    borderRadius: 12,
+    padding: 16,
+  },
+  scopeDetailText: {
+    fontSize: 15,
+    color: Colors.light.text,
+    lineHeight: 24,
+  },
+  paymentScheduleCard: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    backgroundColor: Colors.light.background,
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 12,
+  },
+  paymentScheduleLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    flex: 1,
+  },
+  paymentScheduleIcon: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  paymentScheduleName: {
+    fontSize: 15,
+    fontWeight: "600" as const,
+    color: Colors.light.text,
+    marginBottom: 2,
+  },
+  paymentScheduleAmount: {
+    fontSize: 18,
+    fontWeight: "700" as const,
+    color: Colors.light.text,
+  },
+  paymentScheduleStatusBadge: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 8,
+  },
+  paymentScheduleStatusText: {
+    fontSize: 13,
+    fontWeight: "700" as const,
+    textTransform: "capitalize" as const,
+  },
+  signatureCard: {
+    backgroundColor: `${Colors.light.success}08`,
+    borderRadius: 16,
+    padding: 20,
+    borderWidth: 1,
+    borderColor: `${Colors.light.success}30`,
+  },
+  signatureHeader: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 16,
+    marginBottom: 16,
+    paddingBottom: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: `${Colors.light.success}20`,
+  },
+  signatureHeaderText: {
+    flex: 1,
+  },
+  signatureTitle: {
+    fontSize: 18,
+    fontWeight: "700" as const,
+    color: Colors.light.text,
+    marginBottom: 6,
+  },
+  signatureDescription: {
+    fontSize: 14,
+    color: Colors.light.muted,
+    lineHeight: 20,
+  },
+  signatureFooter: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+  },
+  signatureFooterText: {
+    fontSize: 13,
+    color: Colors.light.muted,
+    flex: 1,
+    lineHeight: 18,
+  },
+  contractActionsGrid: {
+    flexDirection: "row",
+    gap: 12,
+  },
+  contractActionCard: {
+    flex: 1,
+    backgroundColor: Colors.light.background,
+    borderRadius: 12,
+    padding: 16,
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: Colors.light.border,
+  },
+  contractActionCardIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: `${Colors.light.primary}15`,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 10,
+  },
+  contractActionCardText: {
+    fontSize: 13,
+    fontWeight: "600" as const,
+    color: Colors.light.text,
+    textAlign: "center" as const,
+  },
+  signNowButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 12,
+    backgroundColor: Colors.light.primary,
+    paddingVertical: 18,
+    borderRadius: 12,
+    marginBottom: 12,
+  },
+  signNowButtonText: {
+    fontSize: 18,
+    fontWeight: "700" as const,
+    color: "#FFF",
+  },
+  signNowHelpText: {
+    fontSize: 13,
+    color: Colors.light.muted,
+    textAlign: "center" as const,
+    lineHeight: 18,
   },
 });
