@@ -9,7 +9,7 @@ import {
   TextInput,
   Modal,
 } from "react-native";
-import { Stack } from "expo-router";
+import { Stack, useRouter } from "expo-router";
 import {
   FileText,
   Plus,
@@ -48,6 +48,7 @@ const mockContracts: MockContract[] = [
 ];
 
 export default function ContractsScreen() {
+  const router = useRouter();
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [contracts] = useState<MockContract[]>(mockContracts);
   const [modalVisible, setModalVisible] = useState<boolean>(false);
@@ -113,7 +114,10 @@ export default function ContractsScreen() {
           <Text style={styles.title}>Contracts</Text>
           <Text style={styles.subtitle}>{contracts.length} total contracts</Text>
         </View>
-        <TouchableOpacity style={styles.addButton}>
+        <TouchableOpacity 
+          style={styles.addButton}
+          onPress={() => router.push("/contract-editor" as any)}
+        >
           <Plus color="#FFF" size={20} />
         </TouchableOpacity>
       </View>
@@ -246,7 +250,15 @@ export default function ContractsScreen() {
             )}
 
             <View style={styles.modalActions}>
-              <TouchableOpacity style={styles.actionButton}>
+              <TouchableOpacity 
+                style={styles.actionButton}
+                onPress={() => {
+                  if (selectedContract) {
+                    setModalVisible(false);
+                    router.push(`/contract-editor?id=${selectedContract.id}` as any);
+                  }
+                }}
+              >
                 <Edit2 color={Colors.light.text} size={18} />
                 <Text style={styles.actionButtonText}>Edit</Text>
               </TouchableOpacity>
