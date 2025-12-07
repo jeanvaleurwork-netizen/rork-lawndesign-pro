@@ -1,5 +1,5 @@
 import { Tabs } from "expo-router";
-import { Home, FileText, Calendar, Users, Receipt, UsersRound, BarChart3, Wallet, FileCheck, Briefcase, Clock } from "lucide-react-native";
+import { Home, FileText, Calendar, Users, Receipt, UsersRound, BarChart3, Wallet, FileCheck, Briefcase, Clock, Layers } from "lucide-react-native";
 import React from "react";
 import { Platform, ScrollView, View, StyleSheet, TouchableOpacity, Text } from "react-native";
 
@@ -187,6 +187,13 @@ export default function TabLayout() {
         name="daily-schedule"
         options={{
           href: null,
+        }}
+      />
+      <Tabs.Screen
+        name="business"
+        options={{
+          title: t("tabs.business"),
+          tabBarIcon: ({ color }) => <Layers color={color} size={24} />,
         }}
       />
     </Tabs>

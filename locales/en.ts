@@ -26,6 +26,7 @@ export default {
     invoices: "Invoices",
     jobs: "Jobs",
     timecards: "Time Cards",
+    business: "Business",
   },
   home: {
     welcome: "Welcome to ProContractor",

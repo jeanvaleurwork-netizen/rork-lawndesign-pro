@@ -20,6 +20,13 @@ export default {
     designs: "Konsepsyon",
     jobCosting: "Pri Travay",
     receipts: "Resi",
+    crew: "Ekip",
+    payroll: "Salè",
+    analytics: "Analiz",
+    invoices: "Fakti",
+    jobs: "Travay",
+    timecards: "Kat Tan",
+    business: "Biznis",
   },
   home: {
     welcome: "Byenveni nan ProContractor",

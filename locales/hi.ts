@@ -20,6 +20,13 @@ export default {
     designs: "डिज़ाइन",
     jobCosting: "कार्य लागत",
     receipts: "रसीदें",
+    crew: "टीम",
+    payroll: "वेतन",
+    analytics: "विश्लेषण",
+    invoices: "चालान",
+    jobs: "कार्य",
+    timecards: "समय कार्ड",
+    business: "व्यवसाय",
   },
   home: {
     welcome: "ProContractor में आपका स्वागत है",
