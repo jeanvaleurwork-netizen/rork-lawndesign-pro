@@ -291,7 +291,14 @@ export default function CustomerPortalScreen() {
         </View>
       </View>
 
-      <View style={styles.primaryCTA}>
+      <ScrollView
+        style={styles.mainScrollView}
+        contentContainerStyle={styles.mainScrollContent}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+      >
+        <View style={styles.primaryCTA}>
         <View style={styles.ctaContent}>
           <View style={styles.ctaTextSection}>
             <Text style={styles.ctaTitle}>What Should I Do Right Now?</Text>
@@ -359,7 +366,7 @@ export default function CustomerPortalScreen() {
         </View>
       </View>
 
-      <View style={styles.communicationSection}>
+        <View style={styles.communicationSection}>
         <Text style={styles.sectionTitle}>Need to Reach Us?</Text>
         <Text style={styles.sectionSubtitle}>We&apos;re here to help. Reach out anytime.</Text>
         <View style={styles.quickActionsGrid}>
@@ -388,9 +395,9 @@ export default function CustomerPortalScreen() {
             <Text style={styles.quickActionText}>Reschedule</Text>
           </TouchableOpacity>
         </View>
-      </View>
+        </View>
 
-      <View style={styles.tabContainer}>
+        <View style={styles.tabContainer}>
         <TouchableOpacity
           style={[styles.tab, activeTab === "jobs" && styles.activeTab]}
           onPress={() => setActiveTab("jobs")}
@@ -423,14 +430,7 @@ export default function CustomerPortalScreen() {
             Invoices
           </Text>
         </TouchableOpacity>
-      </View>
-
-      <ScrollView
-        style={styles.scrollView}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-        }
-      >
+        </View>
         {activeTab === "jobs" && (
           <View style={styles.contentContainer}>
             {mockJobs.map((job) => {
@@ -744,6 +744,12 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.light.background,
   },
+  mainScrollView: {
+    flex: 1,
+  },
+  mainScrollContent: {
+    paddingBottom: 20,
+  },
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -837,7 +843,7 @@ const styles = StyleSheet.create({
   },
   primaryCTA: {
     marginHorizontal: 20,
-    marginTop: 20,
+    marginTop: 0,
     marginBottom: 16,
     backgroundColor: Colors.light.primary,
     borderRadius: 16,
@@ -1014,9 +1020,6 @@ const styles = StyleSheet.create({
   },
   activeTabText: {
     color: "#FFF",
-  },
-  scrollView: {
-    flex: 1,
   },
   contentContainer: {
     paddingHorizontal: 20,
