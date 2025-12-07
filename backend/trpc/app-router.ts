@@ -65,16 +65,7 @@ import {
   scanReceiptProcedure,
   calculateTaxProcedure,
 } from "./routes/receipt-ai/route";
-import {
-  listContractsRoute,
-  generateContractRoute as generateNewContractRoute,
-  sendContractForSigningRoute,
-  getContractByTokenRoute,
-  signContractRoute,
-  createChangeOrderRoute,
-  createCompletionCertificateRoute,
-  createWarrantyRoute,
-} from "./routes/contracts/route";
+import { contractsRouter } from "./routes/contracts/route";
 
 console.log("[AppRouter] Initializing tRPC router");
 console.log("[AppRouter] Auth routes:", {
@@ -153,16 +144,7 @@ export const appRouter = createTRPCRouter({
     scanReceipt: scanReceiptProcedure,
     calculateTax: calculateTaxProcedure,
   }),
-  contracts: createTRPCRouter({
-    list: listContractsRoute,
-    generate: generateNewContractRoute,
-    sendForSigning: sendContractForSigningRoute,
-    getByToken: getContractByTokenRoute,
-    sign: signContractRoute,
-    createChangeOrder: createChangeOrderRoute,
-    createCompletionCertificate: createCompletionCertificateRoute,
-    createWarranty: createWarrantyRoute,
-  }),
+  contracts: contractsRouter,
 });
 
 console.log("[AppRouter] Router created successfully");
