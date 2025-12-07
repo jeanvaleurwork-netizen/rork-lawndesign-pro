@@ -118,7 +118,7 @@ export default function BusinessScreen() {
               <View style={styles.cardContent}>
                 <Text style={styles.primaryCardTitle}>Admin Console</Text>
                 <Text style={styles.primaryCardDescription}>
-                  Today&apos;s overview, contracts, risk alerts, money snapshot
+                  Today's overview, contracts, risk alerts, money snapshot
                 </Text>
               </View>
             </View>
