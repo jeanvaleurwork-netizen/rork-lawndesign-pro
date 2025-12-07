@@ -395,6 +395,40 @@ export default function CustomerPortalScreen() {
     }
   };
 
+  const getContractTypeIcon = (type: CustomerContract["type"]) => {
+    switch (type) {
+      case "project_contract":
+        return FileCheck;
+      case "master_service":
+        return Shield;
+      case "work_order":
+        return ClipboardCheck;
+      case "change_order":
+        return AlertCircle;
+      case "completion":
+        return Award;
+      default:
+        return FileText;
+    }
+  };
+
+  const getContractTypeColor = (type: CustomerContract["type"]) => {
+    switch (type) {
+      case "project_contract":
+        return Colors.light.primary;
+      case "master_service":
+        return "#8B5CF6";
+      case "work_order":
+        return "#F59E0B";
+      case "change_order":
+        return "#EF4444";
+      case "completion":
+        return Colors.light.success;
+      default:
+        return Colors.light.muted;
+    }
+  };
+
   const handleUploadDocuments = () => {
     router.push('/customer-dropbox');
   };
@@ -937,7 +971,10 @@ export default function CustomerPortalScreen() {
               </View>
             </View>
 
-            {mockContracts.map((contract) => (
+            {mockContracts.map((contract) => {
+              const TypeIcon = getContractTypeIcon(contract.type);
+              const typeColor = getContractTypeColor(contract.type);
+              return (
               <TouchableOpacity 
                 key={contract.id} 
                 style={styles.contractCard}
@@ -947,9 +984,9 @@ export default function CustomerPortalScreen() {
                   <View style={styles.contractCardHeaderLeft}>
                     <View style={[
                       styles.contractTypeIcon,
-                      { backgroundColor: `${getContractStatusColor(contract.status)}15` }
+                      { backgroundColor: `${typeColor}15` }
                     ]}>
-                      <FileText color={getContractStatusColor(contract.status)} size={20} />
+                      <TypeIcon color={typeColor} size={24} />
                     </View>
                     <View style={styles.contractHeaderInfo}>
                       <Text style={styles.contractNumber}>{contract.contractNumber}</Text>
@@ -969,13 +1006,21 @@ export default function CustomerPortalScreen() {
                   </View>
                 </View>
 
+                <View style={styles.contractTypeBadgeLarge}>
+                  <View style={[
+                    styles.contractTypeIndicator,
+                    { backgroundColor: typeColor }
+                  ]} />
+                  <Text style={[
+                    styles.contractTypeText,
+                    { color: typeColor }
+                  ]}>
+                    {getContractTypeLabel(contract.type)}
+                  </Text>
+                </View>
+
                 <View style={styles.contractCardBody}>
                   <View style={styles.contractInfoSection}>
-                    <View style={styles.contractInfoRow}>
-                      <FileCheck color={Colors.light.muted} size={16} />
-                      <Text style={styles.contractInfoLabel}>Type:</Text>
-                      <Text style={styles.contractInfoValue}>{getContractTypeLabel(contract.type)}</Text>
-                    </View>
                     
                     {contract.projectName && (
                       <View style={styles.contractInfoRow}>
@@ -1089,7 +1134,8 @@ export default function CustomerPortalScreen() {
                   )}
                 </View>
               </TouchableOpacity>
-            ))}
+            );
+            })}
           </View>
         )}
 
@@ -2607,9 +2653,9 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   contractTypeIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -2627,15 +2673,37 @@ const styles = StyleSheet.create({
     color: Colors.light.muted,
   },
   contractStatusBadge: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 12,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 10,
   },
   contractStatusText: {
-    fontSize: 13,
+    fontSize: 11,
     fontWeight: "700" as const,
     textTransform: "uppercase" as const,
     letterSpacing: 0.5,
+  },
+  contractTypeBadgeLarge: {
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    gap: 10,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    marginHorizontal: 16,
+    marginTop: 12,
+    marginBottom: 8,
+    backgroundColor: Colors.light.background,
+    borderRadius: 12,
+  },
+  contractTypeIndicator: {
+    width: 4,
+    height: 24,
+    borderRadius: 2,
+  },
+  contractTypeText: {
+    fontSize: 16,
+    fontWeight: "700" as const,
+    letterSpacing: 0.3,
   },
   contractCardBody: {
     padding: 16,
