@@ -243,6 +243,7 @@ export default function CustomerPortalScreen() {
   const [selectedContract, setSelectedContract] = useState<CustomerContract | null>(null);
   const [showContractModal, setShowContractModal] = useState<boolean>(false);
   const [beforeAfterSlider] = useState<number>(50);
+  const [showNotifications, setShowNotifications] = useState<boolean>(false);
 
   const onRefresh = () => {
     setRefreshing(true);
@@ -400,7 +401,10 @@ export default function CustomerPortalScreen() {
           </View>
         </View>
         <View style={styles.headerRight}>
-          <TouchableOpacity style={styles.iconButton}>
+          <TouchableOpacity 
+            style={styles.iconButton}
+            onPress={() => setShowNotifications(!showNotifications)}
+          >
             <Bell color={Colors.light.text} size={22} />
             <View style={styles.notificationBadge}>
               <Text style={styles.notificationBadgeText}>2</Text>
@@ -419,7 +423,32 @@ export default function CustomerPortalScreen() {
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
       >
-        <View style={styles.primaryCTA}>
+        {showNotifications && (
+        <View style={styles.notificationsDropdown}>
+          <View style={styles.notificationItem}>
+            <View style={[styles.notificationIcon, { backgroundColor: `${Colors.light.success}15` }]}>
+              <CheckCircle color={Colors.light.success} size={20} />
+            </View>
+            <View style={styles.notificationContent}>
+              <Text style={styles.notificationTitle}>Milestone Complete</Text>
+              <Text style={styles.notificationDesc}>Irrigation system installed successfully</Text>
+              <Text style={styles.notificationTime}>2 hours ago</Text>
+            </View>
+          </View>
+          <View style={styles.notificationItem}>
+            <View style={[styles.notificationIcon, { backgroundColor: `${Colors.light.primary}15` }]}>
+              <Camera color={Colors.light.primary} size={20} />
+            </View>
+            <View style={styles.notificationContent}>
+              <Text style={styles.notificationTitle}>New Photos Available</Text>
+              <Text style={styles.notificationDesc}>3 progress photos were uploaded</Text>
+              <Text style={styles.notificationTime}>5 hours ago</Text>
+            </View>
+          </View>
+        </View>
+      )}
+
+      <View style={styles.primaryCTA}>
         <View style={styles.ctaContent}>
           <View style={styles.ctaTextSection}>
             <Text style={styles.ctaTitle}>What Should I Do Right Now?</Text>
@@ -530,6 +559,51 @@ export default function CustomerPortalScreen() {
         </ScrollView>
       </View>
 
+      <View style={styles.projectSnapshotCard}>
+        <View style={styles.snapshotHeader}>
+          <View>
+            <Text style={styles.snapshotTitle}>Your Active Project</Text>
+            <Text style={styles.snapshotSubtitle}>Front Yard Landscaping</Text>
+          </View>
+          <TouchableOpacity 
+            style={styles.snapshotViewBtn}
+            onPress={() => handleViewProjectDetails('J-001')}
+          >
+            <Text style={styles.snapshotViewBtnText}>View Details</Text>
+            <ChevronRight color={Colors.light.primary} size={16} />
+          </TouchableOpacity>
+        </View>
+        
+        <View style={styles.snapshotProgress}>
+          <View style={styles.snapshotProgressInfo}>
+            <Text style={styles.snapshotProgressLabel}>Overall Progress</Text>
+            <Text style={styles.snapshotProgressPercent}>65%</Text>
+          </View>
+          <View style={styles.snapshotProgressBar}>
+            <View style={[styles.snapshotProgressFill, { width: '65%' }]} />
+          </View>
+            <Text style={styles.snapshotProgressDesc}>On track for completion by Dec 20</Text>
+        </View>
+
+        <View style={styles.snapshotStats}>
+          <View style={styles.snapshotStat}>
+            <Calendar color={Colors.light.muted} size={18} />
+            <View>
+              <Text style={styles.snapshotStatLabel}>Days Remaining</Text>
+              <Text style={styles.snapshotStatValue}>13 days</Text>
+            </View>
+          </View>
+          <View style={styles.snapshotStatDivider} />
+          <View style={styles.snapshotStat}>
+            <User color={Colors.light.muted} size={18} />
+            <View>
+              <Text style={styles.snapshotStatLabel}>Crew</Text>
+              <Text style={styles.snapshotStatValue}>Green Team A</Text>
+            </View>
+          </View>
+        </View>
+      </View>
+
       <View style={styles.quickStats}>
         <View style={styles.statCard}>
           <View style={[styles.statIcon, { backgroundColor: `${Colors.light.primary}15` }]}>
@@ -564,19 +638,23 @@ export default function CustomerPortalScreen() {
         <View style={styles.communicationSection}>
         <Text style={styles.sectionTitle}>Need to Reach Us?</Text>
         <Text style={styles.sectionSubtitle}>We&apos;re here to help. Reach out anytime.</Text>
+        <View style={styles.communicationButtons}>
+          <TouchableOpacity 
+            style={styles.communicationPrimaryBtn}
+            onPress={handleCallContractor}
+          >
+            <Phone color="#FFF" size={20} />
+            <Text style={styles.communicationPrimaryBtnText}>Call Now</Text>
+          </TouchableOpacity>
+          <TouchableOpacity 
+            style={styles.communicationSecondaryBtn}
+            onPress={handleEmailContractor}
+          >
+            <MessageCircle color={Colors.light.primary} size={20} />
+            <Text style={styles.communicationSecondaryBtnText}>Message</Text>
+          </TouchableOpacity>
+        </View>
         <View style={styles.quickActionsGrid}>
-          <TouchableOpacity style={styles.quickActionCard} onPress={handleCallContractor}>
-            <View style={[styles.quickActionIcon, { backgroundColor: `${Colors.light.primary}15` }]}>
-              <Phone color={Colors.light.primary} size={22} />
-            </View>
-            <Text style={styles.quickActionText}>Call Crew</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.quickActionCard} onPress={handleEmailContractor}>
-            <View style={[styles.quickActionIcon, { backgroundColor: '#E0E7FF' }]}>
-              <MessageCircle color="#6366F1" size={22} />
-            </View>
-            <Text style={styles.quickActionText}>Message</Text>
-          </TouchableOpacity>
           <TouchableOpacity style={styles.quickActionCard} onPress={handleUploadDocuments}>
             <View style={[styles.quickActionIcon, { backgroundColor: '#FEF3C7' }]}>
               <Upload color="#F59E0B" size={22} />
@@ -588,6 +666,12 @@ export default function CustomerPortalScreen() {
               <Calendar color={Colors.light.success} size={22} />
             </View>
             <Text style={styles.quickActionText}>Reschedule</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.quickActionCard}>
+            <View style={[styles.quickActionIcon, { backgroundColor: '#E0E7FF' }]}>
+              <FileText color="#6366F1" size={22} />
+            </View>
+            <Text style={styles.quickActionText}>Documents</Text>
           </TouchableOpacity>
         </View>
         </View>
@@ -2846,5 +2930,193 @@ const styles = StyleSheet.create({
     color: Colors.light.muted,
     textAlign: "center" as const,
     lineHeight: 18,
+  },
+  notificationsDropdown: {
+    marginHorizontal: 20,
+    marginTop: 10,
+    marginBottom: 16,
+    backgroundColor: Colors.light.card,
+    borderRadius: 12,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: Colors.light.border,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    elevation: 5,
+  },
+  notificationItem: {
+    flexDirection: "row",
+    gap: 12,
+    padding: 12,
+    borderRadius: 8,
+  },
+  notificationIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  notificationContent: {
+    flex: 1,
+  },
+  notificationTitle: {
+    fontSize: 14,
+    fontWeight: "700" as const,
+    color: Colors.light.text,
+    marginBottom: 2,
+  },
+  notificationDesc: {
+    fontSize: 13,
+    color: Colors.light.muted,
+    lineHeight: 18,
+    marginBottom: 4,
+  },
+  notificationTime: {
+    fontSize: 12,
+    color: Colors.light.muted,
+  },
+  projectSnapshotCard: {
+    marginHorizontal: 20,
+    marginBottom: 16,
+    backgroundColor: Colors.light.card,
+    borderRadius: 16,
+    padding: 20,
+    borderWidth: 2,
+    borderColor: Colors.light.primary,
+  },
+  snapshotHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+    marginBottom: 16,
+    paddingBottom: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.light.border,
+  },
+  snapshotTitle: {
+    fontSize: 13,
+    fontWeight: "600" as const,
+    color: Colors.light.muted,
+    textTransform: "uppercase" as const,
+    letterSpacing: 0.5,
+    marginBottom: 4,
+  },
+  snapshotSubtitle: {
+    fontSize: 20,
+    fontWeight: "700" as const,
+    color: Colors.light.text,
+  },
+  snapshotViewBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    backgroundColor: `${Colors.light.primary}10`,
+    borderRadius: 8,
+  },
+  snapshotViewBtnText: {
+    fontSize: 13,
+    fontWeight: "700" as const,
+    color: Colors.light.primary,
+  },
+  snapshotProgress: {
+    marginBottom: 16,
+  },
+  snapshotProgressInfo: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 8,
+  },
+  snapshotProgressLabel: {
+    fontSize: 14,
+    fontWeight: "600" as const,
+    color: Colors.light.text,
+  },
+  snapshotProgressPercent: {
+    fontSize: 24,
+    fontWeight: "800" as const,
+    color: Colors.light.success,
+  },
+  snapshotProgressBar: {
+    height: 10,
+    backgroundColor: Colors.light.background,
+    borderRadius: 5,
+    overflow: "hidden",
+    marginBottom: 8,
+  },
+  snapshotProgressFill: {
+    height: "100%",
+    backgroundColor: Colors.light.success,
+    borderRadius: 5,
+  },
+  snapshotProgressDesc: {
+    fontSize: 13,
+    color: Colors.light.muted,
+  },
+  snapshotStats: {
+    flexDirection: "row",
+    gap: 16,
+  },
+  snapshotStat: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+  },
+  snapshotStatDivider: {
+    width: 1,
+    backgroundColor: Colors.light.border,
+  },
+  snapshotStatLabel: {
+    fontSize: 12,
+    color: Colors.light.muted,
+    marginBottom: 2,
+  },
+  snapshotStatValue: {
+    fontSize: 14,
+    fontWeight: "700" as const,
+    color: Colors.light.text,
+  },
+  communicationButtons: {
+    flexDirection: "row",
+    gap: 12,
+    marginBottom: 16,
+  },
+  communicationPrimaryBtn: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    paddingVertical: 16,
+    backgroundColor: Colors.light.primary,
+    borderRadius: 12,
+  },
+  communicationPrimaryBtnText: {
+    fontSize: 15,
+    fontWeight: "700" as const,
+    color: "#FFF",
+  },
+  communicationSecondaryBtn: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    paddingVertical: 16,
+    backgroundColor: `${Colors.light.primary}10`,
+    borderRadius: 12,
+    borderWidth: 1.5,
+    borderColor: Colors.light.primary,
+  },
+  communicationSecondaryBtnText: {
+    fontSize: 15,
+    fontWeight: "700" as const,
+    color: Colors.light.primary,
   },
 });
