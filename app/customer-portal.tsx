@@ -10,7 +10,6 @@ import {
   RefreshControl,
   Linking,
   Modal,
-  Pressable,
 } from "react-native";
 import { Stack, router } from "expo-router";
 import {
@@ -25,14 +24,11 @@ import {
   Home,
   User,
   Upload,
-  Package,
   Bell,
-  Settings,
   Calendar,
   TrendingUp,
   FileCheck,
   Phone,
-  Mail,
   MapPin,
   X,
 } from "lucide-react-native";
@@ -205,6 +201,19 @@ export default function CustomerPortalScreen() {
     }
   };
 
+  const getJobStatusLabel = (status: CustomerJob["status"]) => {
+    switch (status) {
+      case "scheduled":
+        return "Awaiting Scheduling";
+      case "in-progress":
+        return "Work Underway";
+      case "completed":
+        return "Finalized";
+      default:
+        return status;
+    }
+  };
+
   const getJobStatusIcon = (status: CustomerJob["status"]) => {
     switch (status) {
       case "scheduled":
@@ -282,6 +291,43 @@ export default function CustomerPortalScreen() {
         </View>
       </View>
 
+      <View style={styles.primaryCTA}>
+        <View style={styles.ctaContent}>
+          <View style={styles.ctaTextSection}>
+            <Text style={styles.ctaTitle}>What Should I Do Right Now?</Text>
+            <Text style={styles.ctaSubtitle}>View latest progress photos from your crew</Text>
+          </View>
+          <TouchableOpacity 
+            style={styles.ctaButton}
+            onPress={() => handleViewProjectDetails('J-001')}
+          >
+            <Text style={styles.ctaButtonText}>View Progress</Text>
+            <ChevronRight color="#FFF" size={18} />
+          </TouchableOpacity>
+        </View>
+      </View>
+
+      <View style={styles.billingHighlight}>
+        <View style={styles.billingHeader}>
+          <View style={styles.billingIcon}>
+            <DollarSign color={Colors.light.primary} size={24} />
+          </View>
+          <View style={styles.billingInfo}>
+            <Text style={styles.billingLabel}>Balance Due</Text>
+            <Text style={styles.billingAmount}>$2,700</Text>
+            <Text style={styles.billingNext}>Next Milestone: Final Touch-Ups • Expected: Jan 5, 2026</Text>
+          </View>
+        </View>
+        <View style={styles.billingActions}>
+          <TouchableOpacity style={styles.billingActionBtn} onPress={() => handlePayNow('INV-001')}>
+            <Text style={styles.billingActionBtnText}>Pay Now</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.billingActionBtnOutline}>
+            <Text style={styles.billingActionBtnOutlineText}>View Schedule</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+
       <View style={styles.quickStats}>
         <View style={styles.statCard}>
           <View style={[styles.statIcon, { backgroundColor: `${Colors.light.primary}15` }]}>
@@ -313,32 +359,33 @@ export default function CustomerPortalScreen() {
         </View>
       </View>
 
-      <View style={styles.quickActions}>
-        <Text style={styles.sectionTitle}>Quick Actions</Text>
+      <View style={styles.communicationSection}>
+        <Text style={styles.sectionTitle}>Need to Reach Us?</Text>
+        <Text style={styles.sectionSubtitle}>We&apos;re here to help. Reach out anytime.</Text>
         <View style={styles.quickActionsGrid}>
           <TouchableOpacity style={styles.quickActionCard} onPress={handleCallContractor}>
             <View style={[styles.quickActionIcon, { backgroundColor: `${Colors.light.primary}15` }]}>
               <Phone color={Colors.light.primary} size={22} />
             </View>
-            <Text style={styles.quickActionText}>Call</Text>
+            <Text style={styles.quickActionText}>Call Crew</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.quickActionCard} onPress={handleEmailContractor}>
             <View style={[styles.quickActionIcon, { backgroundColor: '#E0E7FF' }]}>
-              <Mail color="#6366F1" size={22} />
+              <MessageCircle color="#6366F1" size={22} />
             </View>
-            <Text style={styles.quickActionText}>Email</Text>
+            <Text style={styles.quickActionText}>Message</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.quickActionCard} onPress={handleUploadDocuments}>
             <View style={[styles.quickActionIcon, { backgroundColor: '#FEF3C7' }]}>
               <Upload color="#F59E0B" size={22} />
             </View>
-            <Text style={styles.quickActionText}>Upload</Text>
+            <Text style={styles.quickActionText}>Upload Docs</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.quickActionCard}>
             <View style={[styles.quickActionIcon, { backgroundColor: `${Colors.light.success}15` }]}>
               <Calendar color={Colors.light.success} size={22} />
             </View>
-            <Text style={styles.quickActionText}>Schedule</Text>
+            <Text style={styles.quickActionText}>Reschedule</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -416,7 +463,7 @@ export default function CustomerPortalScreen() {
                             { color: getJobStatusColor(job.status) },
                           ]}
                         >
-                          {job.status.replace("-", " ")}
+                          {getJobStatusLabel(job.status)}
                         </Text>
                       </View>
                     </View>
@@ -445,7 +492,7 @@ export default function CustomerPortalScreen() {
                     {job.status === "in-progress" && (
                       <View style={styles.progressSection}>
                         <View style={styles.progressHeader}>
-                          <Text style={styles.progressLabel}>Project Progress</Text>
+                          <Text style={styles.progressLabel}>Your Project is Coming to Life</Text>
                           <Text style={styles.progressPercent}>{job.progress}%</Text>
                         </View>
                         <View style={styles.progressBar}>
@@ -457,7 +504,15 @@ export default function CustomerPortalScreen() {
                           />
                         </View>
                         {job.nextMilestone && (
-                          <Text style={styles.nextMilestone}>Next: {job.nextMilestone}</Text>
+                          <View style={styles.nextMilestoneCard}>
+                            <View style={styles.nextMilestoneIcon}>
+                              <Clock color={Colors.light.primary} size={16} />
+                            </View>
+                            <View style={styles.nextMilestoneText}>
+                              <Text style={styles.nextMilestoneLabel}>Next Step</Text>
+                              <Text style={styles.nextMilestone}>{job.nextMilestone}</Text>
+                            </View>
+                          </View>
                         )}
                       </View>
                     )}
@@ -778,8 +833,119 @@ const styles = StyleSheet.create({
     fontSize: 11,
     color: Colors.light.muted,
     textAlign: "center" as const,
+    fontWeight: "600" as const,
   },
-  quickActions: {
+  primaryCTA: {
+    marginHorizontal: 20,
+    marginTop: 20,
+    marginBottom: 16,
+    backgroundColor: Colors.light.primary,
+    borderRadius: 16,
+    padding: 20,
+  },
+  ctaContent: {
+    gap: 16,
+  },
+  ctaTextSection: {
+    gap: 6,
+  },
+  ctaTitle: {
+    fontSize: 18,
+    fontWeight: "700" as const,
+    color: "#FFF",
+  },
+  ctaSubtitle: {
+    fontSize: 14,
+    color: "rgba(255,255,255,0.9)",
+    lineHeight: 20,
+  },
+  ctaButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(255,255,255,0.2)",
+    paddingVertical: 14,
+    paddingHorizontal: 20,
+    borderRadius: 12,
+    gap: 8,
+  },
+  ctaButtonText: {
+    fontSize: 16,
+    fontWeight: "700" as const,
+    color: "#FFF",
+  },
+  billingHighlight: {
+    marginHorizontal: 20,
+    marginBottom: 20,
+    backgroundColor: Colors.light.card,
+    borderRadius: 16,
+    padding: 20,
+    borderWidth: 2,
+    borderColor: Colors.light.primary,
+  },
+  billingHeader: {
+    flexDirection: "row",
+    gap: 16,
+    marginBottom: 16,
+  },
+  billingIcon: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: `${Colors.light.primary}15`,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  billingInfo: {
+    flex: 1,
+  },
+  billingLabel: {
+    fontSize: 13,
+    color: Colors.light.muted,
+    marginBottom: 4,
+  },
+  billingAmount: {
+    fontSize: 32,
+    fontWeight: "800" as const,
+    color: Colors.light.text,
+    marginBottom: 6,
+  },
+  billingNext: {
+    fontSize: 13,
+    color: Colors.light.muted,
+    lineHeight: 18,
+  },
+  billingActions: {
+    flexDirection: "row",
+    gap: 12,
+  },
+  billingActionBtn: {
+    flex: 1,
+    paddingVertical: 14,
+    backgroundColor: Colors.light.primary,
+    borderRadius: 10,
+    alignItems: "center",
+  },
+  billingActionBtnText: {
+    fontSize: 15,
+    fontWeight: "700" as const,
+    color: "#FFF",
+  },
+  billingActionBtnOutline: {
+    flex: 1,
+    paddingVertical: 14,
+    backgroundColor: Colors.light.background,
+    borderRadius: 10,
+    alignItems: "center",
+    borderWidth: 1.5,
+    borderColor: Colors.light.border,
+  },
+  billingActionBtnOutlineText: {
+    fontSize: 15,
+    fontWeight: "700" as const,
+    color: Colors.light.text,
+  },
+  communicationSection: {
     paddingHorizontal: 20,
     marginBottom: 20,
   },
@@ -787,7 +953,13 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "700" as const,
     color: Colors.light.text,
+    marginBottom: 6,
+  },
+  sectionSubtitle: {
+    fontSize: 14,
+    color: Colors.light.muted,
     marginBottom: 12,
+    lineHeight: 20,
   },
   quickActionsGrid: {
     flexDirection: "row",
@@ -927,11 +1099,40 @@ const styles = StyleSheet.create({
     fontWeight: "700" as const,
     color: Colors.light.primary,
   },
-  nextMilestone: {
-    fontSize: 12,
+  nextMilestoneCard: {
+    flexDirection: "row",
+    gap: 12,
+    marginTop: 12,
+    backgroundColor: `${Colors.light.primary}08`,
+    padding: 12,
+    borderRadius: 10,
+    borderLeftWidth: 3,
+    borderLeftColor: Colors.light.primary,
+  },
+  nextMilestoneIcon: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: `${Colors.light.primary}15`,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  nextMilestoneText: {
+    flex: 1,
+  },
+  nextMilestoneLabel: {
+    fontSize: 11,
+    fontWeight: "600" as const,
     color: Colors.light.muted,
-    marginTop: 6,
-    fontStyle: "italic" as const,
+    textTransform: "uppercase" as const,
+    marginBottom: 2,
+    letterSpacing: 0.5,
+  },
+  nextMilestone: {
+    fontSize: 14,
+    color: Colors.light.text,
+    fontWeight: "600" as const,
+    lineHeight: 20,
   },
 
   progressBar: {
