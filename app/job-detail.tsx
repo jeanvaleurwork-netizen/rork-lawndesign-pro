@@ -9,6 +9,9 @@ import {
   Linking,
   Image,
   Platform,
+  Modal,
+  TextInput,
+  KeyboardAvoidingView,
 } from "react-native";
 import { Stack, router, useLocalSearchParams } from "expo-router";
 import * as ImagePicker from "expo-image-picker";
@@ -29,6 +32,10 @@ import {
   Receipt,
   TrendingUp,
   Edit,
+  X,
+  Plus,
+  Trash2,
+  Save,
 } from "lucide-react-native";
 import { useData } from "@/contexts/DataContext";
 import { useAuth } from "@/contexts/AuthContext";
@@ -98,6 +105,19 @@ export default function JobDetailScreen() {
     completedTime: null as string | null,
   });
 
+  const [editModalVisible, setEditModalVisible] = useState(false);
+  const [checklistModalVisible, setChecklistModalVisible] = useState(false);
+  const [editedJobData, setEditedJobData] = useState({
+    service: job?.service || "",
+    propertyAddress: job?.propertyAddress || "",
+    notes: job?.notes || "",
+    budgetedCost: job?.budgetedCost?.toString() || "",
+    actualCost: job?.actualCost?.toString() || "",
+  });
+  const [newChecklistItem, setNewChecklistItem] = useState("");
+  const [editingChecklistId, setEditingChecklistId] = useState<string | null>(null);
+  const [editingChecklistText, setEditingChecklistText] = useState("");
+
   if (!job) {
     return (
       <View style={styles.container}>
@@ -124,6 +144,64 @@ export default function JobDetailScreen() {
         item.id === id ? { ...item, completed: !item.completed } : item
       )
     );
+  };
+
+  const handleSaveJobDetails = () => {
+    updateJob(job.id, {
+      service: editedJobData.service,
+      propertyAddress: editedJobData.propertyAddress,
+      notes: editedJobData.notes,
+      budgetedCost: parseFloat(editedJobData.budgetedCost) || undefined,
+      actualCost: parseFloat(editedJobData.actualCost) || undefined,
+    });
+    setEditModalVisible(false);
+    Alert.alert("Success", "Job details updated successfully");
+  };
+
+  const handleAddChecklistItem = () => {
+    if (!newChecklistItem.trim()) return;
+    const newItem: ChecklistItemType = {
+      id: Date.now().toString(),
+      task: newChecklistItem,
+      completed: false,
+    };
+    setChecklist([...checklist, newItem]);
+    setNewChecklistItem("");
+  };
+
+  const handleDeleteChecklistItem = (id: string) => {
+    Alert.alert(
+      "Delete Item",
+      "Are you sure you want to delete this checklist item?",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: () => {
+            setChecklist(checklist.filter((item) => item.id !== id));
+          },
+        },
+      ]
+    );
+  };
+
+  const handleEditChecklistItem = (id: string, currentText: string) => {
+    setEditingChecklistId(id);
+    setEditingChecklistText(currentText);
+  };
+
+  const handleSaveChecklistEdit = () => {
+    if (!editingChecklistText.trim() || !editingChecklistId) return;
+    setChecklist(
+      checklist.map((item) =>
+        item.id === editingChecklistId
+          ? { ...item, task: editingChecklistText }
+          : item
+      )
+    );
+    setEditingChecklistId(null);
+    setEditingChecklistText("");
   };
 
   const handleCallClient = async () => {
@@ -211,7 +289,19 @@ export default function JobDetailScreen() {
           <ChevronLeft color="#FFF" size={28} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Job Details</Text>
-        <TouchableOpacity style={styles.backButton}>
+        <TouchableOpacity 
+          style={styles.backButton}
+          onPress={() => {
+            setEditedJobData({
+              service: job?.service || "",
+              propertyAddress: job?.propertyAddress || "",
+              notes: job?.notes || "",
+              budgetedCost: job?.budgetedCost?.toString() || "",
+              actualCost: job?.actualCost?.toString() || "",
+            });
+            setEditModalVisible(true);
+          }}
+        >
           <Edit color="#FFF" size={22} />
         </TouchableOpacity>
       </View>
@@ -380,6 +470,12 @@ export default function JobDetailScreen() {
             <View style={styles.cardHeader}>
               <CheckCircle color={Colors.light.primary} size={20} />
               <Text style={styles.cardTitle}>Checklist</Text>
+              <TouchableOpacity 
+                style={styles.editChecklistButton}
+                onPress={() => setChecklistModalVisible(true)}
+              >
+                <Edit color={Colors.light.primary} size={18} />
+              </TouchableOpacity>
             </View>
             <View style={styles.checklistContainer}>
               {checklist.map((item, index) => (
@@ -609,6 +705,222 @@ export default function JobDetailScreen() {
           <View style={styles.bottomPadding} />
         </View>
       </ScrollView>
+
+      <Modal
+        visible={editModalVisible}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setEditModalVisible(false)}
+      >
+        <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          style={styles.modalOverlay}
+        >
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Edit Job Details</Text>
+              <TouchableOpacity onPress={() => setEditModalVisible(false)}>
+                <X color={Colors.light.text} size={24} />
+              </TouchableOpacity>
+            </View>
+
+            <ScrollView style={styles.modalBody} showsVerticalScrollIndicator={false}>
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Service Type</Text>
+                <TextInput
+                  style={styles.input}
+                  value={editedJobData.service}
+                  onChangeText={(text) => setEditedJobData({ ...editedJobData, service: text })}
+                  placeholder="Enter service type"
+                  placeholderTextColor={Colors.light.muted}
+                />
+              </View>
+
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Property Address</Text>
+                <TextInput
+                  style={styles.input}
+                  value={editedJobData.propertyAddress}
+                  onChangeText={(text) => setEditedJobData({ ...editedJobData, propertyAddress: text })}
+                  placeholder="Enter property address"
+                  placeholderTextColor={Colors.light.muted}
+                />
+              </View>
+
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Budgeted Cost ($)</Text>
+                <TextInput
+                  style={styles.input}
+                  value={editedJobData.budgetedCost}
+                  onChangeText={(text) => setEditedJobData({ ...editedJobData, budgetedCost: text })}
+                  placeholder="0.00"
+                  keyboardType="decimal-pad"
+                  placeholderTextColor={Colors.light.muted}
+                />
+              </View>
+
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Actual Cost ($)</Text>
+                <TextInput
+                  style={styles.input}
+                  value={editedJobData.actualCost}
+                  onChangeText={(text) => setEditedJobData({ ...editedJobData, actualCost: text })}
+                  placeholder="0.00"
+                  keyboardType="decimal-pad"
+                  placeholderTextColor={Colors.light.muted}
+                />
+              </View>
+
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Notes</Text>
+                <TextInput
+                  style={[styles.input, styles.textArea]}
+                  value={editedJobData.notes}
+                  onChangeText={(text) => setEditedJobData({ ...editedJobData, notes: text })}
+                  placeholder="Add notes about this job..."
+                  multiline
+                  numberOfLines={4}
+                  textAlignVertical="top"
+                  placeholderTextColor={Colors.light.muted}
+                />
+              </View>
+            </ScrollView>
+
+            <View style={styles.modalFooter}>
+              <TouchableOpacity 
+                style={styles.modalCancelButton}
+                onPress={() => setEditModalVisible(false)}
+              >
+                <Text style={styles.modalCancelText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity 
+                style={styles.modalSaveButton}
+                onPress={handleSaveJobDetails}
+              >
+                <Save color="#FFF" size={18} />
+                <Text style={styles.modalSaveText}>Save Changes</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </KeyboardAvoidingView>
+      </Modal>
+
+      <Modal
+        visible={checklistModalVisible}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setChecklistModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Manage Checklist</Text>
+              <TouchableOpacity onPress={() => setChecklistModalVisible(false)}>
+                <X color={Colors.light.text} size={24} />
+              </TouchableOpacity>
+            </View>
+
+            <ScrollView style={styles.modalBody} showsVerticalScrollIndicator={false}>
+              <View style={styles.addItemSection}>
+                <TextInput
+                  style={styles.addItemInput}
+                  value={newChecklistItem}
+                  onChangeText={setNewChecklistItem}
+                  placeholder="Add new checklist item..."
+                  placeholderTextColor={Colors.light.muted}
+                  onSubmitEditing={handleAddChecklistItem}
+                />
+                <TouchableOpacity 
+                  style={styles.addItemButton}
+                  onPress={handleAddChecklistItem}
+                >
+                  <Plus color="#FFF" size={20} />
+                </TouchableOpacity>
+              </View>
+
+              <View style={styles.checklistEditList}>
+                {checklist.map((item, index) => (
+                  <View
+                    key={item.id}
+                    style={[
+                      styles.checklistEditItem,
+                      index === checklist.length - 1 && styles.checklistEditItemLast,
+                    ]}
+                  >
+                    {editingChecklistId === item.id ? (
+                      <View style={styles.editingRow}>
+                        <TextInput
+                          style={styles.editingInput}
+                          value={editingChecklistText}
+                          onChangeText={setEditingChecklistText}
+                          autoFocus
+                        />
+                        <TouchableOpacity
+                          style={styles.saveEditButton}
+                          onPress={handleSaveChecklistEdit}
+                        >
+                          <Save color={Colors.light.primary} size={18} />
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                          style={styles.cancelEditButton}
+                          onPress={() => {
+                            setEditingChecklistId(null);
+                            setEditingChecklistText("");
+                          }}
+                        >
+                          <X color={Colors.light.muted} size={18} />
+                        </TouchableOpacity>
+                      </View>
+                    ) : (
+                      <View style={styles.checklistEditRow}>
+                        <View
+                          style={[
+                            styles.checkboxSmall,
+                            item.completed && styles.checkboxSmallCompleted,
+                          ]}
+                        >
+                          {item.completed && (
+                            <CheckCircle color={Colors.light.primary} size={14} />
+                          )}
+                        </View>
+                        <Text
+                          style={[
+                            styles.checklistEditText,
+                            item.completed && styles.checklistEditTextCompleted,
+                          ]}
+                        >
+                          {item.task}
+                        </Text>
+                        <TouchableOpacity
+                          style={styles.editButton}
+                          onPress={() => handleEditChecklistItem(item.id, item.task)}
+                        >
+                          <Edit color={Colors.light.primary} size={18} />
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                          style={styles.deleteButton}
+                          onPress={() => handleDeleteChecklistItem(item.id)}
+                        >
+                          <Trash2 color={Colors.light.error} size={18} />
+                        </TouchableOpacity>
+                      </View>
+                    )}
+                  </View>
+                ))}
+              </View>
+            </ScrollView>
+
+            <View style={styles.modalFooter}>
+              <TouchableOpacity 
+                style={styles.modalDoneButton}
+                onPress={() => setChecklistModalVisible(false)}
+              >
+                <Text style={styles.modalDoneText}>Done</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -707,6 +1019,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 10,
     marginBottom: 16,
+  },
+  editChecklistButton: {
+    marginLeft: "auto",
+    padding: 4,
   },
   cardTitle: {
     fontSize: 16,
@@ -1087,5 +1403,191 @@ const styles = StyleSheet.create({
     color: "#FFF",
     fontSize: 16,
     fontWeight: "600" as const,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "flex-end",
+  },
+  modalContent: {
+    backgroundColor: Colors.light.card,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    maxHeight: "90%",
+  },
+  modalHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.light.border,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: "700" as const,
+    color: Colors.light.text,
+  },
+  modalBody: {
+    padding: 20,
+    maxHeight: 500,
+  },
+  inputGroup: {
+    marginBottom: 20,
+  },
+  inputLabel: {
+    fontSize: 14,
+    fontWeight: "600" as const,
+    color: Colors.light.text,
+    marginBottom: 8,
+  },
+  input: {
+    backgroundColor: Colors.light.background,
+    borderRadius: 12,
+    padding: 14,
+    fontSize: 15,
+    color: Colors.light.text,
+    borderWidth: 1,
+    borderColor: Colors.light.border,
+  },
+  textArea: {
+    minHeight: 100,
+    paddingTop: 14,
+  },
+  modalFooter: {
+    flexDirection: "row",
+    padding: 20,
+    gap: 12,
+    borderTopWidth: 1,
+    borderTopColor: Colors.light.border,
+  },
+  modalCancelButton: {
+    flex: 1,
+    paddingVertical: 14,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: Colors.light.border,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  modalCancelText: {
+    fontSize: 16,
+    fontWeight: "600" as const,
+    color: Colors.light.text,
+  },
+  modalSaveButton: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    paddingVertical: 14,
+    borderRadius: 12,
+    backgroundColor: Colors.light.primary,
+  },
+  modalSaveText: {
+    fontSize: 16,
+    fontWeight: "700" as const,
+    color: "#FFF",
+  },
+  addItemSection: {
+    flexDirection: "row",
+    gap: 12,
+    marginBottom: 20,
+  },
+  addItemInput: {
+    flex: 1,
+    backgroundColor: Colors.light.background,
+    borderRadius: 12,
+    padding: 14,
+    fontSize: 15,
+    color: Colors.light.text,
+    borderWidth: 1,
+    borderColor: Colors.light.border,
+  },
+  addItemButton: {
+    width: 48,
+    height: 48,
+    borderRadius: 12,
+    backgroundColor: Colors.light.primary,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  checklistEditList: {
+    gap: 0,
+  },
+  checklistEditItem: {
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.light.border,
+  },
+  checklistEditItemLast: {
+    borderBottomWidth: 0,
+  },
+  checklistEditRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+  },
+  checkboxSmall: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    borderWidth: 2,
+    borderColor: Colors.light.border,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  checkboxSmallCompleted: {
+    borderColor: Colors.light.primary,
+  },
+  checklistEditText: {
+    flex: 1,
+    fontSize: 15,
+    color: Colors.light.text,
+  },
+  checklistEditTextCompleted: {
+    color: Colors.light.muted,
+    textDecorationLine: "line-through",
+  },
+  editButton: {
+    padding: 4,
+  },
+  deleteButton: {
+    padding: 4,
+  },
+  editingRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  editingInput: {
+    flex: 1,
+    backgroundColor: Colors.light.background,
+    borderRadius: 8,
+    padding: 10,
+    fontSize: 15,
+    color: Colors.light.text,
+    borderWidth: 1,
+    borderColor: Colors.light.primary,
+  },
+  saveEditButton: {
+    padding: 6,
+  },
+  cancelEditButton: {
+    padding: 6,
+  },
+  modalDoneButton: {
+    flex: 1,
+    paddingVertical: 14,
+    borderRadius: 12,
+    backgroundColor: Colors.light.primary,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  modalDoneText: {
+    fontSize: 16,
+    fontWeight: "700" as const,
+    color: "#FFF",
   },
 });
