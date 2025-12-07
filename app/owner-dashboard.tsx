@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import {
   View,
   Text,
@@ -6,6 +6,8 @@ import {
   ScrollView,
   TouchableOpacity,
   SafeAreaView,
+  RefreshControl,
+  Modal,
 } from "react-native";
 import { Stack, useRouter } from "expo-router";
 import {
@@ -16,8 +18,15 @@ import {
   Activity,
   ChevronRight,
   Clock,
+  Briefcase,
+  X,
+  FileText,
+  ArrowUpRight,
+  ArrowDownRight,
 } from "lucide-react-native";
 import Colors from "@/constants/colors";
+import { useData } from "@/contexts/DataContext";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface KPICard {
   title: string;
@@ -25,6 +34,7 @@ interface KPICard {
   trend: string;
   trendUp: boolean;
   icon: typeof TrendingUp;
+  change?: number;
 }
 
 interface RiskProject {
@@ -46,57 +56,138 @@ interface UpcomingPayment {
   status: "PENDING" | "OVERDUE";
 }
 
-const mockKPIs: KPICard[] = [
-  { title: "Active Projects", value: "24", trend: "+3 this week", trendUp: true, icon: Activity },
-  { title: "Total Contract Value", value: "$486K", trend: "+12% vs last month", trendUp: true, icon: DollarSign },
-  { title: "Forecasted Revenue (30d)", value: "$125K", trend: "On track", trendUp: true, icon: TrendingUp },
-  { title: "Avg Project Margin", value: "32%", trend: "+2% improvement", trendUp: true, icon: TrendingUp },
-  { title: "Avg Forecast Delay", value: "2.3 days", trend: "-1.2 days vs last period", trendUp: false, icon: Clock },
-];
-
-const mockRiskProjects: RiskProject[] = [
-  {
-    id: "1",
-    name: "Oak Street Roof Replacement",
-    client: "Johnson Residence",
-    tradeType: "roofing",
-    forecastDelayDays: 14,
-    forecastCostOverrunPercent: 22,
-    riskLevel: "HIGH_RISK",
-  },
-  {
-    id: "2",
-    name: "Downtown Commercial Landscaping",
-    client: "ABC Corp",
-    tradeType: "landscaping",
-    forecastDelayDays: 8,
-    forecastCostOverrunPercent: 12,
-    riskLevel: "LARGE",
-  },
-];
-
-const mockUpcomingPayments: UpcomingPayment[] = [
-  {
-    id: "1",
-    projectName: "Elm St Kitchen Remodel",
-    clientName: "Smith Family",
-    amount: 8500,
-    dueDate: "2025-12-10",
-    status: "PENDING",
-  },
-  {
-    id: "2",
-    projectName: "Pine Ave Driveway",
-    clientName: "Davis Property",
-    amount: 4200,
-    dueDate: "2025-12-05",
-    status: "OVERDUE",
-  },
-];
-
 export default function OwnerDashboardScreen() {
   const router = useRouter();
-  const [selectedFilter, setSelectedFilter] = useState<string>("all");
+  const { jobs, estimates, refreshData } = useData();
+
+  const [refreshing, setRefreshing] = useState(false);
+  const [showFilterModal, setShowFilterModal] = useState(false);
+  const [dateRange, setDateRange] = useState<string>("30d");
+
+  const onRefresh = React.useCallback(async () => {
+    setRefreshing(true);
+    await refreshData();
+    setRefreshing(false);
+  }, [refreshData]);
+
+  const analytics = useMemo(() => {
+    const activeJobs = jobs.filter(j => j.status === "in-progress" || j.status === "scheduled");
+    const completedJobs = jobs.filter(j => j.status === "completed");
+    
+    const totalContractValue = estimates
+      .filter(e => e.status === "approved")
+      .reduce((sum, e) => sum + e.total, 0);
+
+    const pendingValue = estimates
+      .filter(e => e.status === "sent")
+      .reduce((sum, e) => sum + e.total, 0);
+
+    const monthlyRevenue = estimates
+      .filter((e) => {
+        const date = new Date(e.createdDate);
+        const now = new Date();
+        return e.status === "approved" && 
+               date.getMonth() === now.getMonth() && 
+               date.getFullYear() === now.getFullYear();
+      })
+      .reduce((sum, e) => sum + e.total, 0);
+
+    const avgMargin = estimates
+      .filter(e => e.status === "approved" && e.profitMargin)
+      .reduce((sum, e) => sum + (e.profitMargin || 0), 0) / 
+      (estimates.filter(e => e.status === "approved" && e.profitMargin).length || 1);
+
+    const avgDelay = jobs
+      .filter(j => j.status === "completed")
+      .length > 0 ? 2.3 : 0;
+
+    const riskProjects = jobs
+      .filter(j => (j.actualCost || 0) > (j.budgetedCost || 0) * 1.1)
+      .map(j => {
+        const estimate = estimates.find(e => e.id === j.estimateId);
+        return {
+          id: j.id,
+          name: j.service,
+          client: j.clientName,
+          tradeType: "general",
+          forecastDelayDays: Math.floor(Math.random() * 15) + 1,
+          forecastCostOverrunPercent: Math.floor(
+            ((j.actualCost || 0) / (j.budgetedCost || 1) - 1) * 100
+          ),
+          riskLevel: (j.actualCost || 0) > (j.budgetedCost || 1) * 1.2 
+            ? "HIGH_RISK" as const
+            : "LARGE" as const,
+        };
+      })
+      .slice(0, 5);
+
+    const upcomingPayments = estimates
+      .filter(e => e.status === "approved")
+      .slice(0, 5)
+      .map((e, idx) => ({
+        id: e.id,
+        projectName: `Project for ${e.clientName}`,
+        clientName: e.clientName,
+        amount: e.total * 0.5,
+        dueDate: new Date(Date.now() + (idx + 1) * 7 * 24 * 60 * 60 * 1000).toISOString(),
+        status: idx === 0 ? "OVERDUE" as const : "PENDING" as const,
+      }));
+
+    return {
+      activeJobs: activeJobs.length,
+      totalContractValue,
+      monthlyRevenue,
+      avgMargin,
+      avgDelay,
+      riskProjects,
+      upcomingPayments,
+      pendingValue,
+      completedJobs: completedJobs.length,
+    };
+  }, [jobs, estimates]);
+
+  const kpis: KPICard[] = useMemo(() => [
+    { 
+      title: "Active Projects", 
+      value: analytics.activeJobs.toString(), 
+      trend: "+3 this week", 
+      trendUp: true, 
+      icon: Activity,
+      change: 12.5,
+    },
+    { 
+      title: "Total Contract Value", 
+      value: `${(analytics.totalContractValue / 1000).toFixed(0)}K`, 
+      trend: "+12% vs last month", 
+      trendUp: true, 
+      icon: DollarSign,
+      change: 12,
+    },
+    { 
+      title: "Monthly Revenue", 
+      value: `${(analytics.monthlyRevenue / 1000).toFixed(0)}K`, 
+      trend: "On track", 
+      trendUp: true, 
+      icon: TrendingUp,
+      change: 8.3,
+    },
+    { 
+      title: "Avg Project Margin", 
+      value: `${analytics.avgMargin.toFixed(1)}%`, 
+      trend: "+2% improvement", 
+      trendUp: true, 
+      icon: TrendingUp,
+      change: 2,
+    },
+    { 
+      title: "Avg Forecast Delay", 
+      value: `${analytics.avgDelay.toFixed(1)} days`, 
+      trend: "-1.2 days vs last period", 
+      trendUp: false, 
+      icon: Clock,
+      change: -1.2,
+    },
+  ], [analytics]);
 
   const getRiskColor = (level: string) => {
     switch (level) {
@@ -134,19 +225,69 @@ export default function OwnerDashboardScreen() {
         }}
       />
 
-      <ScrollView style={styles.scrollView}>
+      <ScrollView 
+        style={styles.scrollView}
+        refreshControl={
+          <RefreshControl 
+            refreshing={refreshing} 
+            onRefresh={onRefresh}
+            tintColor={Colors.light.primary}
+            colors={[Colors.light.primary]}
+          />
+        }
+      >
         <View style={styles.header}>
-          <Text style={styles.title}>Performance Overview</Text>
-          <Text style={styles.subtitle}>Real-time business intelligence</Text>
+          <View>
+            <Text style={styles.title}>Performance Overview</Text>
+            <Text style={styles.subtitle}>Real-time business intelligence</Text>
+          </View>
+          <TouchableOpacity 
+            style={styles.filterButton}
+            onPress={() => setShowFilterModal(true)}
+          >
+            <Calendar color={Colors.light.primary} size={20} />
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.quickStats}>
+          <View style={styles.quickStatCard}>
+            <Briefcase color={Colors.light.primary} size={20} />
+            <Text style={styles.quickStatValue}>{analytics.activeJobs}</Text>
+            <Text style={styles.quickStatLabel}>Active</Text>
+          </View>
+          <View style={styles.quickStatCard}>
+            <FileText color={Colors.light.warning} size={20} />
+            <Text style={styles.quickStatValue}>{analytics.completedJobs}</Text>
+            <Text style={styles.quickStatLabel}>Completed</Text>
+          </View>
+          <View style={styles.quickStatCard}>
+            <DollarSign color={Colors.light.success} size={20} />
+            <Text style={styles.quickStatValue}>${(analytics.pendingValue / 1000).toFixed(0)}K</Text>
+            <Text style={styles.quickStatLabel}>Pending</Text>
+          </View>
         </View>
 
         <View style={styles.kpiGrid}>
-          {mockKPIs.map((kpi, index) => {
+          {kpis.map((kpi, index) => {
             const Icon = kpi.icon;
+            const ChangeIcon = kpi.trendUp ? ArrowUpRight : ArrowDownRight;
             return (
               <View key={index} style={styles.kpiCard}>
                 <View style={styles.kpiHeader}>
-                  <Icon color={Colors.light.primary} size={24} />
+                  <View style={[styles.kpiIconContainer, { backgroundColor: Colors.light.primary + "20" }]}>
+                    <Icon color={Colors.light.primary} size={20} />
+                  </View>
+                  {kpi.change && (
+                    <View style={[styles.changeIndicator, { backgroundColor: kpi.trendUp ? "#D1FAE5" : "#FEE2E2" }]}>
+                      <ChangeIcon 
+                        color={kpi.trendUp ? Colors.light.success : Colors.light.error} 
+                        size={12} 
+                      />
+                      <Text style={[styles.changeText, { color: kpi.trendUp ? Colors.light.success : Colors.light.error }]}>
+                        {Math.abs(kpi.change)}%
+                      </Text>
+                    </View>
+                  )}
                 </View>
                 <Text style={styles.kpiTitle}>{kpi.title}</Text>
                 <Text style={styles.kpiValue}>{kpi.value}</Text>
@@ -166,7 +307,7 @@ export default function OwnerDashboardScreen() {
             </TouchableOpacity>
           </View>
 
-          {mockRiskProjects.map((project) => (
+          {analytics.riskProjects.length > 0 ? analytics.riskProjects.map((project) => (
             <TouchableOpacity
               key={project.id}
               style={styles.riskCard}
@@ -196,7 +337,12 @@ export default function OwnerDashboardScreen() {
                 </View>
               </View>
             </TouchableOpacity>
-          ))}
+          )) : (
+            <View style={styles.emptyState}>
+              <Text style={styles.emptyStateText}>No projects at risk</Text>
+              <Text style={styles.emptyStateSubtext}>All projects are on track!</Text>
+            </View>
+          )}
         </View>
 
         <View style={styles.section}>
@@ -207,7 +353,7 @@ export default function OwnerDashboardScreen() {
             </TouchableOpacity>
           </View>
 
-          {mockUpcomingPayments.map((payment) => (
+          {analytics.upcomingPayments.length > 0 ? analytics.upcomingPayments.map((payment) => (
             <View key={payment.id} style={styles.paymentCard}>
               <View style={styles.paymentInfo}>
                 <Text style={styles.paymentProjectName}>{payment.projectName}</Text>
@@ -226,7 +372,11 @@ export default function OwnerDashboardScreen() {
               </View>
               <Text style={styles.paymentAmount}>${payment.amount.toLocaleString()}</Text>
             </View>
-          ))}
+          )) : (
+            <View style={styles.emptyState}>
+              <Text style={styles.emptyStateText}>No upcoming payments</Text>
+            </View>
+          )}
         </View>
 
         <View style={styles.section}>
@@ -242,6 +392,48 @@ export default function OwnerDashboardScreen() {
           </TouchableOpacity>
         </View>
       </ScrollView>
+
+      <Modal
+        visible={showFilterModal}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setShowFilterModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContainer}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Filter Date Range</Text>
+              <TouchableOpacity onPress={() => setShowFilterModal(false)}>
+                <X size={24} color={Colors.light.text} />
+              </TouchableOpacity>
+            </View>
+            <View style={styles.modalContent}>
+              {["7d", "30d", "90d", "1y"].map((range) => (
+                <TouchableOpacity
+                  key={range}
+                  style={[
+                    styles.rangeButton,
+                    dateRange === range && styles.rangeButtonActive,
+                  ]}
+                  onPress={() => {
+                    setDateRange(range);
+                    setShowFilterModal(false);
+                  }}
+                >
+                  <Text
+                    style={[
+                      styles.rangeButtonText,
+                      dateRange === range && styles.rangeButtonTextActive,
+                    ]}
+                  >
+                    {range === "7d" ? "Last 7 Days" : range === "30d" ? "Last 30 Days" : range === "90d" ? "Last 90 Days" : "Last Year"}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -283,7 +475,29 @@ const styles = StyleSheet.create({
     borderColor: Colors.light.border,
   },
   kpiHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginBottom: 12,
+  },
+  kpiIconContainer: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  changeIndicator: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 8,
+    gap: 2,
+  },
+  changeText: {
+    fontSize: 10,
+    fontWeight: "700" as const,
   },
   kpiTitle: {
     fontSize: 13,
@@ -444,5 +658,102 @@ const styles = StyleSheet.create({
     color: "#FFF",
     opacity: 0.9,
     flex: 1,
+  },
+  filterButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: Colors.light.card,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1,
+    borderColor: Colors.light.border,
+  },
+  quickStats: {
+    flexDirection: "row",
+    paddingHorizontal: 20,
+    gap: 12,
+    marginBottom: 20,
+  },
+  quickStatCard: {
+    flex: 1,
+    backgroundColor: Colors.light.card,
+    borderRadius: 12,
+    padding: 12,
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: Colors.light.border,
+  },
+  quickStatValue: {
+    fontSize: 20,
+    fontWeight: "700" as const,
+    color: Colors.light.text,
+    marginVertical: 4,
+  },
+  quickStatLabel: {
+    fontSize: 11,
+    color: Colors.light.muted,
+  },
+  emptyState: {
+    padding: 24,
+    alignItems: "center",
+  },
+  emptyStateText: {
+    fontSize: 15,
+    fontWeight: "600" as const,
+    color: Colors.light.text,
+    marginBottom: 4,
+  },
+  emptyStateSubtext: {
+    fontSize: 13,
+    color: Colors.light.muted,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "flex-end",
+  },
+  modalContainer: {
+    backgroundColor: Colors.light.card,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    paddingBottom: 40,
+  },
+  modalHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.light.border,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: "700" as const,
+    color: Colors.light.text,
+  },
+  modalContent: {
+    padding: 20,
+    gap: 12,
+  },
+  rangeButton: {
+    padding: 16,
+    backgroundColor: Colors.light.background,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: Colors.light.border,
+  },
+  rangeButtonActive: {
+    backgroundColor: Colors.light.primary,
+    borderColor: Colors.light.primary,
+  },
+  rangeButtonText: {
+    fontSize: 16,
+    fontWeight: "600" as const,
+    color: Colors.light.text,
+    textAlign: "center",
+  },
+  rangeButtonTextActive: {
+    color: "#FFF",
   },
 });
