@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import {
   View,
   Text,
@@ -26,18 +26,25 @@ import {
   Hammer,
   Shield,
   Sparkles,
+  Check,
+  Mail,
 } from "lucide-react-native";
 
 import Colors from "@/constants/colors";
 import { ContractType } from "@/types";
+import { useAuth } from "@/contexts/AuthContext";
+import { getTradeServices } from "@/constants/trades";
+import { trpc } from "@/lib/trpc";
 
 export default function ContractEditorScreen() {
   const router = useRouter();
   const params = useLocalSearchParams();
   const isEditing = Boolean(params.id);
+  const { organization } = useAuth();
 
   const [contractType, setContractType] = useState<ContractType>("PROJECT_CONTRACT");
   const [clientName, setClientName] = useState<string>("");
+  const [clientEmail, setClientEmail] = useState<string>("");
   const [projectName, setProjectName] = useState<string>("");
   const [totalAmount, setTotalAmount] = useState<string>("");
   const [startDate, setStartDate] = useState<string>("");
@@ -45,6 +52,8 @@ export default function ContractEditorScreen() {
   const [scopeOfWork, setScopeOfWork] = useState<string>("");
   const [warrantyYears, setWarrantyYears] = useState<string>("1");
   const [notes, setNotes] = useState<string>("");
+  const [selectedServices, setSelectedServices] = useState<string[]>([]);
+  const [serviceAmounts, setServiceAmounts] = useState<Record<string, string>>({});
 
   const [paymentMilestones, setPaymentMilestones] = useState<
     { id: string; description: string; percent: string }[]
@@ -53,6 +62,14 @@ export default function ContractEditorScreen() {
     { id: "2", description: "Progress Payment", percent: "40" },
     { id: "3", description: "Final Payment", percent: "30" },
   ]);
+
+  const availableServices = useMemo(() => {
+    if (!organization?.tradeType) return [];
+    return getTradeServices(organization.tradeType);
+  }, [organization?.tradeType]);
+
+  const createContractMutation = trpc.contracts.createContract.useMutation();
+  const sendContractMutation = trpc.contracts.sendContractForSigning.useMutation();
 
   const handleAddMilestone = () => {
     const newId = (paymentMilestones.length + 1).toString();
@@ -90,6 +107,43 @@ export default function ContractEditorScreen() {
     return paymentMilestones.reduce((sum, m) => sum + (parseFloat(m.percent) || 0), 0);
   };
 
+  const toggleService = (service: string) => {
+    setSelectedServices(prev => {
+      if (prev.includes(service)) {
+        const updated = prev.filter(s => s !== service);
+        const amounts = { ...serviceAmounts };
+        delete amounts[service];
+        setServiceAmounts(amounts);
+        return updated;
+      } else {
+        return [...prev, service];
+      }
+    });
+  };
+
+  const updateServiceAmount = (service: string, amount: string) => {
+    setServiceAmounts(prev => ({
+      ...prev,
+      [service]: amount
+    }));
+  };
+
+  const calculateTotalFromServices = (): number => {
+    return selectedServices.reduce((sum, service) => {
+      const amount = parseFloat(serviceAmounts[service] || "0");
+      return sum + amount;
+    }, 0);
+  };
+
+  const generateScopeFromServices = (): string => {
+    if (selectedServices.length === 0) return scopeOfWork;
+    const serviceList = selectedServices.map((service, idx) => {
+      const amount = serviceAmounts[service] || "0";
+      return `${idx + 1}. ${service} - ${parseFloat(amount).toLocaleString()}`;
+    }).join("\n");
+    return `${scopeOfWork}\n\nSelected Services:\n${serviceList}`;
+  };
+
   const handleSaveDraft = () => {
     console.log("Saving draft...");
     Alert.alert("Success", "Contract saved as draft");
@@ -100,9 +154,20 @@ export default function ContractEditorScreen() {
     Alert.alert("Preview", "Opening contract preview...");
   };
 
-  const handleSendForSigning = () => {
-    if (!clientName || !projectName || !totalAmount) {
-      Alert.alert("Missing Information", "Please fill in all required fields");
+  const handleSendForSigning = async () => {
+    if (!clientName || !projectName || !clientEmail) {
+      Alert.alert("Missing Information", "Please fill in client name, project name, and email");
+      return;
+    }
+
+    if (selectedServices.length === 0 && !scopeOfWork) {
+      Alert.alert("Missing Services", "Please select at least one service or add scope of work");
+      return;
+    }
+
+    const finalTotal = selectedServices.length > 0 ? calculateTotalFromServices() : parseFloat(totalAmount || "0");
+    if (finalTotal <= 0) {
+      Alert.alert("Invalid Amount", "Total contract amount must be greater than $0");
       return;
     }
 
@@ -115,21 +180,41 @@ export default function ContractEditorScreen() {
       return;
     }
 
-    Alert.alert(
-      "Send for Signature",
-      "Are you sure you want to send this contract for client signature?",
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Send",
-          onPress: () => {
-            console.log("Sending contract for signature...");
-            Alert.alert("Success", "Contract sent to client for e-signature!");
-            router.back();
-          },
-        },
-      ]
-    );
+    try {
+      const finalScope = generateScopeFromServices();
+      
+      const contract = await createContractMutation.mutateAsync({
+        companyId: organization?.id || "demo",
+        clientId: "demo-client",
+        type: contractType as any,
+        title: projectName,
+        totalAmount: finalTotal,
+        startDateEstimated: startDate,
+        endDateEstimated: endDate,
+        scopeOfWork: finalScope,
+        warrantyYears: parseInt(warrantyYears) || 1,
+        paymentMilestones: paymentMilestones.map(m => ({
+          description: m.description,
+          percent: parseFloat(m.percent),
+          amount: (finalTotal * parseFloat(m.percent)) / 100,
+        })),
+        additionalNotes: notes,
+      });
+
+      await sendContractMutation.mutateAsync({
+        contractId: contract.id,
+        clientEmail: clientEmail,
+      });
+
+      Alert.alert(
+        "Success",
+        `Contract created and sent to ${clientEmail}!\n\nContract ID: ${contract.id}\nTotal Amount: ${finalTotal.toLocaleString()}\nServices: ${selectedServices.length}`,
+        [{ text: "OK", onPress: () => router.back() }]
+      );
+    } catch (error) {
+      console.error("Error creating/sending contract:", error);
+      Alert.alert("Error", "Failed to create and send contract. Please try again.");
+    }
   };
 
   return (
@@ -586,6 +671,22 @@ export default function ContractEditorScreen() {
               </View>
 
               <View style={styles.formField}>
+                <Text style={styles.fieldLabel}>Client Email *</Text>
+                <View style={styles.inputWithIcon}>
+                  <Mail color={Colors.light.muted} size={20} />
+                  <TextInput
+                    style={[styles.input, styles.inputNoBorder]}
+                    placeholder="client@example.com"
+                    placeholderTextColor={Colors.light.muted}
+                    value={clientEmail}
+                    onChangeText={setClientEmail}
+                    keyboardType="email-address"
+                    autoCapitalize="none"
+                  />
+                </View>
+              </View>
+
+              <View style={styles.formField}>
                 <Text style={styles.fieldLabel}>Project Name *</Text>
                 <TextInput
                   style={styles.input}
@@ -596,20 +697,23 @@ export default function ContractEditorScreen() {
                 />
               </View>
 
-              <View style={styles.formField}>
-                <Text style={styles.fieldLabel}>Total Contract Amount *</Text>
-                <View style={styles.inputWithIcon}>
-                  <DollarSign color={Colors.light.muted} size={20} />
-                  <TextInput
-                    style={[styles.input, styles.inputNoBorder]}
-                    placeholder="0.00"
-                    placeholderTextColor={Colors.light.muted}
-                    value={totalAmount}
-                    onChangeText={setTotalAmount}
-                    keyboardType="numeric"
-                  />
+              {selectedServices.length === 0 && (
+                <View style={styles.formField}>
+                  <Text style={styles.fieldLabel}>Total Contract Amount</Text>
+                  <View style={styles.inputWithIcon}>
+                    <DollarSign color={Colors.light.muted} size={20} />
+                    <TextInput
+                      style={[styles.input, styles.inputNoBorder]}
+                      placeholder="0.00"
+                      placeholderTextColor={Colors.light.muted}
+                      value={totalAmount}
+                      onChangeText={setTotalAmount}
+                      keyboardType="numeric"
+                    />
+                  </View>
+                  <Text style={styles.helpText}>Or select services below</Text>
                 </View>
-              </View>
+              )}
 
               <View style={styles.formRow}>
                 <View style={[styles.formField, { flex: 1, marginRight: 8 }]}>
@@ -642,11 +746,83 @@ export default function ContractEditorScreen() {
               </View>
             </View>
 
+            {availableServices.length > 0 && (
+              <View style={styles.section}>
+                <View style={styles.sectionHeaderRow}>
+                  <View>
+                    <Text style={styles.sectionTitle}>Select Services</Text>
+                    <Text style={styles.sectionSubtitle}>
+                      {selectedServices.length} service{selectedServices.length !== 1 ? 's' : ''} selected
+                    </Text>
+                  </View>
+                  {selectedServices.length > 0 && (
+                    <View style={styles.totalBadge}>
+                      <Text style={styles.totalBadgeText}>
+                        ${calculateTotalFromServices().toLocaleString()}
+                      </Text>
+                    </View>
+                  )}
+                </View>
+
+                <View style={styles.servicesGrid}>
+                  {availableServices.map((service) => {
+                    const isSelected = selectedServices.includes(service);
+                    return (
+                      <View key={service} style={styles.serviceContainer}>
+                        <TouchableOpacity
+                          style={[
+                            styles.serviceCard,
+                            isSelected && styles.serviceCardActive,
+                          ]}
+                          onPress={() => toggleService(service)}
+                        >
+                          <View style={styles.serviceHeader}>
+                            <Text
+                              style={[
+                                styles.serviceText,
+                                isSelected && styles.serviceTextActive,
+                              ]}
+                            >
+                              {service}
+                            </Text>
+                            <View
+                              style={[
+                                styles.checkbox,
+                                isSelected && styles.checkboxActive,
+                              ]}
+                            >
+                              {isSelected && <Check color="#FFF" size={16} />}
+                            </View>
+                          </View>
+                        </TouchableOpacity>
+                        {isSelected && (
+                          <View style={styles.serviceAmountRow}>
+                            <Text style={styles.serviceAmountLabel}>Amount:</Text>
+                            <View style={styles.serviceAmountInput}>
+                              <DollarSign color={Colors.light.muted} size={16} />
+                              <TextInput
+                                style={styles.serviceAmountField}
+                                placeholder="0.00"
+                                placeholderTextColor={Colors.light.muted}
+                                value={serviceAmounts[service] || ""}
+                                onChangeText={(value) => updateServiceAmount(service, value)}
+                                keyboardType="numeric"
+                              />
+                            </View>
+                          </View>
+                        )}
+                      </View>
+                    );
+                  })}
+                </View>
+              </View>
+            )}
+
             <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Scope of Work</Text>
+              <Text style={styles.sectionTitle}>Additional Scope of Work</Text>
               <TextInput
                 style={[styles.input, styles.textArea]}
-                placeholder="Describe the work to be performed..."
+                placeholder="Describe additional work details..."
                 placeholderTextColor={Colors.light.muted}
                 value={scopeOfWork}
                 onChangeText={setScopeOfWork}
@@ -658,7 +834,14 @@ export default function ContractEditorScreen() {
 
             <View style={styles.section}>
               <View style={styles.sectionHeaderRow}>
-                <Text style={styles.sectionTitle}>Payment Schedule</Text>
+                <View>
+                  <Text style={styles.sectionTitle}>Payment Schedule</Text>
+                  {selectedServices.length > 0 && (
+                    <Text style={styles.sectionSubtitle}>
+                      Based on total: ${calculateTotalFromServices().toLocaleString()}
+                    </Text>
+                  )}
+                </View>
                 <TouchableOpacity style={styles.addButton} onPress={handleAddMilestone}>
                   <Plus color={Colors.light.primary} size={18} />
                 </TouchableOpacity>
@@ -705,7 +888,9 @@ export default function ContractEditorScreen() {
                       <Text style={styles.fieldLabel}>Amount</Text>
                       <View style={styles.amountDisplay}>
                         <Text style={styles.amountText}>
-                          {calculateMilestoneAmount(milestone.percent)}
+                          {selectedServices.length > 0
+                            ? `${((calculateTotalFromServices() * parseFloat(milestone.percent || "0")) / 100).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                            : calculateMilestoneAmount(milestone.percent)}
                         </Text>
                       </View>
                     </View>
@@ -777,11 +962,20 @@ export default function ContractEditorScreen() {
           <TouchableOpacity
             style={[styles.footerButton, styles.primaryButton]}
             onPress={handleSendForSigning}
+            disabled={createContractMutation.isPending || sendContractMutation.isPending}
           >
-            <Send color="#FFF" size={20} />
-            <Text style={[styles.footerButtonText, styles.primaryButtonText]}>
-              Send for Signature
-            </Text>
+            {createContractMutation.isPending || sendContractMutation.isPending ? (
+              <Text style={[styles.footerButtonText, styles.primaryButtonText]}>
+                Sending...
+              </Text>
+            ) : (
+              <>
+                <Send color="#FFF" size={20} />
+                <Text style={[styles.footerButtonText, styles.primaryButtonText]}>
+                  Send to Email
+                </Text>
+              </>
+            )}
           </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>
@@ -1072,5 +1266,98 @@ const styles = StyleSheet.create({
   },
   primaryButtonText: {
     color: "#FFF",
+  },
+  helpText: {
+    fontSize: 12,
+    color: Colors.light.muted,
+    marginTop: 4,
+    fontStyle: "italic" as const,
+  },
+  servicesGrid: {
+    gap: 12,
+  },
+  serviceContainer: {
+    marginBottom: 12,
+  },
+  serviceCard: {
+    backgroundColor: Colors.light.card,
+    borderRadius: 12,
+    padding: 16,
+    borderWidth: 2,
+    borderColor: Colors.light.border,
+  },
+  serviceCardActive: {
+    backgroundColor: `${Colors.light.primary}10`,
+    borderColor: Colors.light.primary,
+  },
+  serviceHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  serviceText: {
+    fontSize: 15,
+    fontWeight: "600" as const,
+    color: Colors.light.text,
+    flex: 1,
+  },
+  serviceTextActive: {
+    color: Colors.light.primary,
+  },
+  checkbox: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    borderWidth: 2,
+    borderColor: Colors.light.border,
+    alignItems: "center",
+    justifyContent: "center",
+    marginLeft: 12,
+  },
+  checkboxActive: {
+    backgroundColor: Colors.light.primary,
+    borderColor: Colors.light.primary,
+  },
+  serviceAmountRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 12,
+    paddingHorizontal: 16,
+  },
+  serviceAmountLabel: {
+    fontSize: 14,
+    fontWeight: "600" as const,
+    color: Colors.light.text,
+    marginRight: 12,
+    width: 70,
+  },
+  serviceAmountInput: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: Colors.light.background,
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    borderWidth: 1,
+    borderColor: Colors.light.border,
+    gap: 8,
+  },
+  serviceAmountField: {
+    flex: 1,
+    fontSize: 15,
+    color: Colors.light.text,
+    padding: 0,
+  },
+  totalBadge: {
+    backgroundColor: Colors.light.primary,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+  },
+  totalBadgeText: {
+    color: "#FFF",
+    fontSize: 16,
+    fontWeight: "700" as const,
   },
 });
