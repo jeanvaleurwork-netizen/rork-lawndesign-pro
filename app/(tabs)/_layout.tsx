@@ -1,5 +1,5 @@
 import { Tabs } from "expo-router";
-import { Home, FileText, Calendar, Users, Receipt, UsersRound, BarChart3, Wallet, FileCheck, Briefcase, Clock, ScrollText } from "lucide-react-native";
+import { Home, FileText, Calendar, Users, Receipt, UsersRound, BarChart3, Wallet, FileCheck, Briefcase, Clock } from "lucide-react-native";
 import React from "react";
 import { Platform, ScrollView, View, StyleSheet, TouchableOpacity, Text } from "react-native";
 
@@ -41,11 +41,6 @@ export default function TabLayout() {
               if (isCrew) {
                 const crewOnlyRoutes = ['index', 'schedule', 'crew-jobs', 'crew-timecards'];
                 if (!crewOnlyRoutes.includes(route.name)) return null;
-              }
-
-              if (!isAdmin) {
-                const adminOnlyRoutes = ['contracts'];
-                if (adminOnlyRoutes.includes(route.name)) return null;
               }
 
               if (isAdmin) {
@@ -192,13 +187,6 @@ export default function TabLayout() {
         name="daily-schedule"
         options={{
           href: null,
-        }}
-      />
-      <Tabs.Screen
-        name="contracts"
-        options={{
-          title: t("tabs.contracts"),
-          tabBarIcon: ({ color }) => <ScrollText color={color} size={24} />,
         }}
       />
     </Tabs>

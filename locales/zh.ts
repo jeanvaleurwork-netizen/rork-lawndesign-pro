@@ -20,13 +20,6 @@ export default {
     designs: "设计",
     jobCosting: "工作成本",
     receipts: "收据",
-    crew: "团队",
-    payroll: "工资单",
-    analytics: "分析",
-    invoices: "发票",
-    jobs: "工作",
-    timecards: "时间卡",
-    contracts: "合同",
   },
   home: {
     welcome: "欢迎使用专业承包商",
