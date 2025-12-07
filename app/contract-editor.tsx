@@ -780,7 +780,7 @@ export default function ContractEditorScreen() {
           >
             <Send color="#FFF" size={20} />
             <Text style={[styles.footerButtonText, styles.primaryButtonText]}>
-              Send
+              Send for Signature
             </Text>
           </TouchableOpacity>
         </View>

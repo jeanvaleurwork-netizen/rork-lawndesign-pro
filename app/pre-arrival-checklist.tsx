@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   Alert,
   ActivityIndicator,
+  TextInput,
 } from "react-native";
 import { Stack, useLocalSearchParams, router } from "expo-router";
 import { 
@@ -114,6 +115,7 @@ export default function PreArrivalChecklistScreen() {
   ]);
 
   const [submitting, setSubmitting] = useState(false);
+  const [notes, setNotes] = useState<string>("");
   const uploadDocumentMutation = trpc.data.uploadCustomerDocument.useMutation();
 
   const toggleItem = (id: string) => {
@@ -275,6 +277,21 @@ export default function PreArrivalChecklistScreen() {
             Completing this checklist ensures our crew can begin work immediately upon arrival, 
             maximizing efficiency and completing your project on time. It also helps keep everyone safe!
           </Text>
+        </View>
+
+        <View style={styles.notesSection}>
+          <Text style={styles.notesTitle}>Additional Notes (Optional)</Text>
+          <Text style={styles.notesSubtitle}>Any special instructions or concerns for the crew?</Text>
+          <TextInput
+            style={styles.notesInput}
+            placeholder="e.g., Please ring the doorbell before starting, dog is friendly but excited, etc."
+            placeholderTextColor={Colors.light.muted}
+            value={notes}
+            onChangeText={setNotes}
+            multiline
+            numberOfLines={4}
+            textAlignVertical="top"
+          />
         </View>
       </ScrollView>
 
@@ -479,6 +496,30 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: Colors.light.textSecondary,
     lineHeight: 22,
+  },
+  notesSection: {
+    marginBottom: 24,
+  },
+  notesTitle: {
+    fontSize: 18,
+    fontWeight: "700" as const,
+    color: Colors.light.text,
+    marginBottom: 4,
+  },
+  notesSubtitle: {
+    fontSize: 14,
+    color: Colors.light.muted,
+    marginBottom: 12,
+  },
+  notesInput: {
+    backgroundColor: Colors.light.card,
+    borderRadius: 12,
+    padding: 16,
+    fontSize: 15,
+    color: Colors.light.text,
+    borderWidth: 1,
+    borderColor: Colors.light.border,
+    minHeight: 100,
   },
   footer: {
     position: "absolute",

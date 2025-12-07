@@ -53,10 +53,14 @@ export default function ContractsScreen() {
   const [contracts] = useState<MockContract[]>(mockContracts);
   const [modalVisible, setModalVisible] = useState<boolean>(false);
   const [selectedContract, setSelectedContract] = useState<MockContract | null>(null);
+  const [filterStatus, setFilterStatus] = useState<"all" | ContractStatus>("all");
 
-  const filteredContracts = contracts.filter((contract) =>
-    contract.clientName.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredContracts = contracts.filter((contract) => {
+    const matchesSearch = contract.clientName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         contract.type.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesFilter = filterStatus === "all" || contract.status === filterStatus;
+    return matchesSearch && matchesFilter;
+  });
 
   const getStatusColor = (status: ContractStatus) => {
     switch (status) {
@@ -112,7 +116,9 @@ export default function ContractsScreen() {
       <View style={styles.header}>
         <View>
           <Text style={styles.title}>Contracts</Text>
-          <Text style={styles.subtitle}>{contracts.length} total contracts</Text>
+          <Text style={styles.subtitle}>
+            {filteredContracts.length} of {contracts.length} contracts
+          </Text>
         </View>
         <TouchableOpacity 
           style={styles.addButton}
@@ -120,6 +126,51 @@ export default function ContractsScreen() {
         >
           <Plus color="#FFF" size={20} />
         </TouchableOpacity>
+      </View>
+
+      <View style={styles.filterSection}>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterScroll}>
+          <TouchableOpacity
+            style={[styles.filterChip, filterStatus === "all" && styles.filterChipActive]}
+            onPress={() => setFilterStatus("all")}
+          >
+            <Text style={[styles.filterChipText, filterStatus === "all" && styles.filterChipTextActive]}>
+              All ({contracts.length})
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.filterChip, filterStatus === "DRAFT" && styles.filterChipActive]}
+            onPress={() => setFilterStatus("DRAFT")}
+          >
+            <Text style={[styles.filterChipText, filterStatus === "DRAFT" && styles.filterChipTextActive]}>
+              Draft ({contracts.filter(c => c.status === "DRAFT").length})
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.filterChip, filterStatus === "SENT" && styles.filterChipActive]}
+            onPress={() => setFilterStatus("SENT")}
+          >
+            <Text style={[styles.filterChipText, filterStatus === "SENT" && styles.filterChipTextActive]}>
+              Sent ({contracts.filter(c => c.status === "SENT").length})
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.filterChip, filterStatus === "SIGNED" && styles.filterChipActive]}
+            onPress={() => setFilterStatus("SIGNED")}
+          >
+            <Text style={[styles.filterChipText, filterStatus === "SIGNED" && styles.filterChipTextActive]}>
+              Signed ({contracts.filter(c => c.status === "SIGNED").length})
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.filterChip, filterStatus === "CANCELLED" && styles.filterChipActive]}
+            onPress={() => setFilterStatus("CANCELLED")}
+          >
+            <Text style={[styles.filterChipText, filterStatus === "CANCELLED" && styles.filterChipTextActive]}>
+              Cancelled ({contracts.filter(c => c.status === "CANCELLED").length})
+            </Text>
+          </TouchableOpacity>
+        </ScrollView>
       </View>
 
       <View style={styles.searchContainer}>
@@ -505,5 +556,35 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: "600" as const,
     color: Colors.light.text,
+  },
+  filterSection: {
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.light.border,
+  },
+  filterScroll: {
+    flexDirection: "row" as const,
+  },
+  filterChip: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    backgroundColor: Colors.light.background,
+    marginRight: 8,
+    borderWidth: 1,
+    borderColor: Colors.light.border,
+  },
+  filterChipActive: {
+    backgroundColor: Colors.light.primary,
+    borderColor: Colors.light.primary,
+  },
+  filterChipText: {
+    fontSize: 14,
+    fontWeight: "600" as const,
+    color: Colors.light.text,
+  },
+  filterChipTextActive: {
+    color: "#FFF",
   },
 });
