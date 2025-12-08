@@ -21,7 +21,7 @@ import Colors from "@/constants/colors";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { mockJobs } from "@/mocks/jobs";
 import { Receipt } from "@/types";
-import { useData } from "@/contexts/DataContext";
+
 
 export default function ReceiptsScreen() {
   const { t } = useLanguage();

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import {
   View,
   Text,
@@ -91,7 +91,6 @@ const mockAlerts: AlertItem[] = [
 
 export default function AdminConsoleHomeScreen() {
   const router = useRouter();
-  const [selectedTab, setSelectedTab] = useState<string>("overview");
 
   const getStatusColor = (status: string) => {
     return status === "VIEWED" ? Colors.light.success : Colors.light.primary;
@@ -132,7 +131,7 @@ export default function AdminConsoleHomeScreen() {
 
       <ScrollView style={styles.scrollView}>
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Today's Overview</Text>
+          <Text style={styles.sectionTitle}>Today&apos;s Overview</Text>
           <View style={styles.overviewGrid}>
             {mockOverview.map((item, index) => {
               const Icon = item.icon;

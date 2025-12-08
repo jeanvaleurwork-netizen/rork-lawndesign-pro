@@ -17,7 +17,7 @@ import {
   Info,
 } from "lucide-react-native";
 import Colors from "@/constants/colors";
-import { trpc } from "@/lib/trpc";
+
 
 export default function CustomerMaterialApprovalScreen() {
   const { approvalId } = useLocalSearchParams();
@@ -60,7 +60,7 @@ export default function CustomerMaterialApprovalScreen() {
                 "Material selection approved. Your contractor will be notified.",
                 [{ text: "OK", onPress: () => router.back() }]
               );
-            } catch (error) {
+            } catch {
               Alert.alert("Error", "Failed to submit approval. Please try again.");
             } finally {
               setSubmitting(false);
@@ -89,7 +89,7 @@ export default function CustomerMaterialApprovalScreen() {
                 "Your contractor will contact you with alternative options.",
                 [{ text: "OK", onPress: () => router.back() }]
               );
-            } catch (error) {
+            } catch {
               Alert.alert("Error", "Failed to submit response. Please try again.");
             } finally {
               setSubmitting(false);

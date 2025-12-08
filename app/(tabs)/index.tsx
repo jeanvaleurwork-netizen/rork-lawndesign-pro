@@ -56,7 +56,6 @@ export default function HomeScreen() {
   const todayJobs = myJobs.filter(
     (job) => job.status === "scheduled" || job.status === "in-progress"
   );
-  const completedToday = myJobs.filter((job) => job.status === "completed").length;
   const pendingEstimates = estimates.filter((e) => e.status === "sent").length;
   const pendingInvoicesAmount = 15420;
   

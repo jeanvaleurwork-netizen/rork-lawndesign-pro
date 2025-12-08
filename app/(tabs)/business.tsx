@@ -92,7 +92,7 @@ export default function BusinessScreen() {
 
           <TouchableOpacity
             style={styles.primaryCard}
-            onPress={() => router.push("/owner-dashboard")}
+            onPress={() => router.push("/owner-dashboard" as any)}
           >
             <View style={styles.primaryCardHeader}>
               <View style={[styles.cardIcon, { backgroundColor: "#EBF5FF" }]}>
@@ -109,7 +109,7 @@ export default function BusinessScreen() {
 
           <TouchableOpacity
             style={styles.primaryCard}
-            onPress={() => router.push("/admin-console-home")}
+            onPress={() => router.push("/admin-console-home" as any)}
           >
             <View style={styles.primaryCardHeader}>
               <View style={[styles.cardIcon, { backgroundColor: "#FEF3C7" }]}>
@@ -118,7 +118,7 @@ export default function BusinessScreen() {
               <View style={styles.cardContent}>
                 <Text style={styles.primaryCardTitle}>Admin Console</Text>
                 <Text style={styles.primaryCardDescription}>
-                  Today's overview, contracts, risk alerts, money snapshot
+                  Today&apos;s overview, contracts, risk alerts, money snapshot
                 </Text>
               </View>
             </View>
@@ -130,7 +130,7 @@ export default function BusinessScreen() {
           <View style={styles.grid}>
             <TouchableOpacity
               style={styles.featureCard}
-              onPress={() => router.push("/contracts")}
+              onPress={() => router.push("/contracts" as any)}
             >
               <View
                 style={[styles.featureIcon, { backgroundColor: "#EBF5FF" }]}
@@ -145,7 +145,7 @@ export default function BusinessScreen() {
 
             <TouchableOpacity
               style={styles.featureCard}
-              onPress={() => router.push("/contract-editor")}
+              onPress={() => router.push("/contract-editor" as any)}
             >
               <View
                 style={[styles.featureIcon, { backgroundColor: "#F3E8FF" }]}
@@ -160,7 +160,7 @@ export default function BusinessScreen() {
 
             <TouchableOpacity
               style={styles.featureCard}
-              onPress={() => router.push("/customer-portal")}
+              onPress={() => router.push("/customer-portal" as any)}
             >
               <View
                 style={[styles.featureIcon, { backgroundColor: "#D1FAE5" }]}
@@ -175,7 +175,7 @@ export default function BusinessScreen() {
 
             <TouchableOpacity
               style={styles.featureCard}
-              onPress={() => router.push("/customer-dropbox")}
+              onPress={() => router.push("/customer-dropbox" as any)}
             >
               <View
                 style={[styles.featureIcon, { backgroundColor: "#FEE2E2" }]}
@@ -195,7 +195,7 @@ export default function BusinessScreen() {
           <View style={styles.grid}>
             <TouchableOpacity
               style={styles.featureCard}
-              onPress={() => router.push("/pagos-ai-dashboard")}
+              onPress={() => router.push("/pagos-ai-dashboard" as any)}
             >
               <View
                 style={[styles.featureIcon, { backgroundColor: "#F3E8FF" }]}
@@ -210,7 +210,7 @@ export default function BusinessScreen() {
 
             <TouchableOpacity
               style={styles.featureCard}
-              onPress={() => router.push("/analytics")}
+              onPress={() => router.push("/analytics" as any)}
             >
               <View
                 style={[styles.featureIcon, { backgroundColor: "#EBF5FF" }]}
@@ -225,7 +225,7 @@ export default function BusinessScreen() {
 
             <TouchableOpacity
               style={styles.featureCard}
-              onPress={() => router.push("/(tabs)/invoices")}
+              onPress={() => router.push("/(tabs)/invoices" as any)}
             >
               <View
                 style={[styles.featureIcon, { backgroundColor: "#FEF3C7" }]}
@@ -240,7 +240,7 @@ export default function BusinessScreen() {
 
             <TouchableOpacity
               style={styles.featureCard}
-              onPress={() => router.push("/(tabs)/receipts")}
+              onPress={() => router.push("/(tabs)/receipts" as any)}
             >
               <View
                 style={[styles.featureIcon, { backgroundColor: "#DBEAFE" }]}
@@ -260,7 +260,7 @@ export default function BusinessScreen() {
           <View style={styles.grid}>
             <TouchableOpacity
               style={styles.featureCard}
-              onPress={() => router.push("/change-orders")}
+              onPress={() => router.push("/change-orders" as any)}
             >
               <View
                 style={[styles.featureIcon, { backgroundColor: "#FEE2E2" }]}
@@ -275,7 +275,7 @@ export default function BusinessScreen() {
 
             <TouchableOpacity
               style={styles.featureCard}
-              onPress={() => router.push("/warranties")}
+              onPress={() => router.push("/warranties" as any)}
             >
               <View
                 style={[styles.featureIcon, { backgroundColor: "#D1FAE5" }]}
@@ -290,7 +290,7 @@ export default function BusinessScreen() {
 
             <TouchableOpacity
               style={styles.featureCard}
-              onPress={() => router.push("/material-approvals")}
+              onPress={() => router.push("/material-approvals" as any)}
             >
               <View
                 style={[styles.featureIcon, { backgroundColor: "#FEF3C7" }]}
@@ -305,7 +305,7 @@ export default function BusinessScreen() {
 
             <TouchableOpacity
               style={styles.featureCard}
-              onPress={() => router.push("/pre-arrival-checklist")}
+              onPress={() => router.push("/pre-arrival-checklist" as any)}
             >
               <View
                 style={[styles.featureIcon, { backgroundColor: "#EBF5FF" }]}
@@ -325,7 +325,7 @@ export default function BusinessScreen() {
           <View style={styles.grid}>
             <TouchableOpacity
               style={styles.featureCard}
-              onPress={() => router.push("/ai-dispatch")}
+              onPress={() => router.push("/ai-dispatch" as any)}
             >
               <View
                 style={[styles.featureIcon, { backgroundColor: "#F3E8FF" }]}
@@ -340,7 +340,7 @@ export default function BusinessScreen() {
 
             <TouchableOpacity
               style={styles.featureCard}
-              onPress={() => router.push("/ai-estimate-generator")}
+              onPress={() => router.push("/ai-estimate-generator" as any)}
             >
               <View
                 style={[styles.featureIcon, { backgroundColor: "#DBEAFE" }]}
@@ -355,7 +355,7 @@ export default function BusinessScreen() {
 
             <TouchableOpacity
               style={styles.featureCard}
-              onPress={() => router.push("/ai-cost-analyzer")}
+              onPress={() => router.push("/ai-cost-analyzer" as any)}
             >
               <View
                 style={[styles.featureIcon, { backgroundColor: "#D1FAE5" }]}
@@ -370,7 +370,7 @@ export default function BusinessScreen() {
 
             <TouchableOpacity
               style={styles.featureCard}
-              onPress={() => router.push("/customer-intake")}
+              onPress={() => router.push("/customer-intake" as any)}
             >
               <View
                 style={[styles.featureIcon, { backgroundColor: "#FEF3C7" }]}
@@ -390,7 +390,7 @@ export default function BusinessScreen() {
           <View style={styles.grid}>
             <TouchableOpacity
               style={styles.featureCard}
-              onPress={() => router.push("/weather-delays")}
+              onPress={() => router.push("/weather-delays" as any)}
             >
               <View
                 style={[styles.featureIcon, { backgroundColor: "#DBEAFE" }]}
@@ -405,7 +405,7 @@ export default function BusinessScreen() {
 
             <TouchableOpacity
               style={styles.featureCard}
-              onPress={() => router.push("/permits")}
+              onPress={() => router.push("/permits" as any)}
             >
               <View
                 style={[styles.featureIcon, { backgroundColor: "#FEE2E2" }]}
@@ -420,7 +420,7 @@ export default function BusinessScreen() {
 
             <TouchableOpacity
               style={styles.featureCard}
-              onPress={() => router.push("/safety-incidents")}
+              onPress={() => router.push("/safety-incidents" as any)}
             >
               <View
                 style={[styles.featureIcon, { backgroundColor: "#FEF3C7" }]}
@@ -435,7 +435,7 @@ export default function BusinessScreen() {
 
             <TouchableOpacity
               style={styles.featureCard}
-              onPress={() => router.push("/punch-list")}
+              onPress={() => router.push("/punch-list" as any)}
             >
               <View
                 style={[styles.featureIcon, { backgroundColor: "#D1FAE5" }]}
@@ -455,7 +455,7 @@ export default function BusinessScreen() {
           <View style={styles.grid}>
             <TouchableOpacity
               style={styles.featureCard}
-              onPress={() => router.push("/material-orders")}
+              onPress={() => router.push("/material-orders" as any)}
             >
               <View
                 style={[styles.featureIcon, { backgroundColor: "#DBEAFE" }]}
@@ -470,7 +470,7 @@ export default function BusinessScreen() {
 
             <TouchableOpacity
               style={styles.featureCard}
-              onPress={() => router.push("/subcontractors")}
+              onPress={() => router.push("/subcontractors" as any)}
             >
               <View
                 style={[styles.featureIcon, { backgroundColor: "#F3E8FF" }]}
@@ -485,7 +485,7 @@ export default function BusinessScreen() {
 
             <TouchableOpacity
               style={styles.featureCard}
-              onPress={() => router.push("/equipment-maintenance")}
+              onPress={() => router.push("/equipment-maintenance" as any)}
             >
               <View
                 style={[styles.featureIcon, { backgroundColor: "#FEF3C7" }]}
