@@ -12,6 +12,7 @@ import { AIChatProvider } from "@/contexts/AIChatContext";
 import { TradeProvider } from "@/contexts/TradeContext";
 import { PagosAIProvider } from "@/contexts/PagosAIContext";
 import { OnboardingProvider } from "@/contexts/OnboardingContext";
+import { SubscriptionProvider } from "@/contexts/SubscriptionContext";
 import { trpc, trpcClient } from "@/lib/trpc";
 
 SplashScreen.preventAutoHideAsync();
@@ -66,6 +67,7 @@ function RootLayoutNav() {
       <Stack.Screen name="intake-summary" options={{ headerShown: true, title: "Intake Summary" }} />
       <Stack.Screen name="ai-intake-dashboard" options={{ headerShown: true, title: "AI Intake" }} />
       <Stack.Screen name="dispatch-assignment" options={{ headerShown: true, title: "Dispatch" }} />
+      <Stack.Screen name="pricing" options={{ headerShown: false }} />
       <Stack.Screen name="+not-found" />
     </Stack>
   );
@@ -80,22 +82,24 @@ export default function RootLayout() {
     <trpc.Provider client={trpcClient} queryClient={queryClient}>
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
-          <OnboardingProvider>
-            <TradeProvider>
-              <DataProvider>
-                <PagosAIProvider>
-                  <AIChatProvider>
-                    <LanguageProvider>
-                      <GestureHandlerRootView style={{ flex: 1 }}>
-                        <StatusBar style="dark" />
-                        <RootLayoutNav />
-                      </GestureHandlerRootView>
-                    </LanguageProvider>
-                  </AIChatProvider>
-                </PagosAIProvider>
-              </DataProvider>
-            </TradeProvider>
-          </OnboardingProvider>
+          <SubscriptionProvider>
+            <OnboardingProvider>
+              <TradeProvider>
+                <DataProvider>
+                  <PagosAIProvider>
+                    <AIChatProvider>
+                      <LanguageProvider>
+                        <GestureHandlerRootView style={{ flex: 1 }}>
+                          <StatusBar style="dark" />
+                          <RootLayoutNav />
+                        </GestureHandlerRootView>
+                      </LanguageProvider>
+                    </AIChatProvider>
+                  </PagosAIProvider>
+                </DataProvider>
+              </TradeProvider>
+            </OnboardingProvider>
+          </SubscriptionProvider>
         </AuthProvider>
       </QueryClientProvider>
     </trpc.Provider>
