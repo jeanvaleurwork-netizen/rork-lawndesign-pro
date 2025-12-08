@@ -10,6 +10,8 @@ const { height } = Dimensions.get("window");
 export default function OnboardingWelcomeScreen() {
   const router = useRouter();
 
+  console.log("[Onboarding] Index screen mounted");
+
   return (
     <LinearGradient
       colors={["#1E3A8A", "#3B82F6", "#60A5FA"]}

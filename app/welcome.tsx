@@ -51,7 +51,14 @@ export default function WelcomeScreen() {
           <View style={styles.buttonContainer}>
             <TouchableOpacity
               style={styles.primaryButton}
-              onPress={() => router.push("/onboarding" as any)}
+              onPress={() => {
+                console.log("[Welcome] Navigating to onboarding/select-trade");
+                try {
+                  router.push("/onboarding/select-trade");
+                } catch (error) {
+                  console.error("[Welcome] Navigation error:", error);
+                }
+              }}
               activeOpacity={0.8}
             >
               <Text style={styles.primaryButtonText}>Get Started</Text>

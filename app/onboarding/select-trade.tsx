@@ -24,6 +24,8 @@ export default function SelectTradeScreen() {
   const { data, updateTrades } = useOnboarding();
   const [selectedTrades, setSelectedTrades] = useState<string[]>(data.trades);
 
+  console.log("[Onboarding] Select trade screen mounted");
+
   const toggleTrade = (trade: string) => {
     if (selectedTrades.includes(trade)) {
       setSelectedTrades(selectedTrades.filter(t => t !== trade));
