@@ -9,6 +9,7 @@ import {
   Modal,
   Dimensions,
   Alert,
+  TextInput,
 } from "react-native";
 import { Stack, router } from "expo-router";
 import { 
@@ -81,8 +82,10 @@ export default function CrewScreen() {
   const [showScheduleModal, setShowScheduleModal] = useState(false);
   const [selectedCrew, setSelectedCrew] = useState<Crew | null>(null);
   const [assignmentType, setAssignmentType] = useState<"job" | "schedule">("job");
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editingMember, setEditingMember] = useState<CrewMember | null>(null);
 
-  const [crews] = useState<Crew[]>([
+  const [crews, setCrews] = useState<Crew[]>([
     {
       id: "1",
       name: "Crew A",
@@ -751,7 +754,14 @@ export default function CrewScreen() {
               </View>
 
               <View style={styles.actionButtons}>
-                <TouchableOpacity style={styles.editButton}>
+                <TouchableOpacity 
+                  style={styles.editButton}
+                  onPress={() => {
+                    setEditingMember(selectedMember);
+                    setShowMemberModal(false);
+                    setTimeout(() => setShowEditModal(true), 300);
+                  }}
+                >
                   <Edit3 size={18} color={Colors.light.primary} />
                   <Text style={styles.editButtonText}>Edit Details</Text>
                 </TouchableOpacity>
@@ -986,6 +996,160 @@ export default function CrewScreen() {
               ))}
             </View>
           </ScrollView>
+        </SafeAreaView>
+      </Modal>
+
+      <Modal
+        visible={showEditModal}
+        animationType="slide"
+        presentationStyle="pageSheet"
+        onRequestClose={() => setShowEditModal(false)}
+      >
+        <SafeAreaView style={styles.modalContainer}>
+          <View style={styles.modalHeader}>
+            <Text style={styles.modalTitle}>Edit Team Member</Text>
+            <TouchableOpacity onPress={() => setShowEditModal(false)}>
+              <X size={24} color={Colors.light.text} />
+            </TouchableOpacity>
+          </View>
+
+          {editingMember && (
+            <ScrollView style={styles.modalContent} showsVerticalScrollIndicator={false}>
+              <View style={styles.editSection}>
+                <Text style={styles.editLabel}>Name</Text>
+                <TextInput
+                  style={styles.editInput}
+                  value={editingMember.name}
+                  onChangeText={(text) => setEditingMember({ ...editingMember, name: text })}
+                  placeholder="Enter name"
+                  placeholderTextColor={Colors.light.muted}
+                />
+              </View>
+
+              <View style={styles.editSection}>
+                <Text style={styles.editLabel}>Job Title</Text>
+                <TextInput
+                  style={styles.editInput}
+                  value={editingMember.title}
+                  onChangeText={(text) => setEditingMember({ ...editingMember, title: text })}
+                  placeholder="Enter job title"
+                  placeholderTextColor={Colors.light.muted}
+                />
+              </View>
+
+              <View style={styles.editSection}>
+                <Text style={styles.editLabel}>Phone</Text>
+                <TextInput
+                  style={styles.editInput}
+                  value={editingMember.phone}
+                  onChangeText={(text) => setEditingMember({ ...editingMember, phone: text })}
+                  placeholder="Enter phone number"
+                  placeholderTextColor={Colors.light.muted}
+                  keyboardType="phone-pad"
+                />
+              </View>
+
+              <View style={styles.editSection}>
+                <Text style={styles.editLabel}>Email</Text>
+                <TextInput
+                  style={styles.editInput}
+                  value={editingMember.email}
+                  onChangeText={(text) => setEditingMember({ ...editingMember, email: text })}
+                  placeholder="Enter email"
+                  placeholderTextColor={Colors.light.muted}
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                />
+              </View>
+
+              <View style={styles.editSection}>
+                <Text style={styles.editLabel}>Hourly Rate ($)</Text>
+                <TextInput
+                  style={styles.editInput}
+                  value={editingMember.hourlyRate.toString()}
+                  onChangeText={(text) => setEditingMember({ ...editingMember, hourlyRate: parseFloat(text) || 0 })}
+                  placeholder="Enter hourly rate"
+                  placeholderTextColor={Colors.light.muted}
+                  keyboardType="decimal-pad"
+                />
+              </View>
+
+              <View style={styles.editSection}>
+                <Text style={styles.editLabel}>Role</Text>
+                <View style={styles.roleSelector}>
+                  {(['lead', 'specialist', 'worker'] as const).map((roleOption) => (
+                    <TouchableOpacity
+                      key={roleOption}
+                      style={[
+                        styles.roleOption,
+                        editingMember.role === roleOption && styles.roleOptionActive,
+                      ]}
+                      onPress={() => setEditingMember({ ...editingMember, role: roleOption })}
+                    >
+                      <Text
+                        style={[
+                          styles.roleOptionText,
+                          editingMember.role === roleOption && styles.roleOptionTextActive,
+                        ]}
+                      >
+                        {roleOption === 'lead' ? 'Lead' : roleOption === 'specialist' ? 'Specialist' : 'Worker'}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </View>
+
+              <View style={styles.editSection}>
+                <Text style={styles.editLabel}>Availability</Text>
+                <View style={styles.roleSelector}>
+                  {(['available', 'busy', 'off'] as const).map((availOption) => (
+                    <TouchableOpacity
+                      key={availOption}
+                      style={[
+                        styles.roleOption,
+                        editingMember.availability === availOption && styles.roleOptionActive,
+                      ]}
+                      onPress={() => setEditingMember({ ...editingMember, availability: availOption })}
+                    >
+                      <Text
+                        style={[
+                          styles.roleOptionText,
+                          editingMember.availability === availOption && styles.roleOptionTextActive,
+                        ]}
+                      >
+                        {availOption === 'available' ? 'Available' : availOption === 'busy' ? 'On Job' : 'Off'}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </View>
+
+              <View style={styles.editActions}>
+                <TouchableOpacity 
+                  style={styles.cancelButton}
+                  onPress={() => setShowEditModal(false)}
+                >
+                  <Text style={styles.cancelButtonText}>Cancel</Text>
+                </TouchableOpacity>
+                <TouchableOpacity 
+                  style={styles.confirmButton}
+                  onPress={() => {
+                    const updatedCrews = crews.map(crew => ({
+                      ...crew,
+                      members: crew.members.map(m => 
+                        m.id === editingMember.id ? editingMember : m
+                      ),
+                    }));
+                    setCrews(updatedCrews);
+                    setShowEditModal(false);
+                    Alert.alert("Success", "Team member updated successfully!");
+                  }}
+                >
+                  <Text style={styles.confirmButtonText}>Save Changes</Text>
+                </TouchableOpacity>
+              </View>
+            </ScrollView>
+          )}
         </SafeAreaView>
       </Modal>
 
@@ -2110,5 +2274,54 @@ const styles = StyleSheet.create({
     color: Colors.light.muted,
     textAlign: "center",
     paddingVertical: 12,
+  },
+  editSection: {
+    marginBottom: 20,
+  },
+  editLabel: {
+    fontSize: 14,
+    fontWeight: "600" as const,
+    color: Colors.light.text,
+    marginBottom: 8,
+  },
+  editInput: {
+    backgroundColor: Colors.light.card,
+    borderRadius: 12,
+    padding: 16,
+    fontSize: 15,
+    color: Colors.light.text,
+    borderWidth: 1,
+    borderColor: Colors.light.border,
+  },
+  roleSelector: {
+    flexDirection: "row",
+    gap: 8,
+  },
+  roleOption: {
+    flex: 1,
+    paddingVertical: 12,
+    backgroundColor: Colors.light.card,
+    borderRadius: 12,
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: Colors.light.border,
+  },
+  roleOptionActive: {
+    backgroundColor: Colors.light.primary,
+    borderColor: Colors.light.primary,
+  },
+  roleOptionText: {
+    fontSize: 14,
+    fontWeight: "600" as const,
+    color: Colors.light.text,
+  },
+  roleOptionTextActive: {
+    color: "#FFF",
+  },
+  editActions: {
+    flexDirection: "row",
+    gap: 12,
+    marginTop: 20,
+    marginBottom: 40,
   },
 });
