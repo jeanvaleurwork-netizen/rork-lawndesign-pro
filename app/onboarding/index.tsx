@@ -57,7 +57,7 @@ export default function OnboardingWelcomeScreen() {
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.secondaryButton}
-              onPress={() => router.push("/role-selection")}
+              onPress={() => router.push("/role-selection" as any)}
               activeOpacity={0.85}
             >
               <Text style={styles.secondaryButtonText}>Log In</Text>

@@ -53,17 +53,17 @@ export default function NeverMissCallScreen() {
             </View>
             <View style={styles.conversationBubble}>
               <Text style={styles.conversationText}>
-                <Text style={styles.conversationLabel}>AI:</Text> &quot;Thank you for calling. What service do you need?&quot;
+                <Text style={styles.conversationLabel}>AI:</Text> {`"Thank you for calling. What service do you need?"`}
               </Text>
             </View>
             <View style={[styles.conversationBubble, styles.customerBubble]}>
               <Text style={styles.conversationText}>
-                <Text style={styles.conversationLabel}>Customer:</Text> &quot;I need my roof repaired after the storm.&quot;
+                <Text style={styles.conversationLabel}>Customer:</Text> {`"I need my roof repaired after the storm."`}
               </Text>
             </View>
             <View style={styles.conversationBubble}>
               <Text style={styles.conversationText}>
-                <Text style={styles.conversationLabel}>AI:</Text> &quot;I can help with that. What&apos;s your property address?&quot;
+                <Text style={styles.conversationLabel}>AI:</Text> {`"I can help with that. What's your property address?"`}
               </Text>
             </View>
           </View>
