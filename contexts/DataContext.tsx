@@ -1,7 +1,7 @@
 import createContextHook from "@nkzw/create-context-hook";
 import { useState, useEffect } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Job, Estimate, Client } from "@/types";
+import { Job, Estimate, Client, Contract } from "@/types";
 import { mockJobs } from "@/mocks/jobs";
 import { mockEstimates } from "@/mocks/estimates";
 import { mockClients } from "@/mocks/clients";
@@ -10,12 +10,14 @@ const STORAGE_KEYS = {
   JOBS: "@contractoros_jobs",
   ESTIMATES: "@contractoros_estimates",
   CLIENTS: "@contractoros_clients",
+  CONTRACTS: "@contractoros_contracts",
 };
 
 export const [DataProvider, useData] = createContextHook(() => {
   const [jobs, setJobs] = useState<Job[]>([]);
   const [estimates, setEstimates] = useState<Estimate[]>([]);
   const [clients, setClients] = useState<Client[]>([]);
+  const [contracts, setContracts] = useState<Contract[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [lastSync, setLastSync] = useState<Date | null>(null);
 
@@ -26,10 +28,11 @@ export const [DataProvider, useData] = createContextHook(() => {
   const loadAllData = async () => {
     try {
       setIsLoading(true);
-      const [jobsData, estimatesData, clientsData] = await Promise.all([
+      const [jobsData, estimatesData, clientsData, contractsData] = await Promise.all([
         AsyncStorage.getItem(STORAGE_KEYS.JOBS),
         AsyncStorage.getItem(STORAGE_KEYS.ESTIMATES),
         AsyncStorage.getItem(STORAGE_KEYS.CLIENTS),
+        AsyncStorage.getItem(STORAGE_KEYS.CONTRACTS),
       ]);
 
       if (jobsData) {
@@ -53,6 +56,12 @@ export const [DataProvider, useData] = createContextHook(() => {
         await AsyncStorage.setItem(STORAGE_KEYS.CLIENTS, JSON.stringify(mockClients));
       }
 
+      if (contractsData) {
+        setContracts(JSON.parse(contractsData));
+      } else {
+        setContracts([]);
+      }
+
       const syncTimeData = await AsyncStorage.getItem("@contractoros_last_sync");
       if (syncTimeData) {
         setLastSync(new Date(syncTimeData));
@@ -62,6 +71,7 @@ export const [DataProvider, useData] = createContextHook(() => {
       setJobs(mockJobs);
       setEstimates(mockEstimates);
       setClients(mockClients);
+      setContracts([]);
     } finally {
       setIsLoading(false);
     }
@@ -73,6 +83,7 @@ export const [DataProvider, useData] = createContextHook(() => {
         AsyncStorage.setItem(STORAGE_KEYS.JOBS, JSON.stringify(jobs)),
         AsyncStorage.setItem(STORAGE_KEYS.ESTIMATES, JSON.stringify(estimates)),
         AsyncStorage.setItem(STORAGE_KEYS.CLIENTS, JSON.stringify(clients)),
+        AsyncStorage.setItem(STORAGE_KEYS.CONTRACTS, JSON.stringify(contracts)),
       ]);
       
       const now = new Date();
@@ -146,6 +157,26 @@ export const [DataProvider, useData] = createContextHook(() => {
     await AsyncStorage.setItem(STORAGE_KEYS.CLIENTS, JSON.stringify(updatedClients));
   };
 
+  const addContract = async (contract: Contract) => {
+    const updatedContracts = [...contracts, contract];
+    setContracts(updatedContracts);
+    await AsyncStorage.setItem(STORAGE_KEYS.CONTRACTS, JSON.stringify(updatedContracts));
+  };
+
+  const updateContract = async (contractId: string, updates: Partial<Contract>) => {
+    const updatedContracts = contracts.map((contract) =>
+      contract.id === contractId ? { ...contract, ...updates } : contract
+    );
+    setContracts(updatedContracts);
+    await AsyncStorage.setItem(STORAGE_KEYS.CONTRACTS, JSON.stringify(updatedContracts));
+  };
+
+  const deleteContract = async (contractId: string) => {
+    const updatedContracts = contracts.filter((contract) => contract.id !== contractId);
+    setContracts(updatedContracts);
+    await AsyncStorage.setItem(STORAGE_KEYS.CONTRACTS, JSON.stringify(updatedContracts));
+  };
+
   const refreshData = async () => {
     await loadAllData();
   };
@@ -154,6 +185,7 @@ export const [DataProvider, useData] = createContextHook(() => {
     jobs,
     estimates,
     clients,
+    contracts,
     isLoading,
     lastSync,
     addJob,
@@ -165,6 +197,9 @@ export const [DataProvider, useData] = createContextHook(() => {
     addClient,
     updateClient,
     deleteClient,
+    addContract,
+    updateContract,
+    deleteContract,
     syncData,
     refreshData,
   };

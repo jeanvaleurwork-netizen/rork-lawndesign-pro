@@ -21,8 +21,8 @@ import {
 } from "lucide-react-native";
 
 import Colors from "@/constants/colors";
-
 import { Contract, ContractStatus } from '@/types';
+import { useData } from "@/contexts/DataContext";
 
 type MockContract = Contract & {
   clientName: string;
@@ -49,11 +49,19 @@ const mockContracts: MockContract[] = [
 
 export default function ContractsScreen() {
   const router = useRouter();
+  const { contracts: storedContracts } = useData();
   const [searchQuery, setSearchQuery] = useState<string>("");
-  const [contracts] = useState<MockContract[]>(mockContracts);
   const [modalVisible, setModalVisible] = useState<boolean>(false);
   const [selectedContract, setSelectedContract] = useState<MockContract | null>(null);
   const [filterStatus, setFilterStatus] = useState<"all" | ContractStatus>("all");
+
+  const contracts: MockContract[] = [
+    ...mockContracts,
+    ...storedContracts.map(contract => ({
+      ...contract,
+      clientName: "Draft Client"
+    }))
+  ];
 
   const filteredContracts = contracts.filter((contract) => {
     const matchesSearch = contract.clientName.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -117,7 +125,7 @@ export default function ContractsScreen() {
         <View>
           <Text style={styles.title}>Contracts</Text>
           <Text style={styles.subtitle}>
-            {filteredContracts.length} of {contracts.length} contracts
+            {filteredContracts.length} of {contracts.length} contracts {storedContracts.length > 0 && `(${storedContracts.length} saved)`}
           </Text>
         </View>
         <TouchableOpacity 

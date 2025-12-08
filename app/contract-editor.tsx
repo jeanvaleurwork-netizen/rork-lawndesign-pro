@@ -31,16 +31,19 @@ import {
 } from "lucide-react-native";
 
 import Colors from "@/constants/colors";
-import { ContractType } from "@/types";
+import { ContractType, Contract } from "@/types";
 import { useAuth } from "@/contexts/AuthContext";
 import { getTradeServices } from "@/constants/trades";
 import { trpc } from "@/lib/trpc";
+import { useData } from "@/contexts/DataContext";
+import { generateId } from "@/utils/id-generator";
 
 export default function ContractEditorScreen() {
   const router = useRouter();
   const params = useLocalSearchParams();
   const isEditing = Boolean(params.id);
   const { organization } = useAuth();
+  const { addContract, updateContract } = useData();
 
   const [contractType, setContractType] = useState<ContractType>("PROJECT_CONTRACT");
   const [clientName, setClientName] = useState<string>("");
@@ -144,9 +147,49 @@ export default function ContractEditorScreen() {
     return `${scopeOfWork}\n\nSelected Services:\n${serviceList}`;
   };
 
-  const handleSaveDraft = () => {
-    console.log("Saving draft...");
-    Alert.alert("Success", "Contract saved as draft");
+  const handleSaveDraft = async () => {
+    if (!clientName || !projectName) {
+      Alert.alert("Missing Information", "Please fill in at least client name and project name");
+      return;
+    }
+
+    try {
+      const finalTotal = selectedServices.length > 0 ? calculateTotalFromServices() : parseFloat(totalAmount || "0");
+      const finalScope = generateScopeFromServices();
+
+      const draftContract: Contract = {
+        id: isEditing ? (params.id as string) : generateId("contract"),
+        companyId: organization?.id || "demo",
+        clientId: "demo-client",
+        type: contractType as any,
+        title: projectName,
+        bodyHtml: `<h2>${projectName}</h2><p>${finalScope}</p>`,
+        status: "DRAFT",
+        totalAmount: finalTotal,
+        startDateEstimated: startDate || undefined,
+        endDateEstimated: endDate || undefined,
+        createdByUserId: "current-user",
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+
+      if (isEditing) {
+        await updateContract(draftContract.id, draftContract);
+        Alert.alert("Success", "Draft contract updated!", [
+          { text: "OK", onPress: () => router.back() }
+        ]);
+      } else {
+        await addContract(draftContract);
+        Alert.alert("Success", "Draft contract saved!", [
+          { text: "OK", onPress: () => router.back() }
+        ]);
+      }
+
+      console.log("[Contract] Draft saved:", draftContract.id);
+    } catch (error) {
+      console.error("Error saving draft:", error);
+      Alert.alert("Error", "Failed to save draft. Please try again.");
+    }
   };
 
   const handlePreview = () => {
