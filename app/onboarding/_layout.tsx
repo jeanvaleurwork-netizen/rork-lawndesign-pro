@@ -22,6 +22,7 @@ export default function OnboardingLayout() {
       <Stack.Screen name="analytics" />
       <Stack.Screen name="subscription-overview" />
       <Stack.Screen name="trial-setup" />
+      <Stack.Screen name="never-miss-call" />
     </Stack>
   );
 }

@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, Dimensions } from "react-nati
 import { useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
-import { Hammer, Users, Calendar, FileText } from "lucide-react-native";
+import { Hammer, Users, Calendar, FileText, Phone, Zap } from "lucide-react-native";
 
 const { height } = Dimensions.get("window");
 
@@ -37,6 +37,14 @@ export default function WelcomeScreen() {
             <FeatureItem
               icon={<FileText color="#FFFFFF" size={24} />}
               text="Create estimates & invoices"
+            />
+            <FeatureItem
+              icon={<Phone color="#FFFFFF" size={24} />}
+              text="AI intake - Never miss a call"
+            />
+            <FeatureItem
+              icon={<Zap color="#FFFFFF" size={24} />}
+              text="Automate paperwork & quotes"
             />
           </View>
 
