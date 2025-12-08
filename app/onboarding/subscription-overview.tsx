@@ -41,8 +41,8 @@ export default function SubscriptionOverviewScreen() {
 
           <View style={styles.pricingCard}>
             <Text style={styles.pricingTitle}>Your Price</Text>
-            <Text style={styles.pricingValue}>30 Days Free</Text>
-            <Text style={styles.pricingSubtitle}>Then affordable plans starting at $49/mo</Text>
+            <Text style={styles.pricingValue}>Starting at $69/mo</Text>
+            <Text style={styles.pricingSubtitle}>Choose the plan that fits your business</Text>
           </View>
 
           <View style={styles.testimonialsContainer}>
@@ -68,10 +68,10 @@ export default function SubscriptionOverviewScreen() {
 
           <TouchableOpacity
             style={styles.continueButton}
-            onPress={() => router.push("/onboarding/trial-setup" as never)}
+            onPress={() => router.push("/pricing" as never)}
             activeOpacity={0.85}
           >
-            <Text style={styles.continueButtonText}>Start Free Trial</Text>
+            <Text style={styles.continueButtonText}>Choose Your Plan</Text>
           </TouchableOpacity>
         </ScrollView>
       </SafeAreaView>

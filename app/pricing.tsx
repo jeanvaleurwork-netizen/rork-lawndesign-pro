@@ -24,6 +24,8 @@ import {
   Star,
 } from "lucide-react-native";
 import { useSubscription } from "@/contexts/SubscriptionContext";
+import { useOnboarding } from "@/contexts/OnboardingContext";
+import { useAuth } from "@/contexts/AuthContext";
 import Colors from "@/constants/colors";
 
 interface TierFeature {
@@ -131,6 +133,8 @@ const PRICING_TIERS: PricingTier[] = [
 export default function PricingScreen() {
   const router = useRouter();
   const { upgradeTier, subscription } = useSubscription();
+  const { data: onboardingData, completeOnboarding } = useOnboarding();
+  const { login, session } = useAuth();
   const [billingCycle, setBillingCycle] = useState<"monthly" | "annual">("monthly");
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [selectedTier, setSelectedTier] = useState<string | null>(null);
@@ -151,15 +155,48 @@ export default function PricingScreen() {
     try {
       setIsLoading(true);
       setSelectedTier(tierId);
+      
+      if (!session) {
+        const userId = `user_${Date.now()}`;
+        const orgId = `org_${Date.now()}`;
+
+        await login({
+          user: {
+            id: userId,
+            email: onboardingData.businessEmail || `user${Date.now()}@contractoros.app`,
+            firstName: onboardingData.companyName?.split(" ")[0] || "User",
+            lastName: onboardingData.companyName?.split(" ").slice(1).join(" ") || "",
+            name: onboardingData.companyName || "User",
+            phone: onboardingData.businessPhone || "",
+            role: onboardingData.role || "admin",
+            organizationId: orgId,
+          },
+          organization: {
+            id: orgId,
+            name: onboardingData.companyName || "My Company",
+            businessName: onboardingData.companyName,
+            ownerId: userId,
+            plan: "active",
+            tradeSpecialties: onboardingData.trades,
+            companyPhone: onboardingData.businessPhone,
+            companyEmail: onboardingData.businessEmail,
+            address: onboardingData.businessAddress,
+          },
+        });
+
+        await completeOnboarding();
+      }
+      
       await upgradeTier(tierId, billingCycle);
+      
       Alert.alert(
-        "Success!",
-        `You've upgraded to ${PRICING_TIERS.find(t => t.id === tierId)?.name}!`,
-        [{ text: "Continue", onPress: () => router.back() }]
+        "Welcome to ContractorOS!",
+        `Your ${PRICING_TIERS.find(t => t.id === tierId)?.name} plan is now active.`,
+        [{ text: "Get Started", onPress: () => router.replace("/(tabs)" as any) }]
       );
     } catch (error) {
-      console.error("[Pricing] Failed to upgrade:", error);
-      Alert.alert("Error", "Failed to upgrade subscription. Please try again.");
+      console.error("[Pricing] Failed to activate plan:", error);
+      Alert.alert("Error", "Failed to activate subscription. Please try again.");
     } finally {
       setIsLoading(false);
       setSelectedTier(null);

@@ -15,7 +15,7 @@ export default function AdminOrCrewScreen() {
     if (role === "admin") {
       router.push("/onboarding/company-setup" as never);
     } else {
-      router.push("/onboarding/trial-setup" as never);
+      router.push("/crew-login" as never);
     }
   };
 
