@@ -45,8 +45,6 @@ import {
   Award,
   ClipboardCheck,
   Plus,
-  Building2,
-  Hammer,
 } from "lucide-react-native";
 
 import Colors from "@/constants/colors";
@@ -330,7 +328,7 @@ export default function CustomerPortalScreen() {
   const [selectedContract, setSelectedContract] = useState<CustomerContract | null>(null);
   const [showContractModal, setShowContractModal] = useState<boolean>(false);
   const [beforeAfterSlider] = useState<number>(50);
-  const [checklistItems, setChecklistItems] = useState<ChecklistItem[]>([]);
+  const [, ] = useState<ChecklistItem[]>([]);
   const [showNotifications, setShowNotifications] = useState<boolean>(false);
 
   const onRefresh = () => {

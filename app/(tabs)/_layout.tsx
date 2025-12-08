@@ -6,10 +6,12 @@ import { Platform, ScrollView, View, StyleSheet, TouchableOpacity, Text } from "
 import Colors from "@/constants/colors";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
+import { useSubscription } from "@/contexts/SubscriptionContext";
 
 export default function TabLayout() {
   const { t } = useLanguage();
   const { isAdmin, isCrew } = useAuth();
+  const { canAccessTab } = useSubscription();
   
   return (
     <Tabs
@@ -46,6 +48,10 @@ export default function TabLayout() {
               if (isAdmin) {
                 const adminHiddenRoutes = ['crew-jobs', 'crew-timecards'];
                 if (adminHiddenRoutes.includes(route.name)) return null;
+                
+                if (!canAccessTab(route.name)) {
+                  return null;
+                }
               }
 
               const onPress = () => {

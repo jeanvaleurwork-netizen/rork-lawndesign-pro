@@ -20,10 +20,20 @@ import {
 import Colors from "@/constants/colors";
 import { useData } from "@/contexts/DataContext";
 import { useAuth } from "@/contexts/AuthContext";
+import { useSubscription } from "@/contexts/SubscriptionContext";
+import UpgradeModal from "@/components/UpgradeModal";
 
 export default function AnalyticsScreen() {
   const { estimates, clients } = useData();
   const { isAdmin } = useAuth();
+  const { hasFeature } = useSubscription();
+  const [showUpgradeModal, setShowUpgradeModal] = React.useState(false);
+
+  React.useEffect(() => {
+    if (!hasFeature("advanced_analytics")) {
+      setShowUpgradeModal(true);
+    }
+  }, [hasFeature]);
 
   const analytics = useMemo(() => {
     const totalRevenue = estimates
@@ -134,6 +144,13 @@ export default function AnalyticsScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <Stack.Screen options={{ headerShown: false }} />
+      <UpgradeModal
+        visible={showUpgradeModal}
+        onClose={() => setShowUpgradeModal(false)}
+        feature="advanced_analytics"
+        title="Unlock Advanced Analytics"
+        description="Get detailed insights into your revenue, profitability, customer analytics, and more to make data-driven decisions."
+      />
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
         <View style={styles.header}>
           <View>
