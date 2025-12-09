@@ -145,8 +145,8 @@ export default function SelectTradeScreen() {
             showsVerticalScrollIndicator={true}
             indicatorStyle="white"
           >
-            {TRADES.map((trade) => (
-              <View key={trade}>
+            {TRADES.map((trade, index) => (
+              <View key={trade} style={{ marginBottom: index === TRADES.length - 1 ? 0 : 12 }}>
                 <TouchableOpacity
                   style={[
                     styles.tradeCard,
@@ -241,7 +241,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   tradesScrollContent: {
-    gap: 12,
+    paddingBottom: 12,
   },
   tradeCard: {
     backgroundColor: "#FFFFFF",
