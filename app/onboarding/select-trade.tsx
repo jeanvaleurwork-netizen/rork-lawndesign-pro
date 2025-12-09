@@ -132,14 +132,19 @@ export default function SelectTradeScreen() {
       style={styles.container}
     >
       <SafeAreaView style={styles.safeArea} edges={["top", "bottom"]}>
-        <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-          <View style={styles.header}>
-            <Text style={styles.title}>Which services do</Text>
-            <Text style={styles.title}>you offer?</Text>
-            <Text style={styles.subtitle}>Select all that apply. This helps personalize your experience.</Text>
-          </View>
+        <View style={styles.header}>
+          <Text style={styles.title}>Which services do</Text>
+          <Text style={styles.title}>you offer?</Text>
+          <Text style={styles.subtitle}>Select all that apply. This helps personalize your experience.</Text>
+        </View>
 
-          <View style={styles.tradesContainer}>
+        <View style={styles.tradesContainer}>
+          <ScrollView
+            style={styles.tradesScrollView}
+            contentContainerStyle={styles.tradesScrollContent}
+            showsVerticalScrollIndicator={true}
+            indicatorStyle="white"
+          >
             {TRADES.map((trade) => (
               <View key={trade}>
                 <TouchableOpacity
@@ -174,8 +179,10 @@ export default function SelectTradeScreen() {
                 )}
               </View>
             ))}
-          </View>
+          </ScrollView>
+        </View>
 
+        <View style={styles.footer}>
           <TouchableOpacity
             style={[
               styles.continueButton,
@@ -189,7 +196,7 @@ export default function SelectTradeScreen() {
               Continue ({selectedTrades.length})
             </Text>
           </TouchableOpacity>
-        </ScrollView>
+        </View>
       </SafeAreaView>
     </LinearGradient>
   );
@@ -203,11 +210,13 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    padding: 24,
+    paddingTop: 24,
+    paddingHorizontal: 24,
     paddingBottom: 32,
   },
   header: {
-    marginBottom: 32,
+    marginBottom: 20,
+    paddingHorizontal: 24,
   },
   title: {
     fontSize: 34,
@@ -222,8 +231,17 @@ const styles = StyleSheet.create({
     lineHeight: 23,
   },
   tradesContainer: {
-    gap: 12,
+    maxHeight: 420,
+    borderRadius: 16,
+    backgroundColor: "rgba(255, 255, 255, 0.1)",
+    padding: 12,
     marginBottom: 32,
+  },
+  tradesScrollView: {
+    flex: 1,
+  },
+  tradesScrollContent: {
+    gap: 12,
   },
   tradeCard: {
     backgroundColor: "#FFFFFF",
@@ -252,6 +270,11 @@ const styles = StyleSheet.create({
   tradeTextSelected: {
     color: "#1E3A8A",
     fontWeight: "700" as const,
+  },
+  footer: {
+    paddingHorizontal: 24,
+    paddingBottom: 32,
+    paddingTop: 16,
   },
   continueButton: {
     backgroundColor: "#FFFFFF",
