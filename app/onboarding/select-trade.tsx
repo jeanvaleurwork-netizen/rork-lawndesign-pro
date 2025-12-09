@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, TextInput } from "react-native";
 import { useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
@@ -48,16 +48,63 @@ const TRADES = [
   "Pest Control",
   "Septic Services",
   "Well Services",
+  "Appliance Repair",
+  "Cabinet Installation",
+  "Carpet Cleaning",
+  "Ceiling Services",
+  "Custom Woodworking",
+  "Door & Window Repair",
+  "Drainage Solutions",
+  "Driveway Sealing",
+  "Dumpster Rental",
+  "Epoxy Flooring",
+  "Fence Repair",
+  "Fire Sprinkler Services",
+  "Glass Services",
+  "Grading & Leveling",
+  "Handyman Services",
+  "Hauling & Junk Removal",
+  "Hot Tub Services",
+  "Kitchen Remodeling",
+  "Lawn Care",
+  "Moving Services",
+  "Outdoor Lighting",
+  "Patio & Deck Installation",
+  "Retaining Walls",
+  "Roofing Repair",
+  "Security Systems",
+  "Sewer & Drain Cleaning",
+  "Shutter Services",
+  "Smart Home Installation",
+  "Stucco",
+  "Swimming Pool Construction",
+  "Trim & Molding",
+  "Upholstery Cleaning",
+  "Ventilation Services",
+  "Water Damage Restoration",
+  "Window Cleaning",
+  "Other",
 ];
 
 export default function SelectTradeScreen() {
   const router = useRouter();
   const { data, updateTrades } = useOnboarding();
   const [selectedTrades, setSelectedTrades] = useState<string[]>(data.trades);
+  const [otherTrade, setOtherTrade] = useState<string>("");
+  const [showOtherInput, setShowOtherInput] = useState<boolean>(false);
 
   console.log("[Onboarding] Select trade screen mounted");
 
   const toggleTrade = (trade: string) => {
+    if (trade === "Other") {
+      setShowOtherInput(!showOtherInput);
+      if (showOtherInput) {
+        setSelectedTrades(selectedTrades.filter(t => t !== "Other" && !t.startsWith("Other: ")));
+        setOtherTrade("");
+      }
+      return;
+    }
+    
     if (selectedTrades.includes(trade)) {
       setSelectedTrades(selectedTrades.filter(t => t !== trade));
     } else {
@@ -66,7 +113,16 @@ export default function SelectTradeScreen() {
   };
 
   const handleContinue = async () => {
-    await updateTrades(selectedTrades);
+    let finalTrades = [...selectedTrades];
+    
+    if (showOtherInput && otherTrade.trim()) {
+      finalTrades = finalTrades.filter(t => t !== "Other");
+      finalTrades.push(`Other: ${otherTrade.trim()}`);
+    } else {
+      finalTrades = finalTrades.filter(t => t !== "Other" && !t.startsWith("Other: "));
+    }
+    
+    await updateTrades(finalTrades);
     router.push("/onboarding/what-we-do" as never);
   };
 
@@ -85,25 +141,38 @@ export default function SelectTradeScreen() {
 
           <View style={styles.tradesContainer}>
             {TRADES.map((trade) => (
-              <TouchableOpacity
-                key={trade}
-                style={[
-                  styles.tradeCard,
-                  selectedTrades.includes(trade) && styles.tradeCardSelected
-                ]}
-                onPress={() => toggleTrade(trade)}
-                activeOpacity={0.8}
-              >
-                <Text style={[
-                  styles.tradeText,
-                  selectedTrades.includes(trade) && styles.tradeTextSelected
-                ]}>{trade}</Text>
-                {selectedTrades.includes(trade) ? (
-                  <CheckCircle2 color="#1E3A8A" size={24} strokeWidth={2.5} />
-                ) : (
-                  <Circle color="#1E3A8A" size={24} strokeWidth={2} />
+              <View key={trade}>
+                <TouchableOpacity
+                  style={[
+                    styles.tradeCard,
+                    (trade === "Other" ? showOtherInput : selectedTrades.includes(trade)) && styles.tradeCardSelected
+                  ]}
+                  onPress={() => toggleTrade(trade)}
+                  activeOpacity={0.8}
+                >
+                  <Text style={[
+                    styles.tradeText,
+                    (trade === "Other" ? showOtherInput : selectedTrades.includes(trade)) && styles.tradeTextSelected
+                  ]}>{trade}</Text>
+                  {(trade === "Other" ? showOtherInput : selectedTrades.includes(trade)) ? (
+                    <CheckCircle2 color="#1E3A8A" size={24} strokeWidth={2.5} />
+                  ) : (
+                    <Circle color="#1E3A8A" size={24} strokeWidth={2} />
+                  )}
+                </TouchableOpacity>
+                {trade === "Other" && showOtherInput && (
+                  <View style={styles.otherInputContainer}>
+                    <TextInput
+                      style={styles.otherInput}
+                      placeholder="Please specify your trade..."
+                      placeholderTextColor="rgba(26, 26, 26, 0.4)"
+                      value={otherTrade}
+                      onChangeText={setOtherTrade}
+                      autoFocus
+                    />
+                  </View>
                 )}
-              </TouchableOpacity>
+              </View>
             ))}
           </View>
 
@@ -194,6 +263,20 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 8,
     elevation: 4,
+  },
+  otherInputContainer: {
+    marginTop: 8,
+    marginBottom: 4,
+  },
+  otherInput: {
+    backgroundColor: "#FFFFFF",
+    paddingVertical: 14,
+    paddingHorizontal: 20,
+    borderRadius: 12,
+    fontSize: 16,
+    color: "#1A1A1A",
+    borderWidth: 2,
+    borderColor: "#1E3A8A",
   },
   continueButtonDisabled: {
     opacity: 0.5,
