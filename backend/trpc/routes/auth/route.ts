@@ -116,29 +116,36 @@ export const activateSubscriptionRoute = publicProcedure
 export const crewLoginRoute = publicProcedure
   .input(
     z.object({
-      email: z.string(),
+      emailOrPhone: z.string(),
       password: z.string(),
     })
   )
   .mutation(({ input }): AuthSession => {
-    console.log("[Backend] Crew login attempt:", input.email);
+    console.log("[Backend] Crew login attempt:", input.emailOrPhone);
 
-    const user = users.find((u) => u.email === input.email && u.role === "crew");
+    const user = users.find(
+      (u) =>
+        (u.email === input.emailOrPhone || u.phone === input.emailOrPhone) &&
+        (u.role === "crew" || u.role === "manager")
+    );
+
     if (!user) {
-      throw new Error("Invalid credentials or user not found");
+      console.log("[Backend] User not found or not crew/manager role");
+      throw new Error("Invalid email/phone or password");
     }
 
     const organization = organizations.find((o) => o.id === user.organizationId);
     if (!organization) {
+      console.log("[Backend] Organization not found for user:", user.id);
       throw new Error("Organization not found");
     }
 
-    console.log("[Backend] Crew login successful:", user.email);
+    console.log("[Backend] Crew login successful:", user.email, "Role:", user.role);
 
     return {
       user,
       organization,
-      token: `token_${user.id}`,
+      token: `token_${user.id}_${Date.now()}`,
     };
   });
 
@@ -361,7 +368,13 @@ export const getOrganizationCrewRoute = publicProcedure
     }
 
     const crewMembers = users.filter(
-      (u) => u.organizationId === user.organizationId && u.role === "crew"
+      (u) =>
+        u.organizationId === user.organizationId &&
+        (u.role === "crew" || u.role === "manager")
+    );
+
+    console.log(
+      `[Backend] Found ${crewMembers.length} crew members for organization ${user.organizationId}`
     );
 
     return crewMembers.map((crew) => ({
@@ -372,6 +385,7 @@ export const getOrganizationCrewRoute = publicProcedure
       role: crew.role,
       jobTitle: crew.jobTitle,
       createdAt: crew.createdAt,
+      organizationId: crew.organizationId,
     }));
   });
 

@@ -40,42 +40,32 @@ export default function CrewLoginScreen() {
   const validateInviteMutation = trpc.auth.validateInviteCode.useMutation();
   const crewSignupMutation = trpc.auth.crewSignupWithInvite.useMutation();
 
+  const crewLoginMutation = trpc.auth.crewLogin.useMutation();
+
   const handleLogin = async () => {
     if (!loginForm.email || !loginForm.password) {
-      Alert.alert("Missing Information", "Please enter email and password");
+      Alert.alert("Missing Information", "Please enter email/phone and password");
       return;
     }
 
     setIsLoading(true);
     try {
-      const userId = `crew_${Date.now()}`;
-      const orgId = "org_demo";
+      console.log("[CrewLogin] Attempting crew login:", loginForm.email);
       
-      const authSession = {
-        user: {
-          id: userId,
-          email: loginForm.email,
-          firstName: "Crew",
-          lastName: "Member",
-          name: "Crew Member",
-          phone: "",
-          role: "crew" as const,
-        },
-        organization: {
-          id: orgId,
-          name: "Demo Organization",
-          ownerId: "admin_demo",
-          plan: "active" as const,
-        },
-        token: `token_${Date.now()}`,
-      };
+      const authSession = await crewLoginMutation.mutateAsync({
+        emailOrPhone: loginForm.email,
+        password: loginForm.password,
+      });
       
-      console.log("[CrewLogin] Crew login successful:", authSession);
+      console.log("[CrewLogin] Crew login successful:", authSession.user.name, authSession.user.role);
       await login(authSession);
       router.replace("/(tabs)");
-    } catch (error) {
+    } catch (error: any) {
       console.error("[CrewLogin] Failed to login:", error);
-      Alert.alert("Login Failed", "Please try again.");
+      Alert.alert(
+        "Login Failed",
+        error.message || "Invalid email/phone or password. Please try again."
+      );
     } finally {
       setIsLoading(false);
     }
