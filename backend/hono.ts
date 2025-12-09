@@ -36,6 +36,18 @@ try {
   } else {
     console.log("[Hono] ✗ gemini router NOT found");
   }
+  if (router.contracts) {
+    console.log("[Hono] ✓ contracts router found");
+    console.log("[Hono] contracts procedures:", Object.keys(router.contracts._def?.procedures || {}));
+  } else {
+    console.log("[Hono] ✗ contracts router NOT found");
+  }
+  if (router.smartContracts) {
+    console.log("[Hono] ✓ smartContracts router found");
+    console.log("[Hono] smartContracts procedures:", Object.keys(router.smartContracts._def?.procedures || {}));
+  } else {
+    console.log("[Hono] ✗ smartContracts router NOT found");
+  }
 } catch (e) {
   console.error("[Hono] Error inspecting router:", e);
 }

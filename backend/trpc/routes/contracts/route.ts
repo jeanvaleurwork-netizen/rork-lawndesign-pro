@@ -5,14 +5,11 @@ import {
   MSA_TEMPLATE, 
   PROJECT_CONTRACT_TEMPLATE, 
   WORK_ORDER_TEMPLATE,
-  CHANGE_ORDER_TEMPLATE,
-  COMPLETION_CERTIFICATE_TEMPLATE,
-  WARRANTY_CERTIFICATE_TEMPLATE,
-  MATERIAL_APPROVAL_TEMPLATE,
-  SUBCONTRACTOR_AGREEMENT_TEMPLATE,
   LIEN_WAIVER_CONDITIONAL_TEMPLATE,
   LIEN_WAIVER_UNCONDITIONAL_TEMPLATE
 } from "@/constants/contract-templates";
+
+console.log("[Contracts Route] Loading contracts router module");
 
 function replaceTemplateVariables(template: string, variables: Record<string, string>): string {
   let result = template;
@@ -417,3 +414,5 @@ export const contractsRouter = createTRPCRouter({
       return waiver;
     }),
 });
+
+console.log("[Contracts Route] contractsRouter created with procedures:", Object.keys(contractsRouter._def.procedures));
