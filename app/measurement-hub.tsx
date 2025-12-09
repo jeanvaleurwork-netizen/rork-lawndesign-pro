@@ -10,7 +10,6 @@ import {
 import { Stack, router } from "expo-router";
 import {
   ArrowLeft,
-  Satellite,
   Camera,
   Ruler,
   Layers,
@@ -19,7 +18,6 @@ import {
   MapPin,
   AlertCircle,
   CheckCircle,
-  Eye,
   Zap,
 } from "lucide-react-native";
 
@@ -29,7 +27,7 @@ interface MeasurementTool {
   id: string;
   title: string;
   description: string;
-  icon: typeof Satellite;
+  icon: typeof MapPin;
   color: string;
   route: string;
   features: string[];
@@ -37,16 +35,6 @@ interface MeasurementTool {
 }
 
 const MEASUREMENT_TOOLS: MeasurementTool[] = [
-  {
-    id: "aerial",
-    title: "Aerial Property Viewer",
-    description: "EagleView-style aerial and side views with real-time measurements",
-    icon: Satellite,
-    color: Colors.light.primary,
-    route: "/aerial-viewer",
-    features: ["Aerial views", "All sides (N/S/E/W)", "Live measurements", "3D visualization"],
-    badge: "NEW",
-  },
   {
     id: "property-scan",
     title: "Property Scanner",
@@ -86,12 +74,6 @@ const MEASUREMENT_TOOLS: MeasurementTool[] = [
 ];
 
 const INTEGRATIONS = [
-  {
-    name: "EagleView",
-    description: "Premium aerial imagery and measurements",
-    icon: Eye,
-    status: "Available",
-  },
   {
     name: "Hover",
     description: "3D property models and measurements",
@@ -236,7 +218,7 @@ export default function MeasurementHubScreen() {
                 <Text style={styles.stepNumberText}>1</Text>
               </View>
               <View style={styles.stepContent}>
-                <Text style={styles.stepTitle}>Start with Aerial Viewer</Text>
+                <Text style={styles.stepTitle}>Start with Property Scanner</Text>
                 <Text style={styles.stepDescription}>
                   Get comprehensive property overview from all angles
                 </Text>

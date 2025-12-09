@@ -13,7 +13,7 @@ import {
   TextInput,
   Alert,
 } from "react-native";
-import { Plus, MapPin, Clock, CheckCircle, AlertCircle, DollarSign, TrendingUp, BarChart3, Ruler, Satellite, Layers, Users, Sparkles, Crown, FileText, Receipt, MessageSquare, Bot, Edit2, X, Target } from "lucide-react-native";
+import { Plus, MapPin, Clock, CheckCircle, AlertCircle, DollarSign, TrendingUp, BarChart3, Ruler, Layers, Users, Sparkles, Crown, FileText, Receipt, MessageSquare, Bot, Edit2, X, Target } from "lucide-react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import Colors from "@/constants/colors";
@@ -259,17 +259,7 @@ export default function HomeScreen() {
               <Text style={styles.actionLabel}>New Estimate</Text>
             </AnimatedButton>
 
-            <TouchableOpacity 
-              style={styles.actionButton}
-              onPress={() => router.push("/aerial-viewer")}
-            >
-              <View style={[styles.actionIcon, { backgroundColor: Colors.light.purple }]}>
-                <Satellite color="#FFF" size={24} />
-              </View>
-              <Text style={styles.actionLabel}>Aerial Viewer</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity 
+<TouchableOpacity 
               style={styles.actionButton}
               onPress={() => router.push("/pagos-ai-dashboard")}
             >
