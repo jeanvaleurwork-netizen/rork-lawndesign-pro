@@ -256,7 +256,27 @@ export default function ContractEditorScreen() {
       );
     } catch (error) {
       console.error("Error creating/sending contract:", error);
-      Alert.alert("Error", "Failed to create and send contract. Please try again.");
+      const errorMessage = error instanceof Error ? error.message : "Unknown error";
+      
+      if (errorMessage.includes("404") || errorMessage.includes("Backend not ready")) {
+        Alert.alert(
+          "Backend Starting",
+          "The backend is still starting up. Please wait a moment and try again.\n\nThis is normal on first launch.",
+          [
+            { text: "OK" },
+            { 
+              text: "Retry", 
+              onPress: () => handleSendForSigning() 
+            }
+          ]
+        );
+      } else {
+        Alert.alert(
+          "Error", 
+          `Failed to create and send contract.\n\nDetails: ${errorMessage}`,
+          [{ text: "OK" }]
+        );
+      }
     }
   };
 

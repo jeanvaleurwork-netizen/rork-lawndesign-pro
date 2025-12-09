@@ -56,7 +56,22 @@ const routes = [
   ] },
   { group: "AI Office", items: ["officeManager, imageAnalysis, jobCosting"] },
   { group: "Pagos AI", items: ["Payment analysis and predictions"] },
-  { group: "Receipt AI", items: ["Receipt scanning and tax calculations"] }
+  { group: "Receipt AI", items: ["Receipt scanning and tax calculations"] },
+  { group: "Contracts", items: [
+    "contracts.createContract (mutation) ✓",
+    "contracts.getContractsByCompany (query) ✓",
+    "contracts.getContractByToken (query) ✓",
+    "contracts.signContract (mutation) ✓",
+    "contracts.sendContractForSigning (mutation) ✓",
+    "contracts.createChangeOrder (mutation) ✓",
+    "contracts.createCompletionCertificate (mutation) ✓",
+    "contracts.createWarranty (mutation) ✓",
+    "contracts.createMaterialApproval (mutation) ✓",
+    "contracts.approveMaterial (mutation) ✓",
+    "contracts.createSubcontractorAgreement (mutation) ✓",
+    "contracts.createLienWaiver (mutation) ✓"
+  ] },
+  { group: "Smart Contracts", items: ["Smart contract management"] }
 ];
 
 routes.forEach(({ group, items }) => {
