@@ -208,6 +208,7 @@ const styles = StyleSheet.create({
   },
   safeArea: {
     flex: 1,
+    paddingTop: 20,
   },
   scrollContent: {
     paddingTop: 24,
@@ -215,7 +216,7 @@ const styles = StyleSheet.create({
     paddingBottom: 32,
   },
   header: {
-    marginBottom: 20,
+    marginBottom: 16,
     paddingHorizontal: 24,
   },
   title: {
@@ -231,17 +232,20 @@ const styles = StyleSheet.create({
     lineHeight: 23,
   },
   tradesContainer: {
-    maxHeight: 420,
+    flex: 1,
     borderRadius: 16,
     backgroundColor: "rgba(255, 255, 255, 0.1)",
-    padding: 12,
-    marginBottom: 32,
+    marginHorizontal: 24,
+    marginBottom: 16,
+    overflow: "hidden",
   },
   tradesScrollView: {
     flex: 1,
+    paddingHorizontal: 12,
+    paddingTop: 12,
   },
   tradesScrollContent: {
-    paddingBottom: 12,
+    paddingBottom: 16,
   },
   tradeCard: {
     backgroundColor: "#FFFFFF",
@@ -273,8 +277,9 @@ const styles = StyleSheet.create({
   },
   footer: {
     paddingHorizontal: 24,
-    paddingBottom: 32,
-    paddingTop: 16,
+    paddingTop: 12,
+    paddingBottom: 16,
+    backgroundColor: "transparent",
   },
   continueButton: {
     backgroundColor: "#FFFFFF",
