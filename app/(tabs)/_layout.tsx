@@ -38,19 +38,25 @@ export default function TabLayout() {
               const options = props.descriptors[route.key].options;
               
               const hiddenRoutes = ['gallery', 'job-costing', 'daily-schedule'];
-              if (hiddenRoutes.includes(route.name)) return null;
+              if (hiddenRoutes.includes(route.name)) {
+                return <React.Fragment key={route.key} />;
+              }
 
               if (isCrew) {
                 const crewOnlyRoutes = ['index', 'schedule', 'crew-jobs', 'crew-timecards'];
-                if (!crewOnlyRoutes.includes(route.name)) return null;
+                if (!crewOnlyRoutes.includes(route.name)) {
+                  return <React.Fragment key={route.key} />;
+                }
               }
 
               if (isAdmin) {
                 const adminHiddenRoutes = ['crew-jobs', 'crew-timecards'];
-                if (adminHiddenRoutes.includes(route.name)) return null;
+                if (adminHiddenRoutes.includes(route.name)) {
+                  return <React.Fragment key={route.key} />;
+                }
                 
                 if (!canAccessTab(route.name)) {
-                  return null;
+                  return <React.Fragment key={route.key} />;
                 }
               }
 
@@ -82,7 +88,7 @@ export default function TabLayout() {
                       focused: isFocused 
                     })}
                   </View>
-                  {options.title && (
+                  {options.title ? (
                     <Text 
                       style={[
                         styles.tabLabel,
@@ -90,9 +96,9 @@ export default function TabLayout() {
                       ]}
                       numberOfLines={1}
                     >
-                      {options.title}
+                      {String(options.title)}
                     </Text>
-                  )}
+                  ) : null}
                 </TouchableOpacity>
               );
             })}
