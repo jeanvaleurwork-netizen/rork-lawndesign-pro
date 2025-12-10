@@ -82,6 +82,7 @@ export default function ContractEditorScreen() {
 
   const [showPreview, setShowPreview] = useState<boolean>(false);
   const [previewHtml, setPreviewHtml] = useState<string>("");
+  const [isGeneratingPreview, setIsGeneratingPreview] = useState<boolean>(false);
 
   const createContractMutation = trpc.contracts.createContract.useMutation();
   const sendContractMutation = trpc.contracts.sendContractForSigning.useMutation();
@@ -449,14 +450,98 @@ export default function ContractEditorScreen() {
     return templateHtml || html;
   };
 
-  const handlePreview = () => {
+  const handlePreview = async () => {
     if (selectedTypes.length === 0) {
       Alert.alert("No Contract Types", "Please select at least one contract type to preview");
       return;
     }
-    const html = generateContractPreview();
-    setPreviewHtml(html);
+
+    setIsGeneratingPreview(true);
     setShowPreview(true);
+
+    try {
+      const finalTotal = selectedServices.length > 0 ? calculateTotalFromServices() : parseFloat(totalAmount || "0");
+      const finalScope = generateScopeFromServices();
+
+      const contractContext = `
+Contract Information:
+- Client: ${clientName || 'Not specified'}
+- Email: ${clientEmail || 'Not specified'}
+- Project: ${projectName || 'Not specified'}
+- Total Amount: ${finalTotal.toLocaleString()}
+- Start Date: ${startDate || 'TBD'}
+- End Date: ${endDate || 'TBD'}
+- Warranty: ${warrantyYears || '1'} year(s)
+- Selected Contract Types: ${selectedTypes.join(', ')}
+- Trade: ${organization?.tradeType || 'General Contractor'}
+
+Scope of Work:
+${finalScope || 'Not specified'}
+
+Selected Services:
+${selectedServices.map((s, i) => `${i + 1}. ${s} - ${serviceAmounts[s] || '0'}`).join('\n') || 'None'}
+
+Payment Schedule:
+${paymentMilestones.map((m, i) => `${i + 1}. ${m.description} - ${m.percent}% (${((finalTotal * parseFloat(m.percent || "0")) / 100).toFixed(2)})`).join('\n')}
+
+Additional Notes:
+${notes || 'None'}
+      `;
+
+      const prompt = `You are a construction contract specialist. Generate a comprehensive, professional contract preview document that combines the following contract types: ${selectedTypes.join(', ')}.
+
+Context:
+${contractContext}
+
+Generate a complete HTML document with:
+1. A professional header with contract title and company branding
+2. Executive summary of the contract
+3. Detailed sections for each selected contract type
+4. Key terms and conditions
+5. Payment schedule visualization
+6. Scope of work breakdown
+7. Risk management and warranty information
+8. Signature blocks
+
+The HTML should be mobile-responsive and use modern styling with:
+- Clean typography
+- Professional color scheme (blue primary, grey accents)
+- Clear section headers
+- Tables for payment schedule
+- Callout boxes for important terms
+- Professional formatting throughout
+
+Return ONLY the complete HTML document with inline CSS, no markdown formatting.`;
+
+      const response = await fetch('https://rork.app/api/ai/text-generation', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          prompt,
+          projectId: 'cd0n1qkddyoc55k8emdlp',
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to generate preview');
+      }
+
+      const data = await response.json();
+      setPreviewHtml(data.text || generateContractPreview());
+    } catch (error) {
+      console.error('Error generating AI preview:', error);
+      Alert.alert(
+        'AI Preview Unavailable',
+        'Using standard preview template instead.',
+        [{ text: 'OK' }]
+      );
+      const html = generateContractPreview();
+      setPreviewHtml(html);
+    } finally {
+      setIsGeneratingPreview(false);
+    }
   };
 
   const handleSendForSigning = async () => {
@@ -1177,9 +1262,120 @@ export default function ContractEditorScreen() {
             <View style={{ width: 24 }} />
           </View>
           <ScrollView style={styles.modalContent}>
-            <View style={{ flex: 1, padding: 20, alignItems: "center", justifyContent: "center" }}>
-              <Text style={{color: Colors.light.text, fontSize: 16, textAlign: "center"}}>Preview available in web mode</Text>
-            </View>
+            {isGeneratingPreview ? (
+              <View style={styles.loadingContainer}>
+                <Sparkles color={Colors.light.primary} size={48} />
+                <Text style={styles.loadingTitle}>Generating AI Preview...</Text>
+                <Text style={styles.loadingSubtitle}>Creating a comprehensive contract document</Text>
+              </View>
+            ) : (
+              <View style={styles.previewContainer}>
+                <View style={styles.previewHeader}>
+                  <View style={styles.previewBadge}>
+                    <Sparkles color={Colors.light.primary} size={16} />
+                    <Text style={styles.previewBadgeText}>AI Enhanced</Text>
+                  </View>
+                </View>
+                
+                <View style={styles.previewInfo}>
+                  <Text style={styles.previewLabel}>Contract Types Selected:</Text>
+                  <View style={styles.previewTypes}>
+                    {selectedTypes.map(type => (
+                      <View key={type} style={styles.previewTypeBadge}>
+                        <Text style={styles.previewTypeText}>{type.replace(/_/g, ' ')}</Text>
+                      </View>
+                    ))}
+                  </View>
+                </View>
+
+                <View style={styles.previewSection}>
+                  <Text style={styles.previewSectionTitle}>Client Information</Text>
+                  <Text style={styles.previewText}>{clientName || 'Not specified'}</Text>
+                  <Text style={styles.previewTextMuted}>{clientEmail || 'No email'}</Text>
+                </View>
+
+                <View style={styles.previewSection}>
+                  <Text style={styles.previewSectionTitle}>Project Details</Text>
+                  <Text style={styles.previewText}>{projectName || 'Not specified'}</Text>
+                  <View style={styles.previewRow}>
+                    <Text style={styles.previewLabel}>Start:</Text>
+                    <Text style={styles.previewText}>{startDate || 'TBD'}</Text>
+                  </View>
+                  <View style={styles.previewRow}>
+                    <Text style={styles.previewLabel}>End:</Text>
+                    <Text style={styles.previewText}>{endDate || 'TBD'}</Text>
+                  </View>
+                </View>
+
+                <View style={styles.previewSection}>
+                  <Text style={styles.previewSectionTitle}>Financial Summary</Text>
+                  <Text style={styles.previewAmount}>
+                    ${(selectedServices.length > 0 ? calculateTotalFromServices() : parseFloat(totalAmount || '0')).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                  </Text>
+                </View>
+
+                {selectedServices.length > 0 && (
+                  <View style={styles.previewSection}>
+                    <Text style={styles.previewSectionTitle}>Selected Services ({selectedServices.length})</Text>
+                    {selectedServices.map(service => (
+                      <View key={service} style={styles.previewServiceRow}>
+                        <Text style={styles.previewText}>{service}</Text>
+                        <Text style={styles.previewServiceAmount}>
+                          ${parseFloat(serviceAmounts[service] || '0').toLocaleString()}
+                        </Text>
+                      </View>
+                    ))}
+                  </View>
+                )}
+
+                {paymentMilestones.length > 0 && (
+                  <View style={styles.previewSection}>
+                    <Text style={styles.previewSectionTitle}>Payment Schedule</Text>
+                    {paymentMilestones.map((m, i) => {
+                      const finalTotal = selectedServices.length > 0 ? calculateTotalFromServices() : parseFloat(totalAmount || '0');
+                      const amount = (finalTotal * parseFloat(m.percent || '0')) / 100;
+                      return (
+                        <View key={m.id} style={styles.previewMilestone}>
+                          <View style={styles.previewMilestoneHeader}>
+                            <Text style={styles.previewMilestoneNumber}>{i + 1}</Text>
+                            <Text style={styles.previewMilestoneDesc}>{m.description}</Text>
+                          </View>
+                          <View style={styles.previewMilestoneDetails}>
+                            <Text style={styles.previewMilestonePercent}>{m.percent}%</Text>
+                            <Text style={styles.previewMilestoneAmount}>
+                              ${amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                            </Text>
+                          </View>
+                        </View>
+                      );
+                    })}
+                  </View>
+                )}
+
+                {scopeOfWork && (
+                  <View style={styles.previewSection}>
+                    <Text style={styles.previewSectionTitle}>Scope of Work</Text>
+                    <Text style={styles.previewTextMultiline}>{scopeOfWork}</Text>
+                  </View>
+                )}
+
+                <View style={styles.previewSection}>
+                  <Text style={styles.previewSectionTitle}>Warranty</Text>
+                  <Text style={styles.previewText}>{warrantyYears || '1'} year(s) workmanship warranty</Text>
+                </View>
+
+                {notes && (
+                  <View style={styles.previewSection}>
+                    <Text style={styles.previewSectionTitle}>Additional Notes</Text>
+                    <Text style={styles.previewTextMultiline}>{notes}</Text>
+                  </View>
+                )}
+
+                <View style={styles.previewFooter}>
+                  <Text style={styles.previewFooterText}>This is a preview. The final document will include all legal terms, conditions, and signature blocks.</Text>
+                </View>
+              </View>
+            )}
           </ScrollView>
         </SafeAreaView>
       </Modal>
@@ -1774,7 +1970,183 @@ const styles = StyleSheet.create({
   },
   modalContent: {
     flex: 1,
+  },
+  loadingContainer: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 40,
+  },
+  loadingTitle: {
+    fontSize: 20,
+    fontWeight: "700" as const,
+    color: Colors.light.text,
+    marginTop: 20,
+    marginBottom: 8,
+  },
+  loadingSubtitle: {
+    fontSize: 14,
+    color: Colors.light.muted,
+    textAlign: "center",
+  },
+  previewContainer: {
     padding: 20,
+  },
+  previewHeader: {
+    marginBottom: 20,
+    alignItems: "center",
+  },
+  previewBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: `${Colors.light.primary}15`,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    gap: 6,
+  },
+  previewBadgeText: {
+    fontSize: 13,
+    fontWeight: "600" as const,
+    color: Colors.light.primary,
+  },
+  previewInfo: {
+    backgroundColor: Colors.light.card,
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: Colors.light.border,
+  },
+  previewTypes: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+    marginTop: 8,
+  },
+  previewTypeBadge: {
+    backgroundColor: Colors.light.primary,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+  },
+  previewTypeText: {
+    fontSize: 12,
+    fontWeight: "600" as const,
+    color: "#FFF",
+  },
+  previewSection: {
+    backgroundColor: Colors.light.card,
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: Colors.light.border,
+  },
+  previewSectionTitle: {
+    fontSize: 16,
+    fontWeight: "700" as const,
+    color: Colors.light.text,
+    marginBottom: 12,
+  },
+  previewLabel: {
+    fontSize: 13,
+    fontWeight: "600" as const,
+    color: Colors.light.muted,
+    marginRight: 8,
+  },
+  previewText: {
+    fontSize: 15,
+    color: Colors.light.text,
+    marginBottom: 4,
+  },
+  previewTextMuted: {
+    fontSize: 14,
+    color: Colors.light.muted,
+  },
+  previewTextMultiline: {
+    fontSize: 14,
+    color: Colors.light.text,
+    lineHeight: 20,
+  },
+  previewRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 4,
+  },
+  previewAmount: {
+    fontSize: 32,
+    fontWeight: "700" as const,
+    color: Colors.light.primary,
+  },
+  previewServiceRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingVertical: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.light.border,
+  },
+  previewServiceAmount: {
+    fontSize: 15,
+    fontWeight: "600" as const,
+    color: Colors.light.primary,
+  },
+  previewMilestone: {
+    backgroundColor: Colors.light.background,
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 8,
+  },
+  previewMilestoneHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 8,
+  },
+  previewMilestoneNumber: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: Colors.light.primary,
+    color: "#FFF",
+    fontSize: 12,
+    fontWeight: "700" as const,
+    textAlign: "center",
+    lineHeight: 24,
+    marginRight: 8,
+  },
+  previewMilestoneDesc: {
+    fontSize: 14,
+    fontWeight: "600" as const,
+    color: Colors.light.text,
+    flex: 1,
+  },
+  previewMilestoneDetails: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  previewMilestonePercent: {
+    fontSize: 13,
+    fontWeight: "600" as const,
+    color: Colors.light.muted,
+  },
+  previewMilestoneAmount: {
+    fontSize: 16,
+    fontWeight: "700" as const,
+    color: Colors.light.primary,
+  },
+  previewFooter: {
+    backgroundColor: `${Colors.light.primary}10`,
+    borderRadius: 12,
+    padding: 16,
+    marginTop: 8,
+  },
+  previewFooterText: {
+    fontSize: 13,
+    color: Colors.light.muted,
+    textAlign: "center",
+    lineHeight: 18,
   },
   fieldLabelRow: {
     flexDirection: "row",
