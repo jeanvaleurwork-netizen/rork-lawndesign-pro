@@ -1217,6 +1217,21 @@ export function getTradeSpecificClauses(tradeType?: TradeType): string {
           <li>Final walkthrough before completion certificate issued</li>
         </ul>
       `;
+    case 'garage_door':
+      return `
+        <h4>Garage Door-Specific Terms:</h4>
+        <ul>
+          <li>Licensed garage door technician performing all work</li>
+          <li>All installations comply with UL 325 safety standards</li>
+          <li>Spring replacement warranty: 1 year on labor and parts</li>
+          <li>Opener warranty per manufacturer specifications</li>
+          <li>Safety sensor installation and testing included</li>
+          <li>Emergency service available for failures</li>
+          <li>Door balance and tracking inspection included</li>
+          <li>Weather stripping and seals installed where applicable</li>
+          <li>Annual maintenance recommended</li>
+        </ul>
+      `;
     default:
       return '<p>Standard trade terms apply.</p>';
   }

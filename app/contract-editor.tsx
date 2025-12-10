@@ -29,6 +29,8 @@ import {
   Sparkles,
   Check,
   Mail,
+  Wallet,
+  X,
 } from "lucide-react-native";
 
 import Colors from "@/constants/colors";
@@ -59,6 +61,9 @@ export default function ContractEditorScreen() {
   const [notes, setNotes] = useState<string>("");
   const [selectedServices, setSelectedServices] = useState<string[]>([]);
   const [serviceAmounts, setServiceAmounts] = useState<Record<string, string>>({});
+  const [showBudgetModal, setShowBudgetModal] = useState<boolean>(false);
+  const [clientBudget, setClientBudget] = useState<string>("");
+  const [clientBudgetNotes, setClientBudgetNotes] = useState<string>("");
 
   const [paymentMilestones, setPaymentMilestones] = useState<
     { id: string; description: string; percent: string }[]
@@ -67,6 +72,8 @@ export default function ContractEditorScreen() {
     { id: "2", description: "Progress Payment", percent: "40" },
     { id: "3", description: "Final Payment", percent: "30" },
   ]);
+
+  const { clients, updateClient } = useData();
 
   const availableServices = useMemo(() => {
     if (!organization?.tradeType) return [];
@@ -809,7 +816,25 @@ export default function ContractEditorScreen() {
               <Text style={styles.sectionTitle}>Basic Information</Text>
               
               <View style={styles.formField}>
-                <Text style={styles.fieldLabel}>Client Name *</Text>
+                <View style={styles.fieldLabelRow}>
+                  <Text style={styles.fieldLabel}>Client Name *</Text>
+                  <TouchableOpacity
+                    style={styles.budgetIconButton}
+                    onPress={() => {
+                      const foundClient = clients.find(c => c.name === clientName);
+                      if (foundClient) {
+                        setClientBudget(foundClient.budget?.toString() || "");
+                        setClientBudgetNotes(foundClient.budgetNotes || "");
+                        setShowBudgetModal(true);
+                      } else {
+                        Alert.alert("Client Not Found", "Please select an existing client to manage budget.");
+                      }
+                    }}
+                  >
+                    <Wallet color={Colors.light.primary} size={20} />
+                    <Text style={styles.budgetIconText}>Budget</Text>
+                  </TouchableOpacity>
+                </View>
                 <TextInput
                   style={styles.input}
                   placeholder="Select or enter client name"
@@ -817,6 +842,14 @@ export default function ContractEditorScreen() {
                   value={clientName}
                   onChangeText={setClientName}
                 />
+                {clientName && clients.find(c => c.name === clientName)?.budget && (
+                  <View style={styles.budgetChip}>
+                    <Wallet color={Colors.light.success} size={14} />
+                    <Text style={styles.budgetChipText}>
+                      Budget: ${clients.find(c => c.name === clientName)?.budget?.toLocaleString()}
+                    </Text>
+                  </View>
+                )}
               </View>
 
               <View style={styles.formField}>
@@ -1151,6 +1184,150 @@ export default function ContractEditorScreen() {
             )}
           </ScrollView>
         </SafeAreaView>
+      </Modal>
+
+      <Modal
+        visible={showBudgetModal}
+        animationType="slide"
+        transparent
+        onRequestClose={() => setShowBudgetModal(false)}
+      >
+        <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          style={{ flex: 1, backgroundColor: "rgba(0, 0, 0, 0.5)", justifyContent: "flex-end" }}
+        >
+          <View style={styles.budgetModalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Client Budget Management</Text>
+              <TouchableOpacity onPress={() => setShowBudgetModal(false)}>
+                <X color={Colors.light.text} size={24} />
+              </TouchableOpacity>
+            </View>
+
+            <ScrollView style={styles.budgetModalScroll}>
+              <View style={styles.budgetModalBody}>
+                <View style={styles.budgetInfoCard}>
+                  <Wallet color={Colors.light.primary} size={32} />
+                  <Text style={styles.budgetInfoTitle}>Set Client Budget</Text>
+                  <Text style={styles.budgetInfoSubtitle}>
+                    Track and manage budget allocation for this client
+                  </Text>
+                </View>
+
+                <View style={styles.formField}>
+                  <Text style={styles.fieldLabel}>Budget Amount</Text>
+                  <View style={styles.inputWithIcon}>
+                    <DollarSign color={Colors.light.muted} size={20} />
+                    <TextInput
+                      style={[styles.input, styles.inputNoBorder]}
+                      placeholder="0.00"
+                      placeholderTextColor={Colors.light.muted}
+                      value={clientBudget}
+                      onChangeText={setClientBudget}
+                      keyboardType="numeric"
+                    />
+                  </View>
+                </View>
+
+                <View style={styles.formField}>
+                  <Text style={styles.fieldLabel}>Budget Notes</Text>
+                  <TextInput
+                    style={[styles.input, styles.textArea]}
+                    placeholder="Add notes about budget allocation, restrictions, or special terms..."
+                    placeholderTextColor={Colors.light.muted}
+                    value={clientBudgetNotes}
+                    onChangeText={setClientBudgetNotes}
+                    multiline
+                    numberOfLines={4}
+                    textAlignVertical="top"
+                  />
+                </View>
+
+                {clientBudget && parseFloat(clientBudget) > 0 && (
+                  <View style={styles.budgetSummaryCard}>
+                    <Text style={styles.budgetSummaryLabel}>Budget Summary</Text>
+                    <Text style={styles.budgetSummaryAmount}>
+                      ${parseFloat(clientBudget).toLocaleString(undefined, {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2,
+                      })}
+                    </Text>
+                    {selectedServices.length > 0 && (
+                      <View style={styles.budgetComparisonRow}>
+                        <Text style={styles.budgetComparisonLabel}>Contract Total:</Text>
+                        <Text style={styles.budgetComparisonValue}>
+                          ${calculateTotalFromServices().toLocaleString(undefined, {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2,
+                          })}
+                        </Text>
+                      </View>
+                    )}
+                    {selectedServices.length > 0 && parseFloat(clientBudget) > 0 && (
+                      <View style={styles.budgetComparisonRow}>
+                        <Text style={styles.budgetComparisonLabel}>Remaining:</Text>
+                        <Text
+                          style={[
+                            styles.budgetComparisonValue,
+                            parseFloat(clientBudget) - calculateTotalFromServices() < 0
+                              ? styles.budgetOverText
+                              : styles.budgetUnderText,
+                          ]}
+                        >
+                          ${(parseFloat(clientBudget) - calculateTotalFromServices()).toLocaleString(
+                            undefined,
+                            { minimumFractionDigits: 2, maximumFractionDigits: 2 }
+                          )}
+                        </Text>
+                      </View>
+                    )}
+                  </View>
+                )}
+              </View>
+            </ScrollView>
+
+            <View style={styles.budgetModalActions}>
+              <TouchableOpacity
+                style={styles.cancelButton}
+                onPress={() => setShowBudgetModal(false)}
+              >
+                <Text style={styles.cancelButtonText}>Cancel</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.saveButton}
+                onPress={async () => {
+                  const foundClient = clients.find(c => c.name === clientName);
+                  if (!foundClient) {
+                    Alert.alert("Error", "Client not found");
+                    return;
+                  }
+
+                  const budgetValue = clientBudget.trim() ? parseFloat(clientBudget) : undefined;
+                  if (clientBudget.trim() && (isNaN(budgetValue!) || budgetValue! < 0)) {
+                    Alert.alert("Invalid Amount", "Please enter a valid budget amount.");
+                    return;
+                  }
+
+                  try {
+                    await updateClient(foundClient.id, {
+                      budget: budgetValue,
+                      budgetNotes: clientBudgetNotes.trim() || undefined,
+                    });
+                    Alert.alert("Success", "Client budget updated successfully!");
+                    setShowBudgetModal(false);
+                  } catch (error) {
+                    console.error("Error updating budget:", error);
+                    Alert.alert("Error", "Failed to update budget. Please try again.");
+                  }
+                }}
+              >
+                <Save color="#FFF" size={18} />
+                <Text style={styles.saveButtonText}>Save Budget</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </KeyboardAvoidingView>
       </Modal>
     </SafeAreaView>
   );
@@ -1600,5 +1777,143 @@ const styles = StyleSheet.create({
   modalContent: {
     flex: 1,
     padding: 20,
+  },
+  fieldLabelRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 8,
+  },
+  budgetIconButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: `${Colors.light.primary}15`,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+    gap: 6,
+  },
+  budgetIconText: {
+    fontSize: 13,
+    fontWeight: "600" as const,
+    color: Colors.light.primary,
+  },
+  budgetChip: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: `${Colors.light.success}15`,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 8,
+    marginTop: 8,
+    gap: 6,
+  },
+  budgetChipText: {
+    fontSize: 13,
+    fontWeight: "600" as const,
+    color: Colors.light.success,
+  },
+  budgetModalContent: {
+    backgroundColor: Colors.light.card,
+    marginTop: "auto",
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    maxHeight: "90%",
+  },
+  budgetModalScroll: {
+    maxHeight: 500,
+  },
+  budgetModalBody: {
+    padding: 20,
+  },
+  budgetInfoCard: {
+    alignItems: "center",
+    backgroundColor: Colors.light.background,
+    padding: 24,
+    borderRadius: 16,
+    marginBottom: 24,
+  },
+  budgetInfoTitle: {
+    fontSize: 20,
+    fontWeight: "700" as const,
+    color: Colors.light.text,
+    marginTop: 12,
+    marginBottom: 4,
+  },
+  budgetInfoSubtitle: {
+    fontSize: 14,
+    color: Colors.light.muted,
+    textAlign: "center",
+  },
+  budgetSummaryCard: {
+    backgroundColor: Colors.light.background,
+    padding: 20,
+    borderRadius: 16,
+    marginTop: 16,
+  },
+  budgetSummaryLabel: {
+    fontSize: 14,
+    fontWeight: "600" as const,
+    color: Colors.light.muted,
+    marginBottom: 8,
+  },
+  budgetSummaryAmount: {
+    fontSize: 32,
+    fontWeight: "700" as const,
+    color: Colors.light.primary,
+    marginBottom: 16,
+  },
+  budgetComparisonRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingVertical: 8,
+    borderTopWidth: 1,
+    borderTopColor: Colors.light.border,
+  },
+  budgetComparisonLabel: {
+    fontSize: 15,
+    fontWeight: "600" as const,
+    color: Colors.light.text,
+  },
+  budgetComparisonValue: {
+    fontSize: 16,
+    fontWeight: "700" as const,
+    color: Colors.light.text,
+  },
+  budgetOverText: {
+    color: Colors.light.error,
+  },
+  budgetUnderText: {
+    color: Colors.light.success,
+  },
+  budgetModalActions: {
+    flexDirection: "row",
+    padding: 20,
+    gap: 12,
+    borderTopWidth: 1,
+    borderTopColor: Colors.light.border,
+  },
+  cancelButton: {
+    backgroundColor: Colors.light.background,
+    borderWidth: 1,
+    borderColor: Colors.light.border,
+  },
+  cancelButtonText: {
+    fontSize: 15,
+    fontWeight: "600" as const,
+    color: Colors.light.text,
+  },
+  saveButton: {
+    backgroundColor: Colors.light.primary,
+    borderColor: Colors.light.primary,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  saveButtonText: {
+    fontSize: 15,
+    fontWeight: "600" as const,
+    color: "#FFF",
   },
 });
