@@ -75,6 +75,7 @@ function getSmartWarrantyYears(tradeType?: TradeType): number {
     drywall: 2,
     masonry: 5,
     carpentry: 3,
+    garage_door: 3,
   };
   
   return warrantyMap[tradeType] || 1;

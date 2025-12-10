@@ -106,6 +106,7 @@ export const [TradeProvider, useTrade] = createContextHook(() => {
       drywall: "Drywall",
       masonry: "Masonry",
       carpentry: "Carpentry",
+      garage_door: "Garage Door",
     };
     return names[trade] || trade;
   };

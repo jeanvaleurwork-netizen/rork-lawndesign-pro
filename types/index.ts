@@ -805,7 +805,8 @@ export type TradeType =
   | "flooring"
   | "drywall"
   | "masonry"
-  | "carpentry";
+  | "carpentry"
+  | "garage_door";
 
 export interface Organization {
   id: string;
