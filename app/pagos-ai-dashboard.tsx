@@ -72,10 +72,10 @@ export default function PagosAIDashboard() {
   }, [analyzePayments, predictPayments, optimizeCashFlow]);
 
   useEffect(() => {
-    if (!lastAnalysis) {
+    if (!lastAnalysis && !isLoading) {
       performAnalysis();
     }
-  }, [lastAnalysis, performAnalysis]);
+  }, []);
 
   const getHealthColor = (score: number) => {
     if (score >= 80) return Colors.light.success;
