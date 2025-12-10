@@ -38,6 +38,7 @@ import { getTradeServices } from "@/constants/trades";
 import { trpc } from "@/lib/trpc";
 import { useData } from "@/contexts/DataContext";
 import { generateId } from "@/utils/id-generator";
+import * as ContractTemplates from "@/constants/contract-templates";
 
 export default function ContractEditorScreen() {
   const router = useRouter();
@@ -258,8 +259,6 @@ export default function ContractEditorScreen() {
     templateVariables.payment_schedule_table = paymentScheduleTable;
     
     let templateHtml = "";
-    
-    import * as ContractTemplates from "@/constants/contract-templates";
     
     switch (primaryType) {
       case "PROJECT_CONTRACT":
