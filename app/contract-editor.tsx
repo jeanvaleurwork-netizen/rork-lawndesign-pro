@@ -1177,13 +1177,9 @@ export default function ContractEditorScreen() {
             <View style={{ width: 24 }} />
           </View>
           <ScrollView style={styles.modalContent}>
-            {Platform.OS === 'web' ? (
-              <div dangerouslySetInnerHTML={{ __html: previewHtml }} />
-            ) : (
-              <View style={{ flex: 1, padding: 20, alignItems: "center", justifyContent: "center" }}>
-                <Text style={{color: Colors.light.text, fontSize: 16, textAlign: "center"}}>Preview available in web mode</Text>
-              </View>
-            )}
+            <View style={{ flex: 1, padding: 20, alignItems: "center", justifyContent: "center" }}>
+              <Text style={{color: Colors.light.text, fontSize: 16, textAlign: "center"}}>Preview available in web mode</Text>
+            </View>
           </ScrollView>
         </SafeAreaView>
       </Modal>
