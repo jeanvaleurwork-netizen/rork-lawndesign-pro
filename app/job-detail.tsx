@@ -107,12 +107,18 @@ export default function JobDetailScreen() {
 
   const [editModalVisible, setEditModalVisible] = useState(false);
   const [checklistModalVisible, setChecklistModalVisible] = useState(false);
+  const [budgetModalVisible, setBudgetModalVisible] = useState(false);
   const [editedJobData, setEditedJobData] = useState({
     service: job?.service || "",
     propertyAddress: job?.propertyAddress || "",
     notes: job?.notes || "",
     budgetedCost: job?.budgetedCost?.toString() || "",
     actualCost: job?.actualCost?.toString() || "",
+  });
+  const [editedBudgetData, setEditedBudgetData] = useState({
+    budgetedCost: job?.budgetedCost?.toString() || "",
+    actualCost: job?.actualCost?.toString() || "",
+    notes: "",
   });
   const [newChecklistItem, setNewChecklistItem] = useState("");
   const [editingChecklistId, setEditingChecklistId] = useState<string | null>(null);
@@ -156,6 +162,34 @@ export default function JobDetailScreen() {
     });
     setEditModalVisible(false);
     Alert.alert("Success", "Job details updated successfully");
+  };
+
+  const handleSaveBudgetDetails = () => {
+    const budgetedCost = parseFloat(editedBudgetData.budgetedCost);
+    const actualCost = parseFloat(editedBudgetData.actualCost);
+    
+    if (isNaN(budgetedCost) || budgetedCost <= 0) {
+      Alert.alert("Error", "Please enter a valid budgeted cost");
+      return;
+    }
+    
+    updateJob(job.id, {
+      budgetedCost,
+      actualCost: actualCost > 0 ? actualCost : undefined,
+    });
+    
+    if (editedBudgetData.notes.trim()) {
+      const budgetNote: Note = {
+        id: Date.now().toString(),
+        text: `Budget Update: ${editedBudgetData.notes}`,
+        createdAt: new Date().toISOString(),
+        priority: "high" as const,
+      };
+      setJobNotes([...jobNotes, budgetNote]);
+    }
+    
+    setBudgetModalVisible(false);
+    Alert.alert("Success", "Budget details updated successfully");
   };
 
   const handleAddChecklistItem = () => {
@@ -415,39 +449,64 @@ export default function JobDetailScreen() {
           </View>
 
           {isAdmin && (
-            <View style={styles.card}>
-              <View style={styles.cardHeader}>
-                <DollarSign color={Colors.light.primary} size={20} />
-                <Text style={styles.cardTitle}>Payment Details</Text>
-              </View>
-              <View style={styles.paymentGrid}>
-                <View style={styles.paymentItem}>
-                  <Text style={styles.paymentLabel}>Estimate</Text>
-                  <Text style={styles.paymentValue}>
-                    ${(job.budgetedCost || 0).toLocaleString()}
-                  </Text>
+            <TouchableOpacity 
+              activeOpacity={0.7}
+              onPress={() => {
+                setEditedBudgetData({
+                  budgetedCost: job?.budgetedCost?.toString() || "",
+                  actualCost: job?.actualCost?.toString() || "",
+                  notes: "",
+                });
+                setBudgetModalVisible(true);
+              }}
+            >
+              <View style={styles.card}>
+                <View style={styles.cardHeader}>
+                  <DollarSign color={Colors.light.primary} size={20} />
+                  <Text style={styles.cardTitle}>Payment Details</Text>
+                  <Edit color={Colors.light.primary} size={18} style={{ marginLeft: "auto" }} />
                 </View>
-                {job.actualCost && (
+                <View style={styles.paymentGrid}>
                   <View style={styles.paymentItem}>
-                    <Text style={styles.paymentLabel}>Actual Cost</Text>
-                    <Text style={[styles.paymentValue, budgetStatus === "over" && styles.overBudget]}>
-                      ${job.actualCost.toLocaleString()}
+                    <Text style={styles.paymentLabel}>Estimate</Text>
+                    <Text style={styles.paymentValue}>
+                      ${(job.budgetedCost || 0).toLocaleString()}
                     </Text>
                   </View>
-                )}
-                <View style={styles.paymentItem}>
-                  <Text style={styles.paymentLabel}>Budget Status</Text>
-                  <View style={[
-                    styles.budgetBadge,
-                    budgetStatus === "on-track" && styles.budget_ontrack,
-                    budgetStatus === "over" && styles.budget_over,
-                    budgetStatus === "under" && styles.budget_under,
-                  ]}>
-                    <Text style={styles.budgetBadgeText}>{budgetStatus}</Text>
+                  {job.actualCost && (
+                    <View style={styles.paymentItem}>
+                      <Text style={styles.paymentLabel}>Actual Cost</Text>
+                      <Text style={[styles.paymentValue, budgetStatus === "over" && styles.overBudget]}>
+                        ${job.actualCost.toLocaleString()}
+                      </Text>
+                    </View>
+                  )}
+                  <View style={styles.paymentItem}>
+                    <Text style={styles.paymentLabel}>Budget Status</Text>
+                    <View style={[
+                      styles.budgetBadge,
+                      budgetStatus === "on-track" && styles.budget_ontrack,
+                      budgetStatus === "over" && styles.budget_over,
+                      budgetStatus === "under" && styles.budget_under,
+                    ]}>
+                      <Text style={styles.budgetBadgeText}>{budgetStatus}</Text>
+                    </View>
                   </View>
+                  {job.actualCost && job.budgetedCost && (
+                    <View style={styles.paymentItem}>
+                      <Text style={styles.paymentLabel}>Variance</Text>
+                      <Text style={[
+                        styles.paymentValue,
+                        job.actualCost > job.budgetedCost ? styles.overBudget : styles.underBudget,
+                      ]}>
+                        {job.actualCost > job.budgetedCost ? "+" : ""}
+                        ${(job.actualCost - job.budgetedCost).toLocaleString()}
+                      </Text>
+                    </View>
+                  )}
                 </View>
               </View>
-            </View>
+            </TouchableOpacity>
           )}
 
           <View style={styles.card}>
@@ -921,6 +980,125 @@ export default function JobDetailScreen() {
           </View>
         </View>
       </Modal>
+
+      <Modal
+        visible={budgetModalVisible}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setBudgetModalVisible(false)}
+      >
+        <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          style={styles.modalOverlay}
+        >
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Edit Budget Details</Text>
+              <TouchableOpacity onPress={() => setBudgetModalVisible(false)}>
+                <X color={Colors.light.text} size={24} />
+              </TouchableOpacity>
+            </View>
+
+            <ScrollView style={styles.modalBody} showsVerticalScrollIndicator={false}>
+              <View style={styles.budgetSummaryBox}>
+                <Text style={styles.budgetSummaryLabel}>Current Status</Text>
+                <View style={styles.budgetSummaryRow}>
+                  <Text style={styles.budgetSummaryText}>Budgeted:</Text>
+                  <Text style={styles.budgetSummaryValue}>
+                    ${(job.budgetedCost || 0).toLocaleString()}
+                  </Text>
+                </View>
+                {job.actualCost && (
+                  <View style={styles.budgetSummaryRow}>
+                    <Text style={styles.budgetSummaryText}>Actual:</Text>
+                    <Text style={[
+                      styles.budgetSummaryValue,
+                      budgetStatus === "over" && styles.overBudget,
+                    ]}>
+                      ${job.actualCost.toLocaleString()}
+                    </Text>
+                  </View>
+                )}
+                {job.actualCost && job.budgetedCost && (
+                  <View style={styles.budgetSummaryRow}>
+                    <Text style={styles.budgetSummaryText}>Variance:</Text>
+                    <Text style={[
+                      styles.budgetSummaryValue,
+                      job.actualCost > job.budgetedCost ? styles.overBudget : styles.underBudget,
+                    ]}>
+                      {job.actualCost > job.budgetedCost ? "+" : ""}
+                      ${(job.actualCost - job.budgetedCost).toLocaleString()}
+                    </Text>
+                  </View>
+                )}
+              </View>
+
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Client Estimate / Budgeted Cost ($)</Text>
+                <TextInput
+                  style={styles.input}
+                  value={editedBudgetData.budgetedCost}
+                  onChangeText={(text) => setEditedBudgetData({ ...editedBudgetData, budgetedCost: text })}
+                  placeholder="0.00"
+                  keyboardType="decimal-pad"
+                  placeholderTextColor={Colors.light.muted}
+                />
+                <Text style={styles.inputHint}>The amount quoted to the client</Text>
+              </View>
+
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Actual Cost / Job Cost ($)</Text>
+                <TextInput
+                  style={styles.input}
+                  value={editedBudgetData.actualCost}
+                  onChangeText={(text) => setEditedBudgetData({ ...editedBudgetData, actualCost: text })}
+                  placeholder="0.00"
+                  keyboardType="decimal-pad"
+                  placeholderTextColor={Colors.light.muted}
+                />
+                <Text style={styles.inputHint}>Total costs incurred (materials + labor + overhead)</Text>
+              </View>
+
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Budget Revision Notes (Optional)</Text>
+                <TextInput
+                  style={[styles.input, styles.textArea]}
+                  value={editedBudgetData.notes}
+                  onChangeText={(text) => setEditedBudgetData({ ...editedBudgetData, notes: text })}
+                  placeholder="Add reason for budget change, scope adjustments, etc."
+                  multiline
+                  numberOfLines={4}
+                  textAlignVertical="top"
+                  placeholderTextColor={Colors.light.muted}
+                />
+              </View>
+
+              <View style={styles.budgetTipsBox}>
+                <Text style={styles.budgetTipsTitle}>💡 Budget Tips</Text>
+                <Text style={styles.budgetTipsText}>• Update actual costs as materials and labor are spent</Text>
+                <Text style={styles.budgetTipsText}>• Track variance to improve future estimates</Text>
+                <Text style={styles.budgetTipsText}>• Add notes when making significant budget changes</Text>
+              </View>
+            </ScrollView>
+
+            <View style={styles.modalFooter}>
+              <TouchableOpacity 
+                style={styles.modalCancelButton}
+                onPress={() => setBudgetModalVisible(false)}
+              >
+                <Text style={styles.modalCancelText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity 
+                style={styles.modalSaveButton}
+                onPress={handleSaveBudgetDetails}
+              >
+                <Save color="#FFF" size={18} />
+                <Text style={styles.modalSaveText}>Save Budget</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </KeyboardAvoidingView>
+      </Modal>
     </View>
   );
 }
@@ -1143,6 +1321,9 @@ const styles = StyleSheet.create({
   },
   overBudget: {
     color: Colors.light.error,
+  },
+  underBudget: {
+    color: Colors.light.success,
   },
   budgetBadge: {
     paddingHorizontal: 12,
@@ -1589,5 +1770,58 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "700" as const,
     color: "#FFF",
+  },
+  budgetSummaryBox: {
+    backgroundColor: Colors.light.background,
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 20,
+    borderWidth: 1,
+    borderColor: Colors.light.border,
+  },
+  budgetSummaryLabel: {
+    fontSize: 12,
+    fontWeight: "600" as const,
+    color: Colors.light.muted,
+    textTransform: "uppercase" as const,
+    marginBottom: 12,
+  },
+  budgetSummaryRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 8,
+  },
+  budgetSummaryText: {
+    fontSize: 14,
+    color: Colors.light.text,
+  },
+  budgetSummaryValue: {
+    fontSize: 16,
+    fontWeight: "700" as const,
+    color: Colors.light.text,
+  },
+  inputHint: {
+    fontSize: 12,
+    color: Colors.light.muted,
+    marginTop: 6,
+  },
+  budgetTipsBox: {
+    backgroundColor: "#EEF2FF",
+    borderRadius: 12,
+    padding: 16,
+    marginTop: 8,
+  },
+  budgetTipsTitle: {
+    fontSize: 14,
+    fontWeight: "600" as const,
+    color: Colors.light.text,
+    marginBottom: 8,
+  },
+  budgetTipsText: {
+    fontSize: 13,
+    color: Colors.light.text,
+    marginBottom: 4,
+    lineHeight: 20,
   },
 });
