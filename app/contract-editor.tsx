@@ -846,7 +846,7 @@ export default function ContractEditorScreen() {
                   <View style={styles.budgetChip}>
                     <Wallet color={Colors.light.success} size={14} />
                     <Text style={styles.budgetChipText}>
-                      Budget: ${clients.find(c => c.name === clientName)?.budget?.toLocaleString()}
+                      {`Budget: ${clients.find(c => c.name === clientName)?.budget?.toLocaleString()}`}
                     </Text>
                   </View>
                 )}
