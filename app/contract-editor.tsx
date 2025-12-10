@@ -212,6 +212,73 @@ export default function ContractEditorScreen() {
 
     const finalTotal = selectedServices.length > 0 ? calculateTotalFromServices() : parseFloat(totalAmount || "0");
     const finalScope = generateScopeFromServices();
+    
+    const primaryType = selectedTypes[0];
+    
+    const templateVariables: Record<string, string> = {
+      company_name: organization?.name || "Your Company",
+      company_phone: "(555) 555-5555",
+      company_email: "contact@company.com",
+      company_license: "License #",
+      company_address: "123 Business St",
+      client_name: clientName || "Client Name",
+      client_email: clientEmail || "client@email.com",
+      client_phone: "Client Phone",
+      client_property_address: "Property Address",
+      project_name: projectName || "Project Name",
+      project_address: "Project Address",
+      current_date: new Date().toLocaleDateString(),
+      contract_total_amount: finalTotal.toLocaleString(undefined, { minimumFractionDigits: 2 }),
+      project_start_date: startDate || "TBD",
+      project_end_date: endDate || "TBD",
+      scope_of_work: finalScope || "To be determined",
+      warranty_years: warrantyYears || "1",
+      project_duration_text: "To be determined",
+      trade_specific_clauses: "Standard trade terms apply",
+      risk_clauses: finalTotal < 5000 ? "<p>Small project terms apply</p>" : "<p>Standard project terms apply</p>",
+    };
+    
+    let paymentScheduleTable = "<table style='width: 100%; border-collapse: collapse; margin: 16px 0;'>";
+    paymentScheduleTable += "<thead><tr style='background-color: #f3f4f6;'>";
+    paymentScheduleTable += "<th style='padding: 12px; text-align: left; border: 1px solid #e5e7eb;'>Payment</th>";
+    paymentScheduleTable += "<th style='padding: 12px; text-align: right; border: 1px solid #e5e7eb;'>Percent</th>";
+    paymentScheduleTable += "<th style='padding: 12px; text-align: right; border: 1px solid #e5e7eb;'>Amount</th>";
+    paymentScheduleTable += "</tr></thead><tbody>";
+    
+    paymentMilestones.forEach((m) => {
+      const amount = (finalTotal * parseFloat(m.percent || "0")) / 100;
+      paymentScheduleTable += "<tr>";
+      paymentScheduleTable += `<td style='padding: 12px; border: 1px solid #e5e7eb;'>${m.description}</td>`;
+      paymentScheduleTable += `<td style='padding: 12px; text-align: right; border: 1px solid #e5e7eb;'>${m.percent}%</td>`;
+      paymentScheduleTable += `<td style='padding: 12px; text-align: right; border: 1px solid #e5e7eb; font-weight: 600;'>${amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>`;
+      paymentScheduleTable += "</tr>";
+    });
+    
+    paymentScheduleTable += "</tbody></table>";
+    templateVariables.payment_schedule_table = paymentScheduleTable;
+    
+    let templateHtml = "";
+    
+    import * as ContractTemplates from "@/constants/contract-templates";
+    
+    switch (primaryType) {
+      case "PROJECT_CONTRACT":
+        templateHtml = ContractTemplates.PROJECT_CONTRACT_TEMPLATE;
+        break;
+      case "MSA":
+        templateHtml = ContractTemplates.MSA_TEMPLATE;
+        break;
+      case "WORK_ORDER":
+        templateHtml = ContractTemplates.WORK_ORDER_TEMPLATE;
+        break;
+      default:
+        templateHtml = ContractTemplates.PROJECT_CONTRACT_TEMPLATE;
+    }
+    
+    Object.keys(templateVariables).forEach((key) => {
+      const regex = new RegExp(`{{${key}}}`, 'g');
+      templateHtml = templateHtml.replace(regex, templateVariables[key]);
+    });
 
     let html = `
       <!DOCTYPE html>
@@ -219,7 +286,7 @@ export default function ContractEditorScreen() {
       <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Contract Preview</title>
+        <title>Contract Document - ${projectName || "Project"}</title>
         <style>
           * { margin: 0; padding: 0; box-sizing: border-box; }
           body {
@@ -360,11 +427,20 @@ export default function ContractEditorScreen() {
     `;
 
     html += `
+      <div style="margin-top: 60px; padding: 20px; background: #f7fafc; border-radius: 8px;">
+        <h3 style="color: #2d3748;">E-Signature Instructions</h3>
+        <p>This contract can be signed electronically via email or through our customer portal. Both methods are legally binding and comply with the ESIGN Act and UETA.</p>
+        <ul style="margin-left: 24px; color: #4a5568;">
+          <li>Email signature: Sign and return via secure email link</li>
+          <li>Portal signature: Sign online through customer portal with authentication</li>
+          <li>Digital signature: Upload scanned signature or use stylus/mouse to sign</li>
+        </ul>
+      </div>
       </body>
       </html>
     `;
 
-    return html;
+    return templateHtml || html;
   };
 
   const handlePreview = () => {
