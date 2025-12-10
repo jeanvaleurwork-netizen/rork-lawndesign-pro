@@ -67,6 +67,7 @@ import {
 } from "./routes/receipt-ai/route";
 import { contractsRouter } from "./routes/contracts/route";
 import { smartContractsRouter } from "./routes/smart-contracts/route";
+import { commercialRouter } from "./routes/commercial/route";
 
 console.log("[AppRouter] Initializing tRPC router");
 console.log("[AppRouter] Auth routes:", {
@@ -147,6 +148,7 @@ export const appRouter = createTRPCRouter({
   }),
   contracts: contractsRouter,
   smartContracts: smartContractsRouter,
+  commercial: commercialRouter,
 });
 
 console.log("[AppRouter] Router created successfully");

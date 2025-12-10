@@ -1408,3 +1408,63 @@ export interface PhoneIntakeLead {
   converted_to_job?: boolean;
   converted_to_estimate?: boolean;
 }
+
+export interface CommercialProperty {
+  id: string;
+  clientId: string;
+  name: string;
+  address: string;
+  propertyType: "commercial" | "warehouse" | "retail" | "office" | "industrial" | "multi-unit" | "mixed-use";
+  squareFootage?: number;
+  floors?: number;
+  notes?: string;
+  photos: string[];
+  createdDate: string;
+}
+
+export interface EquipmentAsset {
+  id: string;
+  propertyId: string;
+  name: string;
+  assetType: "hvac" | "electrical" | "plumbing" | "structural" | "other";
+  location: string;
+  modelNumber?: string;
+  serialNumber?: string;
+  installDate?: string;
+  warrantyExpiry?: string;
+  qrCodeValue: string;
+  notes?: string;
+  photos: string[];
+  maintenanceHistory: AssetMaintenanceRecord[];
+  createdDate: string;
+}
+
+export interface AssetMaintenanceRecord {
+  id: string;
+  date: string;
+  description: string;
+  performedBy: string;
+  cost?: number;
+  photos: string[];
+  notes?: string;
+}
+
+export type MaintenanceFrequency = "monthly" | "quarterly" | "semi-annual" | "annual" | "custom";
+
+export interface MaintenanceContract {
+  id: string;
+  propertyId: string;
+  contractName: string;
+  description: string;
+  frequency: MaintenanceFrequency;
+  startDate: string;
+  endDate?: string;
+  nextVisitDate: string;
+  contractValue?: number;
+  autoSchedule: boolean;
+  assignedCrew?: string[];
+  serviceChecklist: string[];
+  notes?: string;
+  status: "active" | "paused" | "cancelled" | "completed";
+  createdDate: string;
+}

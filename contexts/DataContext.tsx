@@ -1,7 +1,7 @@
 import createContextHook from "@nkzw/create-context-hook";
 import { useState, useEffect } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Job, Estimate, Client, Contract } from "@/types";
+import { Job, Estimate, Client, Contract, CommercialProperty, EquipmentAsset, MaintenanceContract } from "@/types";
 import { mockJobs } from "@/mocks/jobs";
 import { mockEstimates } from "@/mocks/estimates";
 import { mockClients } from "@/mocks/clients";
@@ -11,6 +11,9 @@ const STORAGE_KEYS = {
   ESTIMATES: "@contractoros_estimates",
   CLIENTS: "@contractoros_clients",
   CONTRACTS: "@contractoros_contracts",
+  COMMERCIAL_PROPERTIES: "@contractoros_commercial_properties",
+  EQUIPMENT_ASSETS: "@contractoros_equipment_assets",
+  MAINTENANCE_CONTRACTS: "@contractoros_maintenance_contracts",
 };
 
 export const [DataProvider, useData] = createContextHook(() => {
@@ -18,6 +21,9 @@ export const [DataProvider, useData] = createContextHook(() => {
   const [estimates, setEstimates] = useState<Estimate[]>([]);
   const [clients, setClients] = useState<Client[]>([]);
   const [contracts, setContracts] = useState<Contract[]>([]);
+  const [commercialProperties, setCommercialProperties] = useState<CommercialProperty[]>([]);
+  const [equipmentAssets, setEquipmentAssets] = useState<EquipmentAsset[]>([]);
+  const [maintenanceContracts, setMaintenanceContracts] = useState<MaintenanceContract[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [lastSync, setLastSync] = useState<Date | null>(null);
 
@@ -28,11 +34,22 @@ export const [DataProvider, useData] = createContextHook(() => {
   const loadAllData = async () => {
     try {
       setIsLoading(true);
-      const [jobsData, estimatesData, clientsData, contractsData] = await Promise.all([
+      const [
+        jobsData,
+        estimatesData,
+        clientsData,
+        contractsData,
+        commercialPropertiesData,
+        equipmentAssetsData,
+        maintenanceContractsData,
+      ] = await Promise.all([
         AsyncStorage.getItem(STORAGE_KEYS.JOBS),
         AsyncStorage.getItem(STORAGE_KEYS.ESTIMATES),
         AsyncStorage.getItem(STORAGE_KEYS.CLIENTS),
         AsyncStorage.getItem(STORAGE_KEYS.CONTRACTS),
+        AsyncStorage.getItem(STORAGE_KEYS.COMMERCIAL_PROPERTIES),
+        AsyncStorage.getItem(STORAGE_KEYS.EQUIPMENT_ASSETS),
+        AsyncStorage.getItem(STORAGE_KEYS.MAINTENANCE_CONTRACTS),
       ]);
 
       if (jobsData) {
@@ -62,6 +79,24 @@ export const [DataProvider, useData] = createContextHook(() => {
         setContracts([]);
       }
 
+      if (commercialPropertiesData) {
+        setCommercialProperties(JSON.parse(commercialPropertiesData));
+      } else {
+        setCommercialProperties([]);
+      }
+
+      if (equipmentAssetsData) {
+        setEquipmentAssets(JSON.parse(equipmentAssetsData));
+      } else {
+        setEquipmentAssets([]);
+      }
+
+      if (maintenanceContractsData) {
+        setMaintenanceContracts(JSON.parse(maintenanceContractsData));
+      } else {
+        setMaintenanceContracts([]);
+      }
+
       const syncTimeData = await AsyncStorage.getItem("@contractoros_last_sync");
       if (syncTimeData) {
         setLastSync(new Date(syncTimeData));
@@ -72,6 +107,9 @@ export const [DataProvider, useData] = createContextHook(() => {
       setEstimates(mockEstimates);
       setClients(mockClients);
       setContracts([]);
+      setCommercialProperties([]);
+      setEquipmentAssets([]);
+      setMaintenanceContracts([]);
     } finally {
       setIsLoading(false);
     }
@@ -84,6 +122,9 @@ export const [DataProvider, useData] = createContextHook(() => {
         AsyncStorage.setItem(STORAGE_KEYS.ESTIMATES, JSON.stringify(estimates)),
         AsyncStorage.setItem(STORAGE_KEYS.CLIENTS, JSON.stringify(clients)),
         AsyncStorage.setItem(STORAGE_KEYS.CONTRACTS, JSON.stringify(contracts)),
+        AsyncStorage.setItem(STORAGE_KEYS.COMMERCIAL_PROPERTIES, JSON.stringify(commercialProperties)),
+        AsyncStorage.setItem(STORAGE_KEYS.EQUIPMENT_ASSETS, JSON.stringify(equipmentAssets)),
+        AsyncStorage.setItem(STORAGE_KEYS.MAINTENANCE_CONTRACTS, JSON.stringify(maintenanceContracts)),
       ]);
       
       const now = new Date();
@@ -181,11 +222,82 @@ export const [DataProvider, useData] = createContextHook(() => {
     await loadAllData();
   };
 
+  const addCommercialProperty = async (property: CommercialProperty) => {
+    const updated = [...commercialProperties, property];
+    setCommercialProperties(updated);
+    await AsyncStorage.setItem(STORAGE_KEYS.COMMERCIAL_PROPERTIES, JSON.stringify(updated));
+  };
+
+  const updateCommercialProperty = async (propertyId: string, updates: Partial<CommercialProperty>) => {
+    const updated = commercialProperties.map((p) =>
+      p.id === propertyId ? { ...p, ...updates } : p
+    );
+    setCommercialProperties(updated);
+    await AsyncStorage.setItem(STORAGE_KEYS.COMMERCIAL_PROPERTIES, JSON.stringify(updated));
+  };
+
+  const deleteCommercialProperty = async (propertyId: string) => {
+    const updated = commercialProperties.filter((p) => p.id !== propertyId);
+    setCommercialProperties(updated);
+    await AsyncStorage.setItem(STORAGE_KEYS.COMMERCIAL_PROPERTIES, JSON.stringify(updated));
+    
+    const updatedAssets = equipmentAssets.filter((a) => a.propertyId !== propertyId);
+    setEquipmentAssets(updatedAssets);
+    await AsyncStorage.setItem(STORAGE_KEYS.EQUIPMENT_ASSETS, JSON.stringify(updatedAssets));
+    
+    const updatedContracts = maintenanceContracts.filter((c) => c.propertyId !== propertyId);
+    setMaintenanceContracts(updatedContracts);
+    await AsyncStorage.setItem(STORAGE_KEYS.MAINTENANCE_CONTRACTS, JSON.stringify(updatedContracts));
+  };
+
+  const addEquipmentAsset = async (asset: EquipmentAsset) => {
+    const updated = [...equipmentAssets, asset];
+    setEquipmentAssets(updated);
+    await AsyncStorage.setItem(STORAGE_KEYS.EQUIPMENT_ASSETS, JSON.stringify(updated));
+  };
+
+  const updateEquipmentAsset = async (assetId: string, updates: Partial<EquipmentAsset>) => {
+    const updated = equipmentAssets.map((a) =>
+      a.id === assetId ? { ...a, ...updates } : a
+    );
+    setEquipmentAssets(updated);
+    await AsyncStorage.setItem(STORAGE_KEYS.EQUIPMENT_ASSETS, JSON.stringify(updated));
+  };
+
+  const deleteEquipmentAsset = async (assetId: string) => {
+    const updated = equipmentAssets.filter((a) => a.id !== assetId);
+    setEquipmentAssets(updated);
+    await AsyncStorage.setItem(STORAGE_KEYS.EQUIPMENT_ASSETS, JSON.stringify(updated));
+  };
+
+  const addMaintenanceContract = async (contract: MaintenanceContract) => {
+    const updated = [...maintenanceContracts, contract];
+    setMaintenanceContracts(updated);
+    await AsyncStorage.setItem(STORAGE_KEYS.MAINTENANCE_CONTRACTS, JSON.stringify(updated));
+  };
+
+  const updateMaintenanceContract = async (contractId: string, updates: Partial<MaintenanceContract>) => {
+    const updated = maintenanceContracts.map((c) =>
+      c.id === contractId ? { ...c, ...updates } : c
+    );
+    setMaintenanceContracts(updated);
+    await AsyncStorage.setItem(STORAGE_KEYS.MAINTENANCE_CONTRACTS, JSON.stringify(updated));
+  };
+
+  const deleteMaintenanceContract = async (contractId: string) => {
+    const updated = maintenanceContracts.filter((c) => c.id !== contractId);
+    setMaintenanceContracts(updated);
+    await AsyncStorage.setItem(STORAGE_KEYS.MAINTENANCE_CONTRACTS, JSON.stringify(updated));
+  };
+
   return {
     jobs,
     estimates,
     clients,
     contracts,
+    commercialProperties,
+    equipmentAssets,
+    maintenanceContracts,
     isLoading,
     lastSync,
     addJob,
@@ -200,6 +312,15 @@ export const [DataProvider, useData] = createContextHook(() => {
     addContract,
     updateContract,
     deleteContract,
+    addCommercialProperty,
+    updateCommercialProperty,
+    deleteCommercialProperty,
+    addEquipmentAsset,
+    updateEquipmentAsset,
+    deleteEquipmentAsset,
+    addMaintenanceContract,
+    updateMaintenanceContract,
+    deleteMaintenanceContract,
     syncData,
     refreshData,
   };
