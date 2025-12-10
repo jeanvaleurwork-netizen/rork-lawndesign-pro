@@ -8,10 +8,12 @@ import {
   SafeAreaView,
   ActivityIndicator,
   Image,
+  Platform,
 } from "react-native";
 import { Stack, router } from "expo-router";
-import { Camera, Upload, AlertCircle, CheckCircle, ArrowRight, Home, ArrowLeft } from "lucide-react-native";
+import { Camera, Upload, CheckCircle, ArrowRight, Home, ArrowLeft, Sparkles } from "lucide-react-native";
 import * as ImagePicker from "expo-image-picker";
+import { generateObject } from "@rork-ai/toolkit-sdk";
 
 import Colors from "@/constants/colors";
 
@@ -69,36 +71,123 @@ export default function PhotoAnalysisScreen() {
     }
   };
 
+  const convertImageToBase64 = async (uri: string): Promise<string> => {
+    if (Platform.OS === "web") {
+      const response = await fetch(uri);
+      const blob = await response.blob();
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          const base64 = reader.result as string;
+          resolve(base64);
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+      });
+    } else {
+      const response = await fetch(uri);
+      const blob = await response.blob();
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          const base64 = reader.result as string;
+          resolve(base64);
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+      });
+    }
+  };
+
   const handleAnalyze = async () => {
     if (!selectedImage) return;
 
     setIsAnalyzing(true);
 
     try {
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      const base64Image = await convertImageToBase64(selectedImage);
 
-      const mockAnalysis: AnalysisResult = {
-        issue: "Overgrown lawn with weed infestation",
-        severity: "moderate",
-        materialsNeeded: [
-          "Premium Bermuda Grass Sod - 2,500 sq ft",
-          "Pre-emergent Herbicide",
-          "Top Soil - 3 cubic yards",
-          "Lawn Edging - 120 linear feet",
-        ],
-        estimatedCost: {
-          min: 2800,
-          max: 4200,
+      const analysisSchema = {
+        type: "object",
+        properties: {
+          issue: { type: "string", description: "Primary issue or problem identified" },
+          severity: { type: "string", enum: ["low", "moderate", "high"], description: "Severity level" },
+          materialsNeeded: { 
+            type: "array", 
+            items: { type: "string" },
+            description: "List of materials needed with quantities"
+          },
+          estimatedCost: {
+            type: "object",
+            properties: {
+              min: { type: "number", description: "Minimum estimated cost in dollars" },
+              max: { type: "number", description: "Maximum estimated cost in dollars" },
+            },
+          },
+          recommendations: {
+            type: "array",
+            items: { type: "string" },
+            description: "Step-by-step recommendations to fix the issue"
+          },
         },
-        recommendations: [
-          "Remove existing weeds and dead grass completely",
-          "Level ground and add top soil for proper drainage",
-          "Install new sod with proper irrigation setup",
-          "Apply pre-emergent herbicide after installation",
-          "Maintain regular watering schedule for first 2 weeks",
-        ],
       };
 
+      const result = await generateObject({
+        messages: [
+          {
+            role: "user",
+            content: [
+              {
+                type: "text",
+                text: "You are a professional landscaping and property inspector. Analyze this photo and identify any issues, damage, or maintenance needs. Provide the primary issue, severity level (low/moderate/high), materials needed with quantities, estimated cost range, and step-by-step recommendations to address the issue. Be specific and practical.",
+              },
+              {
+                type: "image",
+                image: base64Image,
+              },
+            ],
+          },
+        ],
+        schema: analysisSchema as any,
+      });
+
+      console.log("[Photo Analysis] AI Response:", result);
+
+      if (!result || typeof result !== 'object') {
+        throw new Error("Invalid AI response");
+      }
+
+      const analysis: AnalysisResult = {
+        issue: result.issue || "Unable to identify issue",
+        severity: (result.severity === "low" || result.severity === "moderate" || result.severity === "high") 
+          ? result.severity 
+          : "moderate",
+        materialsNeeded: Array.isArray(result.materialsNeeded) ? result.materialsNeeded : [],
+        estimatedCost: {
+          min: result.estimatedCost?.min || 0,
+          max: result.estimatedCost?.max || 0,
+        },
+        recommendations: Array.isArray(result.recommendations) ? result.recommendations : [],
+      };
+
+      setAnalysis(analysis);
+    } catch (error) {
+      console.error("[Photo Analysis] Error:", error);
+      const mockAnalysis: AnalysisResult = {
+        issue: "Unable to analyze photo. Please try again.",
+        severity: "moderate",
+        materialsNeeded: [
+          "Photo analysis unavailable",
+        ],
+        estimatedCost: {
+          min: 0,
+          max: 0,
+        },
+        recommendations: [
+          "Please try uploading a clearer photo",
+          "Ensure the image shows the property clearly",
+        ],
+      };
       setAnalysis(mockAnalysis);
     } finally {
       setIsAnalyzing(false);
@@ -142,10 +231,15 @@ export default function PhotoAnalysisScreen() {
       />
       <ScrollView style={styles.scrollView}>
         <View style={styles.content}>
-          <Text style={styles.title}>AI Photo Analysis</Text>
-          <Text style={styles.subtitle}>
-            Upload or take a photo to detect issues and get instant recommendations
-          </Text>
+          <View style={styles.headerBanner}>
+            <Sparkles color={Colors.light.primary} size={24} />
+            <View style={styles.headerTextContainer}>
+              <Text style={styles.title}>AI Photo Analysis</Text>
+              <Text style={styles.subtitle}>
+                Upload or take a photo to detect issues and get instant AI-powered recommendations
+              </Text>
+            </View>
+          </View>
 
           {!selectedImage ? (
             <View style={styles.uploadSection}>
@@ -191,10 +285,13 @@ export default function PhotoAnalysisScreen() {
                     disabled={isAnalyzing}
                   >
                     {isAnalyzing ? (
-                      <ActivityIndicator color="#FFF" />
+                      <>
+                        <ActivityIndicator color="#FFF" />
+                        <Text style={styles.analyzeButtonText}>Analyzing...</Text>
+                      </>
                     ) : (
                       <>
-                        <AlertCircle color="#FFF" size={20} />
+                        <Sparkles color="#FFF" size={20} />
                         <Text style={styles.analyzeButtonText}>Analyze with AI</Text>
                       </>
                     )}
@@ -318,10 +415,23 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   subtitle: {
-    fontSize: 16,
+    fontSize: 14,
     color: Colors.light.muted,
-    marginBottom: 32,
-    lineHeight: 22,
+    lineHeight: 20,
+  },
+  headerBanner: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: Colors.light.card,
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 24,
+    borderWidth: 1,
+    borderColor: Colors.light.border,
+    gap: 12,
+  },
+  headerTextContainer: {
+    flex: 1,
   },
   uploadSection: {
     gap: 16,

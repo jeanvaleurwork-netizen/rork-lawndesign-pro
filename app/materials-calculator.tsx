@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   SafeAreaView,
   TextInput,
+  ActivityIndicator,
 } from "react-native";
 import { Stack } from "expo-router";
 import {
@@ -16,7 +17,9 @@ import {
   DollarSign,
   ShoppingCart,
   Check,
+  Sparkles,
 } from "lucide-react-native";
+import { generateObject } from "@rork-ai/toolkit-sdk";
 
 import Colors from "@/constants/colors";
 
@@ -33,64 +36,144 @@ export default function MaterialsCalculatorScreen() {
   const [sqFootage, setSqFootage] = useState<string>("");
   const [calculated, setCalculated] = useState<boolean>(false);
   const [materials, setMaterials] = useState<Material[]>([]);
+  const [projectDescription, setProjectDescription] = useState<string>("");
+  const [isCalculating, setIsCalculating] = useState<boolean>(false);
+  const [useAI, setUseAI] = useState<boolean>(false);
 
-  const handleCalculate = () => {
+  const handleCalculate = async () => {
     const sqFt = parseFloat(sqFootage);
     if (isNaN(sqFt) || sqFt <= 0) return;
 
-    const calculatedMaterials: Material[] = [
-      {
-        id: "1",
-        name: "Premium Bermuda Sod",
-        unit: "sq ft",
-        unitPrice: 0.45,
-        quantity: Math.ceil(sqFt),
-        category: "sod",
-      },
-      {
-        id: "2",
-        name: "Top Soil",
-        unit: "cubic yard",
-        unitPrice: 35,
-        quantity: Math.ceil(sqFt / 100),
-        category: "soil",
-      },
-      {
-        id: "3",
-        name: "Premium Mulch",
-        unit: "cubic yard",
-        unitPrice: 42,
-        quantity: Math.ceil((sqFt * 0.2) / 100),
-        category: "mulch",
-      },
-      {
-        id: "4",
-        name: "Lawn Edging",
-        unit: "linear ft",
-        unitPrice: 2.5,
-        quantity: Math.ceil(Math.sqrt(sqFt) * 4),
-        category: "hardscape",
-      },
-      {
-        id: "5",
-        name: "Fertilizer Starter",
-        unit: "bag (50lb)",
-        unitPrice: 28,
-        quantity: Math.ceil(sqFt / 5000),
-        category: "soil",
-      },
-      {
-        id: "6",
-        name: "Installation Labor",
-        unit: "hour",
-        unitPrice: 65,
-        quantity: Math.ceil(sqFt / 500),
-        category: "labor",
-      },
-    ];
+    setIsCalculating(true);
 
-    setMaterials(calculatedMaterials);
-    setCalculated(true);
+    try {
+      if (useAI && projectDescription.trim()) {
+        const materialsSchema = {
+          type: "object",
+          properties: {
+            materials: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  name: { type: "string", description: "Material name" },
+                  unit: { type: "string", description: "Unit of measurement" },
+                  unitPrice: { type: "number", description: "Price per unit in dollars" },
+                  quantity: { type: "number", description: "Quantity needed" },
+                  category: { type: "string", enum: ["sod", "soil", "mulch", "hardscape", "plants", "labor"] },
+                },
+              },
+            },
+          },
+        };
+
+        const result = await generateObject({
+          messages: [
+            {
+              role: "user",
+              content: `You are a professional landscaping materials estimator. Based on the following project details, provide a comprehensive list of materials needed:
+
+Project Size: ${sqFt} square feet
+Project Description: ${projectDescription}
+
+Provide realistic materials with accurate quantities, units, and market prices. Include materials, soil amendments, hardscape items, plants if mentioned, and labor. Be specific and practical.`,
+            },
+          ],
+          schema: materialsSchema as any,
+        });
+
+        if (result?.materials && Array.isArray(result.materials)) {
+          const aiMaterials: Material[] = result.materials.map((m: any, idx: number) => ({
+            id: (idx + 1).toString(),
+            name: m.name || "Unknown Material",
+            unit: m.unit || "unit",
+            unitPrice: typeof m.unitPrice === 'number' ? m.unitPrice : 0,
+            quantity: typeof m.quantity === 'number' ? m.quantity : 0,
+            category: m.category || "soil",
+          }));
+          setMaterials(aiMaterials);
+        } else {
+          throw new Error("Invalid AI response");
+        }
+      } else {
+        const calculatedMaterials: Material[] = [
+          {
+            id: "1",
+            name: "Premium Bermuda Sod",
+            unit: "sq ft",
+            unitPrice: 0.45,
+            quantity: Math.ceil(sqFt),
+            category: "sod",
+          },
+          {
+            id: "2",
+            name: "Top Soil",
+            unit: "cubic yard",
+            unitPrice: 35,
+            quantity: Math.ceil(sqFt / 100),
+            category: "soil",
+          },
+          {
+            id: "3",
+            name: "Premium Mulch",
+            unit: "cubic yard",
+            unitPrice: 42,
+            quantity: Math.ceil((sqFt * 0.2) / 100),
+            category: "mulch",
+          },
+          {
+            id: "4",
+            name: "Lawn Edging",
+            unit: "linear ft",
+            unitPrice: 2.5,
+            quantity: Math.ceil(Math.sqrt(sqFt) * 4),
+            category: "hardscape",
+          },
+          {
+            id: "5",
+            name: "Fertilizer Starter",
+            unit: "bag (50lb)",
+            unitPrice: 28,
+            quantity: Math.ceil(sqFt / 5000),
+            category: "soil",
+          },
+          {
+            id: "6",
+            name: "Installation Labor",
+            unit: "hour",
+            unitPrice: 65,
+            quantity: Math.ceil(sqFt / 500),
+            category: "labor",
+          },
+        ];
+        setMaterials(calculatedMaterials);
+      }
+      setCalculated(true);
+    } catch (error) {
+      console.error("[Materials Calculator] Error:", error);
+      const calculatedMaterials: Material[] = [
+        {
+          id: "1",
+          name: "Premium Bermuda Sod",
+          unit: "sq ft",
+          unitPrice: 0.45,
+          quantity: Math.ceil(sqFt),
+          category: "sod",
+        },
+        {
+          id: "2",
+          name: "Top Soil",
+          unit: "cubic yard",
+          unitPrice: 35,
+          quantity: Math.ceil(sqFt / 100),
+          category: "soil",
+        },
+      ];
+      setMaterials(calculatedMaterials);
+      setCalculated(true);
+    } finally {
+      setIsCalculating(false);
+    }
   };
 
   const updateQuantity = (id: string, delta: number) => {
@@ -156,6 +239,21 @@ export default function MaterialsCalculatorScreen() {
 
           {!calculated ? (
             <View style={styles.inputSection}>
+              <TouchableOpacity
+                style={styles.aiToggle}
+                onPress={() => setUseAI(!useAI)}
+              >
+                <View style={[styles.aiToggleCircle, useAI && styles.aiToggleCircleActive]}>
+                  <Sparkles color={useAI ? "#FFF" : Colors.light.muted} size={16} />
+                </View>
+                <View style={styles.aiToggleText}>
+                  <Text style={styles.aiToggleTitle}>AI-Powered Calculation</Text>
+                  <Text style={styles.aiToggleSubtitle}>
+                    {useAI ? "Get smart recommendations" : "Use standard calculation"}
+                  </Text>
+                </View>
+              </TouchableOpacity>
+
               <Text style={styles.inputLabel}>Project Size (Square Feet)</Text>
               <TextInput
                 style={styles.input}
@@ -166,13 +264,39 @@ export default function MaterialsCalculatorScreen() {
                 onChangeText={setSqFootage}
               />
 
+              {useAI && (
+                <View>
+                  <Text style={styles.inputLabel}>Project Description (Optional)</Text>
+                  <TextInput
+                    style={[styles.input, styles.textArea]}
+                    placeholder="E.g., Full lawn replacement with irrigation, garden beds, and patio..."
+                    placeholderTextColor={Colors.light.muted}
+                    multiline
+                    numberOfLines={4}
+                    value={projectDescription}
+                    onChangeText={setProjectDescription}
+                  />
+                </View>
+              )}
+
               <TouchableOpacity
-                style={[styles.calculateButton, !sqFootage && styles.calculateButtonDisabled]}
+                style={[styles.calculateButton, (!sqFootage || isCalculating) && styles.calculateButtonDisabled]}
                 onPress={handleCalculate}
-                disabled={!sqFootage}
+                disabled={!sqFootage || isCalculating}
               >
-                <Calculator color="#FFF" size={20} />
-                <Text style={styles.calculateButtonText}>Calculate Materials</Text>
+                {isCalculating ? (
+                  <>
+                    <ActivityIndicator color="#FFF" size="small" />
+                    <Text style={styles.calculateButtonText}>Calculating...</Text>
+                  </>
+                ) : (
+                  <>
+                    {useAI ? <Sparkles color="#FFF" size={20} /> : <Calculator color="#FFF" size={20} />}
+                    <Text style={styles.calculateButtonText}>
+                      {useAI ? "Calculate with AI" : "Calculate Materials"}
+                    </Text>
+                  </>
+                )}
               </TouchableOpacity>
 
               <View style={styles.quickSizeSection}>
@@ -615,5 +739,45 @@ const styles = StyleSheet.create({
     color: "#FFF",
     fontSize: 15,
     fontWeight: "600" as const,
+  },
+  aiToggle: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: Colors.light.card,
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 20,
+    borderWidth: 1,
+    borderColor: Colors.light.border,
+    gap: 12,
+  },
+  aiToggleCircle: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: Colors.light.background,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  aiToggleCircleActive: {
+    backgroundColor: Colors.light.primary,
+  },
+  aiToggleText: {
+    flex: 1,
+  },
+  aiToggleTitle: {
+    fontSize: 16,
+    fontWeight: "600" as const,
+    color: Colors.light.text,
+    marginBottom: 4,
+  },
+  aiToggleSubtitle: {
+    fontSize: 13,
+    color: Colors.light.muted,
+  },
+  textArea: {
+    height: 100,
+    textAlignVertical: "top",
+    paddingTop: 16,
   },
 });
