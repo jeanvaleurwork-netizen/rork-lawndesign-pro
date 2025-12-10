@@ -28,6 +28,8 @@ import {
   DollarSign,
   AlertCircle,
   TrendingUp,
+  Edit3,
+  Save,
 } from "lucide-react-native";
 
 import Colors from "@/constants/colors";
@@ -36,7 +38,7 @@ import { useData } from "@/contexts/DataContext";
 
 export default function EstimateDetailScreen() {
   const params = useLocalSearchParams();
-  const { estimates, addEstimate, updateEstimate, clients, addClient } = useData();
+  const { estimates, addEstimate, updateEstimate, clients, addClient, updateClient } = useData();
   
   const estimateId = params.id as string | undefined;
   const existingEstimate = estimateId
@@ -58,6 +60,9 @@ export default function EstimateDetailScreen() {
   const [showClientPicker, setShowClientPicker] = useState<boolean>(false);
   const [showNewClientForm, setShowNewClientForm] = useState<boolean>(false);
   const [isSaving, setIsSaving] = useState<boolean>(false);
+  const [isEditingBudget, setIsEditingBudget] = useState<boolean>(false);
+  const [editedBudget, setEditedBudget] = useState<string>("");
+  const [editedBudgetNotes, setEditedBudgetNotes] = useState<string>("");
 
   const [newClientName, setNewClientName] = useState<string>("");
   const [newClientEmail, setNewClientEmail] = useState<string>("");
@@ -97,6 +102,46 @@ export default function EstimateDetailScreen() {
         return item;
       })
     );
+  };
+
+  const handleStartEditBudget = () => {
+    if (selectedClient) {
+      setEditedBudget(selectedClient.budget?.toString() || "");
+      setEditedBudgetNotes(selectedClient.budgetNotes || "");
+      setIsEditingBudget(true);
+    }
+  };
+
+  const handleCancelEditBudget = () => {
+    setIsEditingBudget(false);
+    setEditedBudget("");
+    setEditedBudgetNotes("");
+  };
+
+  const handleSaveBudget = async () => {
+    if (!selectedClient) return;
+
+    const budgetValue = parseFloat(editedBudget);
+    if (isNaN(budgetValue) || budgetValue < 0) {
+      Alert.alert("Invalid Budget", "Please enter a valid budget amount.");
+      return;
+    }
+
+    try {
+      const updatedClient: Client = {
+        ...selectedClient,
+        budget: budgetValue,
+        budgetNotes: editedBudgetNotes.trim(),
+      };
+
+      await updateClient(selectedClient.id, updatedClient);
+      setSelectedClient(updatedClient);
+      setIsEditingBudget(false);
+      Alert.alert("Success", "Client budget updated successfully!");
+    } catch (error) {
+      console.error("Error updating budget:", error);
+      Alert.alert("Error", "Failed to update budget. Please try again.");
+    }
   };
 
   const handleCreateNewClient = async () => {
@@ -576,30 +621,98 @@ export default function EstimateDetailScreen() {
             )}
           </View>
 
-          {selectedClient?.budget && (
+          {selectedClient && (
             <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Client Budget</Text>
+              <View style={styles.sectionHeader}>
+                <Text style={styles.sectionTitle}>Client Budget</Text>
+                {!isEditingBudget ? (
+                  <TouchableOpacity 
+                    style={styles.editBudgetButton}
+                    onPress={handleStartEditBudget}
+                  >
+                    <Edit3 color={Colors.light.primary} size={18} />
+                    <Text style={styles.editBudgetButtonText}>Edit</Text>
+                  </TouchableOpacity>
+                ) : (
+                  <View style={styles.budgetEditActions}>
+                    <TouchableOpacity 
+                      style={styles.cancelBudgetButton}
+                      onPress={handleCancelEditBudget}
+                    >
+                      <Text style={styles.cancelBudgetButtonText}>Cancel</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity 
+                      style={styles.saveBudgetButton}
+                      onPress={handleSaveBudget}
+                    >
+                      <Save color="#FFF" size={16} />
+                      <Text style={styles.saveBudgetButtonText}>Save</Text>
+                    </TouchableOpacity>
+                  </View>
+                )}
+              </View>
               <View style={styles.budgetCard}>
-                <View style={styles.budgetHeader}>
-                  <View style={styles.budgetIconContainer}>
-                    <DollarSign color={Colors.light.primary} size={20} />
-                  </View>
-                  <View style={styles.budgetHeaderText}>
-                    <Text style={styles.budgetLabel}>Available Budget</Text>
-                    <Text style={styles.budgetAmount}>
-                      ${selectedClient.budget.toLocaleString("en-US", { minimumFractionDigits: 2 })}
-                    </Text>
-                  </View>
-                </View>
+                {!isEditingBudget ? (
+                  <>
+                    <View style={styles.budgetHeader}>
+                      <View style={styles.budgetIconContainer}>
+                        <DollarSign color={Colors.light.primary} size={20} />
+                      </View>
+                      <View style={styles.budgetHeaderText}>
+                        <Text style={styles.budgetLabel}>Available Budget</Text>
+                        <Text style={styles.budgetAmount}>
+                          {selectedClient.budget 
+                            ? `${selectedClient.budget.toLocaleString("en-US", { minimumFractionDigits: 2 })}`
+                            : "No budget set"
+                          }
+                        </Text>
+                      </View>
+                    </View>
 
-                {selectedClient.budgetNotes && (
-                  <View style={styles.budgetNotesContainer}>
-                    <Text style={styles.budgetNotesLabel}>Budget Notes:</Text>
-                    <Text style={styles.budgetNotesText}>{selectedClient.budgetNotes}</Text>
+                    {selectedClient.budgetNotes && (
+                      <View style={styles.budgetNotesContainer}>
+                        <Text style={styles.budgetNotesLabel}>Budget Notes:</Text>
+                        <Text style={styles.budgetNotesText}>{selectedClient.budgetNotes}</Text>
+                      </View>
+                    )}
+                  </>
+                ) : (
+                  <View style={styles.budgetEditForm}>
+                    <View style={styles.formField}>
+                      <View style={styles.fieldLabel}>
+                        <DollarSign color={Colors.light.primary} size={18} />
+                        <Text style={styles.fieldLabelText}>Budget Amount</Text>
+                      </View>
+                      <TextInput
+                        style={styles.formInput}
+                        placeholder="5000.00"
+                        placeholderTextColor={Colors.light.muted}
+                        value={editedBudget}
+                        onChangeText={setEditedBudget}
+                        keyboardType="decimal-pad"
+                      />
+                    </View>
+
+                    <View style={styles.formField}>
+                      <View style={styles.fieldLabel}>
+                        <FileText color={Colors.light.primary} size={18} />
+                        <Text style={styles.fieldLabelText}>Budget Notes</Text>
+                      </View>
+                      <TextInput
+                        style={[styles.formInput, styles.textArea]}
+                        placeholder="Budget for seasonal lawn maintenance and improvements"
+                        placeholderTextColor={Colors.light.muted}
+                        value={editedBudgetNotes}
+                        onChangeText={setEditedBudgetNotes}
+                        multiline
+                        numberOfLines={3}
+                        textAlignVertical="top"
+                      />
+                    </View>
                   </View>
                 )}
 
-                {total > 0 && (
+                {total > 0 && selectedClient.budget && (
                   <>
                     <View style={styles.divider} />
                     <View style={styles.budgetComparisonRow}>
@@ -1397,5 +1510,55 @@ const styles = StyleSheet.create({
     color: "#92400E",
     fontWeight: "600" as const,
     flex: 1,
+  },
+  editBudgetButton: {
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    gap: 6,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    backgroundColor: Colors.light.background,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: Colors.light.primary,
+  },
+  editBudgetButtonText: {
+    fontSize: 14,
+    fontWeight: "600" as const,
+    color: Colors.light.primary,
+  },
+  budgetEditActions: {
+    flexDirection: "row" as const,
+    gap: 8,
+  },
+  cancelBudgetButton: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    backgroundColor: Colors.light.background,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: Colors.light.border,
+  },
+  cancelBudgetButtonText: {
+    fontSize: 14,
+    fontWeight: "600" as const,
+    color: Colors.light.text,
+  },
+  saveBudgetButton: {
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    gap: 6,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    backgroundColor: Colors.light.primary,
+    borderRadius: 8,
+  },
+  saveBudgetButtonText: {
+    fontSize: 14,
+    fontWeight: "600" as const,
+    color: "#FFF",
+  },
+  budgetEditForm: {
+    gap: 16,
   },
 });
