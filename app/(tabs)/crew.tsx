@@ -84,6 +84,9 @@ export default function CrewScreen() {
   const [assignmentType, setAssignmentType] = useState<"job" | "schedule">("job");
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingMember, setEditingMember] = useState<CrewMember | null>(null);
+  const [showEditCrewModal, setShowEditCrewModal] = useState(false);
+  const [editingCrew, setEditingCrew] = useState<Crew | null>(null);
+  const [showAddMemberModal, setShowAddMemberModal] = useState(false);
 
   const [crews, setCrews] = useState<Crew[]>([
     {
@@ -429,7 +432,15 @@ export default function CrewScreen() {
                         <Text style={styles.crewMembers}>{crew.members.length} members</Text>
                       </View>
                     </View>
-                    <ChevronRight color={Colors.light.muted} size={20} />
+                    <TouchableOpacity
+                      style={styles.editCrewButton}
+                      onPress={() => {
+                        setEditingCrew(crew);
+                        setShowEditCrewModal(true);
+                      }}
+                    >
+                      <Edit3 size={18} color={Colors.light.primary} />
+                    </TouchableOpacity>
                   </View>
 
                   <View style={styles.crewPerformance}>
@@ -1226,6 +1237,156 @@ export default function CrewScreen() {
                 </View>
               </View>
             ))}
+          </ScrollView>
+        </SafeAreaView>
+      </Modal>
+
+      <Modal
+        visible={showEditCrewModal}
+        animationType="slide"
+        presentationStyle="pageSheet"
+        onRequestClose={() => setShowEditCrewModal(false)}
+      >
+        <SafeAreaView style={styles.modalContainer}>
+          <View style={styles.modalHeader}>
+            <Text style={styles.modalTitle}>Edit Crew</Text>
+            <TouchableOpacity onPress={() => setShowEditCrewModal(false)}>
+              <X size={24} color={Colors.light.text} />
+            </TouchableOpacity>
+          </View>
+
+          {editingCrew && (
+            <ScrollView style={styles.modalContent} showsVerticalScrollIndicator={false}>
+              <View style={styles.editSection}>
+                <Text style={styles.editLabel}>Crew Name</Text>
+                <TextInput
+                  style={styles.editInput}
+                  value={editingCrew.name}
+                  onChangeText={(text) => setEditingCrew({ ...editingCrew, name: text })}
+                  placeholder="Enter crew name"
+                  placeholderTextColor={Colors.light.muted}
+                />
+              </View>
+
+              <View style={styles.editSection}>
+                <View style={styles.sectionHeaderRow}>
+                  <Text style={styles.editLabel}>Team Members ({editingCrew.members.length})</Text>
+                  <TouchableOpacity
+                    style={styles.addMemberButton}
+                    onPress={() => {
+                      setShowAddMemberModal(true);
+                    }}
+                  >
+                    <Plus size={16} color={Colors.light.primary} />
+                    <Text style={styles.addMemberButtonText}>Add</Text>
+                  </TouchableOpacity>
+                </View>
+
+                {editingCrew.members.map((member, index) => (
+                  <View key={member.id} style={styles.editMemberRow}>
+                    <View style={styles.editMemberLeft}>
+                      <View style={[styles.memberAvatarSmall, { backgroundColor: getRoleColor(member.role) + "20" }]}>
+                        <User size={20} color={getRoleColor(member.role)} />
+                      </View>
+                      <View style={styles.editMemberInfo}>
+                        <Text style={styles.editMemberName}>{member.name}</Text>
+                        <Text style={styles.editMemberTitle}>{member.title}</Text>
+                      </View>
+                    </View>
+                    <TouchableOpacity
+                      style={styles.removeMemberButton}
+                      onPress={() => {
+                        const updatedMembers = editingCrew.members.filter((_, i) => i !== index);
+                        setEditingCrew({ ...editingCrew, members: updatedMembers });
+                      }}
+                    >
+                      <X size={18} color={Colors.light.error} />
+                    </TouchableOpacity>
+                  </View>
+                ))}
+
+                {editingCrew.members.length === 0 && (
+                  <Text style={styles.emptyText}>No members in this crew</Text>
+                )}
+              </View>
+
+              <View style={styles.editActions}>
+                <TouchableOpacity 
+                  style={styles.cancelButton}
+                  onPress={() => setShowEditCrewModal(false)}
+                >
+                  <Text style={styles.cancelButtonText}>Cancel</Text>
+                </TouchableOpacity>
+                <TouchableOpacity 
+                  style={styles.confirmButton}
+                  onPress={() => {
+                    const updatedCrews = crews.map(c => 
+                      c.id === editingCrew.id ? editingCrew : c
+                    );
+                    setCrews(updatedCrews);
+                    setShowEditCrewModal(false);
+                    Alert.alert("Success", "Crew updated successfully!");
+                  }}
+                >
+                  <Text style={styles.confirmButtonText}>Save Changes</Text>
+                </TouchableOpacity>
+              </View>
+            </ScrollView>
+          )}
+        </SafeAreaView>
+      </Modal>
+
+      <Modal
+        visible={showAddMemberModal}
+        animationType="slide"
+        presentationStyle="pageSheet"
+        onRequestClose={() => setShowAddMemberModal(false)}
+      >
+        <SafeAreaView style={styles.modalContainer}>
+          <View style={styles.modalHeader}>
+            <Text style={styles.modalTitle}>Add Member to Crew</Text>
+            <TouchableOpacity onPress={() => setShowAddMemberModal(false)}>
+              <X size={24} color={Colors.light.text} />
+            </TouchableOpacity>
+          </View>
+
+          <ScrollView style={styles.modalContent} showsVerticalScrollIndicator={false}>
+            <Text style={styles.sectionTitle}>Available Members</Text>
+            {allMembers
+              .filter(member => !editingCrew?.members.find(m => m.id === member.id))
+              .map((member) => (
+                <TouchableOpacity
+                  key={member.id}
+                  style={styles.addMemberCard}
+                  onPress={() => {
+                    if (editingCrew) {
+                      setEditingCrew({
+                        ...editingCrew,
+                        members: [...editingCrew.members, member],
+                      });
+                      setShowAddMemberModal(false);
+                    }
+                  }}
+                >
+                  <View style={[styles.memberAvatarSmall, { backgroundColor: getRoleColor(member.role) + "20" }]}>
+                    <User size={20} color={getRoleColor(member.role)} />
+                  </View>
+                  <View style={styles.addMemberCardInfo}>
+                    <Text style={styles.addMemberCardName}>{member.name}</Text>
+                    <Text style={styles.addMemberCardTitle}>{member.title}</Text>
+                    <View style={styles.memberStats}>
+                      <Star size={12} color={Colors.light.warning} fill={Colors.light.warning} />
+                      <Text style={styles.memberRating}>{member.avgRating.toFixed(1)}</Text>
+                      <Text style={styles.memberJobs}>• {member.jobsCompleted} jobs</Text>
+                    </View>
+                  </View>
+                  <ChevronRight size={20} color={Colors.light.muted} />
+                </TouchableOpacity>
+              ))}
+            
+            {allMembers.filter(member => !editingCrew?.members.find(m => m.id === member.id)).length === 0 && (
+              <Text style={styles.emptyText}>All members are already in this crew</Text>
+            )}
           </ScrollView>
         </SafeAreaView>
       </Modal>
@@ -2323,5 +2484,92 @@ const styles = StyleSheet.create({
     gap: 12,
     marginTop: 20,
     marginBottom: 40,
+  },
+  editCrewButton: {
+    padding: 8,
+    borderRadius: 8,
+    backgroundColor: Colors.light.background,
+  },
+  sectionHeaderRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 12,
+  },
+  addMemberButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    backgroundColor: Colors.light.background,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: Colors.light.primary,
+  },
+  addMemberButtonText: {
+    fontSize: 13,
+    fontWeight: "600" as const,
+    color: Colors.light.primary,
+  },
+  editMemberRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    backgroundColor: Colors.light.card,
+    padding: 12,
+    borderRadius: 12,
+    marginBottom: 8,
+    borderWidth: 1,
+    borderColor: Colors.light.border,
+  },
+  editMemberLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    flex: 1,
+  },
+  editMemberInfo: {
+    flex: 1,
+  },
+  editMemberName: {
+    fontSize: 15,
+    fontWeight: "600" as const,
+    color: Colors.light.text,
+    marginBottom: 2,
+  },
+  editMemberTitle: {
+    fontSize: 13,
+    color: Colors.light.muted,
+  },
+  removeMemberButton: {
+    padding: 8,
+    borderRadius: 8,
+    backgroundColor: Colors.light.background,
+  },
+  addMemberCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: Colors.light.card,
+    padding: 16,
+    borderRadius: 12,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: Colors.light.border,
+  },
+  addMemberCardInfo: {
+    flex: 1,
+    marginLeft: 12,
+  },
+  addMemberCardName: {
+    fontSize: 15,
+    fontWeight: "600" as const,
+    color: Colors.light.text,
+    marginBottom: 2,
+  },
+  addMemberCardTitle: {
+    fontSize: 13,
+    color: Colors.light.muted,
+    marginBottom: 4,
   },
 });
