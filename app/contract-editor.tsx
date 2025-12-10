@@ -1178,9 +1178,7 @@ export default function ContractEditorScreen() {
           </View>
           <ScrollView style={styles.modalContent}>
             {Platform.OS === 'web' ? (
-              <View style={{ flex: 1 }}>
-                <div dangerouslySetInnerHTML={{ __html: previewHtml }} />
-              </View>
+              <div dangerouslySetInnerHTML={{ __html: previewHtml }} />
             ) : (
               <View style={{ flex: 1, padding: 20, alignItems: "center", justifyContent: "center" }}>
                 <Text style={{color: Colors.light.text, fontSize: 16, textAlign: "center"}}>Preview available in web mode</Text>
@@ -1899,6 +1897,11 @@ const styles = StyleSheet.create({
     borderTopColor: Colors.light.border,
   },
   cancelButton: {
+    flex: 1,
+    paddingVertical: 14,
+    borderRadius: 10,
+    alignItems: "center",
+    justifyContent: "center",
     backgroundColor: Colors.light.background,
     borderWidth: 1,
     borderColor: Colors.light.border,
@@ -1909,10 +1912,15 @@ const styles = StyleSheet.create({
     color: Colors.light.text,
   },
   saveButton: {
+    flex: 1,
+    paddingVertical: 14,
+    borderRadius: 10,
     backgroundColor: Colors.light.primary,
+    borderWidth: 1,
     borderColor: Colors.light.primary,
     flexDirection: "row",
     alignItems: "center",
+    justifyContent: "center",
     gap: 8,
   },
   saveButtonText: {
