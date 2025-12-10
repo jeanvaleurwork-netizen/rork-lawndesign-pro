@@ -18,9 +18,7 @@ import {
   TrendingUp, 
   Building2,
   FileText,
-  Users,
   Shield,
-  BarChart3,
   Star,
 } from "lucide-react-native";
 import { useSubscription } from "@/contexts/SubscriptionContext";
@@ -34,7 +32,7 @@ interface TierFeature {
 }
 
 interface PricingTier {
-  id: "basic" | "pro" | "elite" | "enterprise";
+  id: "starter" | "pro" | "enterprise" | "elite" | "elitePlus";
   name: string;
   tagline: string;
   monthlyPrice: number;
@@ -48,84 +46,112 @@ interface PricingTier {
 
 const PRICING_TIERS: PricingTier[] = [
   {
-    id: "basic",
-    name: "Basic",
-    tagline: "Start Simple",
-    monthlyPrice: 69,
-    annualPrice: 828,
-    aiCredits: 15,
+    id: "starter",
+    name: "Starter",
+    tagline: "Run Your Business Professionally",
+    monthlyPrice: 99,
+    annualPrice: 1188,
+    aiCredits: 50,
     icon: FileText,
     iconColor: "#3B82F6",
     features: [
-      { text: "Estimates & Invoices", included: true },
-      { text: "Basic Contracts", included: true },
-      { text: "Crew Clock (5 members)", included: true },
-      { text: "Customer Portal Access", included: true },
-      { text: "15 AI Credits/month", included: true },
-      { text: "Unlimited Contracts", included: false },
-      { text: "Full Legal Suite", included: false },
-      { text: "Job Profit Analysis", included: false },
+      { text: "Client CRM (contacts, properties, job history)", included: true },
+      { text: "AI Phone Intake (never miss a call)", included: true },
+      { text: "Estimates & Invoices (PDFs)", included: true },
+      { text: "Job Scheduling (calendar view)", included: true },
+      { text: "Job Tracking + Photos", included: true },
+      { text: "Client Payment Records", included: true },
+      { text: "Basic Dashboard Reporting", included: true },
+      { text: "50 AI Credits/month", included: true },
     ],
   },
   {
     id: "pro",
     name: "Pro",
-    tagline: "Scale Revenue",
-    monthlyPrice: 149,
-    annualPrice: 1788,
-    aiCredits: 200,
+    tagline: "Know Actual Costs, Track Crews",
+    monthlyPrice: 299,
+    annualPrice: 3588,
+    aiCredits: 300,
     popular: true,
     icon: TrendingUp,
     iconColor: "#8B5CF6",
     features: [
-      { text: "Everything in Basic", included: true },
-      { text: "Unlimited Contracts", included: true },
-      { text: "Full Legal Suite", included: true },
-      { text: "Job Profit Analysis", included: true },
-      { text: "200 AI Credits/month", included: true },
-      { text: "Receipt Scanning", included: true },
-      { text: "Full Crew Management", included: true },
-      { text: "Advanced Scheduling", included: true },
-    ],
-  },
-  {
-    id: "elite",
-    name: "Business Elite",
-    tagline: "Run Everything",
-    monthlyPrice: 349,
-    annualPrice: 4188,
-    aiCredits: 600,
-    icon: Crown,
-    iconColor: "#F59E0B",
-    features: [
-      { text: "Everything in Pro", included: true },
-      { text: "Unlimited AI Scanning", included: true },
-      { text: "Payroll Analytics", included: true },
-      { text: "Priority Support", included: true },
-      { text: "600 AI Credits/month", included: true },
-      { text: "Damage Detection", included: true },
-      { text: "Advanced Analytics", included: true },
-      { text: "Custom Reports", included: true },
+      { text: "Everything in Starter", included: true },
+      { text: "Crew Portal (mobile login)", included: true },
+      { text: "Job Status Tracking", included: true },
+      { text: "GPS Timecards + Time Tracking", included: true },
+      { text: "Material Tracking per Job", included: true },
+      { text: "Profit Calculator per Estimate", included: true },
+      { text: "Receipt Scanner (AI cost extraction)", included: true },
+      { text: "Contract Templates + E-Signatures", included: true },
+      { text: "Customizable Job Checklists", included: true },
+      { text: "Revenue & Profit Dashboard", included: true },
     ],
   },
   {
     id: "enterprise",
     name: "Enterprise",
-    tagline: "Commercial Operations",
+    tagline: "Automate Operations & Scale",
     monthlyPrice: 999,
     annualPrice: 11988,
-    aiCredits: 2000,
+    aiCredits: 1500,
     icon: Building2,
     iconColor: "#10B981",
     features: [
+      { text: "Everything in Pro", included: true },
+      { text: "Multi-Admin Dashboard (HQ)", included: true },
+      { text: "Payroll System (approve time, overtime)", included: true },
+      { text: "Subcontractor Management + Agreements", included: true },
+      { text: "Change Orders + Material Approvals", included: true },
+      { text: "Custom Reports (job/client/crew/material)", included: true },
+      { text: "Client Dropbox Portal", included: true },
+      { text: "Digital Warranty & Completion Certificates", included: true },
+      { text: "AI Smart Pricing Recommendations", included: true },
+      { text: "Full Branding on PDFs & Contracts", included: true },
+    ],
+  },
+  {
+    id: "elite",
+    name: "Elite",
+    tagline: "Operational Excellence",
+    monthlyPrice: 1999,
+    annualPrice: 23988,
+    aiCredits: 3000,
+    icon: Crown,
+    iconColor: "#F59E0B",
+    features: [
+      { text: "Everything in Enterprise", included: true },
+      { text: "AI Operations Manager (forecast scheduling)", included: true },
+      { text: "Business Intelligence Dashboards", included: true },
+      { text: "AI Safety Officer (risk scoring)", included: true },
+      { text: "Crew Performance Scoring", included: true },
+      { text: "Supplier Optimization", included: true },
+      { text: "Purchasing Automation (auto-POs)", included: true },
+      { text: "Custom Integration Suite (QuickBooks/Sage)", included: true },
+      { text: "Advanced Custom Reports Package", included: true },
+      { text: "Priority Support", included: true },
+    ],
+  },
+  {
+    id: "elitePlus",
+    name: "Elite PLUS",
+    tagline: "Enterprise Resource Planning",
+    monthlyPrice: 2499,
+    annualPrice: 29988,
+    aiCredits: 5000,
+    icon: Star,
+    iconColor: "#DC2626",
+    features: [
       { text: "Everything in Elite", included: true },
-      { text: "Custom Workflows", included: true },
-      { text: "Multi-Location Support", included: true },
-      { text: "API Integrations", included: true },
-      { text: "2000+ AI Credits/month", included: true },
-      { text: "Dedicated Engineer", included: true },
-      { text: "White-Label Options", included: true },
-      { text: "24/7 Priority Support", included: true },
+      { text: "Multi-Location Rollout System", included: true },
+      { text: "Regional Pricing AI", included: true },
+      { text: "Dedicated Account Manager", included: true },
+      { text: "Custom onboarding & dashboard config", included: true },
+      { text: "ERP-level integration (SAP, Sage 300, Procore)", included: true },
+      { text: "Corporate Safety Compliance Automation", included: true },
+      { text: "SOP Automation (flow-based procedures)", included: true },
+      { text: "AI-Driven Strategic Planning", included: true },
+      { text: "White-Glove Service", included: true },
     ],
   },
 ];
@@ -139,11 +165,11 @@ export default function PricingScreen() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [selectedTier, setSelectedTier] = useState<string | null>(null);
 
-  const handleSelectPlan = async (tierId: "basic" | "pro" | "elite" | "enterprise") => {
-    if (tierId === "enterprise") {
+  const handleSelectPlan = async (tierId: "starter" | "pro" | "enterprise" | "elite" | "elitePlus") => {
+    if (tierId === "elite" || tierId === "elitePlus") {
       Alert.alert(
-        "Enterprise Plan",
-        "Contact our sales team for a custom enterprise solution.",
+        "Elite Plan",
+        "Contact our sales team for enterprise-level solutions.",
         [
           { text: "Cancel", style: "cancel" },
           { text: "Contact Sales", onPress: () => console.log("Contact sales") },
@@ -355,7 +381,7 @@ export default function PricingScreen() {
                     <ActivityIndicator color="#FFF" />
                   ) : (
                     <Text style={styles.selectButtonText}>
-                      {isCurrentTier ? "Current Plan" : tier.id === "enterprise" ? "Contact Sales" : `Choose ${tier.name}`}
+                      {isCurrentTier ? "Current Plan" : (tier.id === "elite" || tier.id === "elitePlus") ? "Contact Sales" : `Choose ${tier.name}`}
                     </Text>
                   )}
                 </TouchableOpacity>
