@@ -229,7 +229,7 @@ export default function ContractsScreen() {
                 </Text>
               </View>
 
-              <View style={styles.dateRow}>
+              <View style={styles.contractDateRow}>
                 <Clock color={Colors.light.muted} size={14} />
                 <Text style={styles.dateText}>
                   {contract.startDateEstimated
@@ -264,46 +264,74 @@ export default function ContractsScreen() {
             {selectedContract && (
               <ScrollView style={styles.modalScroll}>
                 <View style={styles.modalBody}>
-                  <Text style={styles.detailLabel}>Client:</Text>
-                  <Text style={styles.detailValue}>{selectedContract.clientName}</Text>
-
-                  <Text style={styles.detailLabel}>Contract Type:</Text>
-                  <Text style={styles.detailValue}>
-                    {selectedContract.type === "MSA"
-                      ? "Master Service Agreement"
-                      : selectedContract.type === "PROJECT_CONTRACT"
-                      ? "Project Contract"
-                      : "Work Order"}
-                  </Text>
-
-                  <Text style={styles.detailLabel}>Total Amount:</Text>
-                  <Text style={styles.detailValue}>
-                    ${selectedContract.totalAmount.toLocaleString()}
-                  </Text>
-
-                  {selectedContract.startDateEstimated && (
-                    <>
-                      <Text style={styles.detailLabel}>Start Date:</Text>
-                      <Text style={styles.detailValue}>
-                        {new Date(selectedContract.startDateEstimated).toLocaleDateString()}
+                  <View style={styles.previewHeader}>
+                    <View
+                      style={[
+                        styles.statusBadge,
+                        { backgroundColor: getStatusBg(selectedContract.status) },
+                      ]}
+                    >
+                      <Text
+                        style={[styles.statusText, { color: getStatusColor(selectedContract.status) }]}
+                      >
+                        {selectedContract.status.charAt(0).toUpperCase() + selectedContract.status.slice(1)}
                       </Text>
-                    </>
-                  )}
+                    </View>
+                  </View>
+                  <View style={styles.previewInfoCard}>
+                    <Text style={styles.detailLabel}>Contract ID</Text>
+                    <Text style={styles.detailValue}>{selectedContract.id}</Text>
+                  </View>
 
-                  {selectedContract.endDateEstimated && (
-                    <>
-                      <Text style={styles.detailLabel}>Estimated Completion:</Text>
-                      <Text style={styles.detailValue}>
-                        {new Date(selectedContract.endDateEstimated).toLocaleDateString()}
-                      </Text>
-                    </>
-                  )}
+                  <View style={styles.previewInfoCard}>
+                    <Text style={styles.detailLabel}>Client</Text>
+                    <Text style={styles.detailValueLarge}>{selectedContract.clientName}</Text>
+                  </View>
 
-                  <Text style={styles.detailLabel}>Status:</Text>
-                  <Text style={styles.detailValue}>
-                    {selectedContract.status.charAt(0) +
-                      selectedContract.status.slice(1).toLowerCase()}
-                  </Text>
+                  <View style={styles.previewInfoCard}>
+                    <Text style={styles.detailLabel}>Contract Type</Text>
+                    <Text style={styles.detailValue}>
+                      {selectedContract.type === "MSA"
+                        ? "Master Service Agreement"
+                        : selectedContract.type === "PROJECT_CONTRACT"
+                        ? "Project Contract"
+                        : "Work Order"}
+                    </Text>
+                  </View>
+
+                  <View style={styles.previewAmountCard}>
+                    <Text style={styles.amountCardLabel}>Total Contract Amount</Text>
+                    <Text style={styles.amountCardValue}>
+                      ${selectedContract.totalAmount.toLocaleString()}
+                    </Text>
+                  </View>
+
+                  <View style={styles.dateRow}>
+                    {selectedContract.startDateEstimated && (
+                      <View style={styles.dateCard}>
+                        <Text style={styles.detailLabel}>Start Date</Text>
+                        <Text style={styles.detailValue}>
+                          {new Date(selectedContract.startDateEstimated).toLocaleDateString()}
+                        </Text>
+                      </View>
+                    )}
+
+                    {selectedContract.endDateEstimated && (
+                      <View style={styles.dateCard}>
+                        <Text style={styles.detailLabel}>Completion</Text>
+                        <Text style={styles.detailValue}>
+                          {new Date(selectedContract.endDateEstimated).toLocaleDateString()}
+                        </Text>
+                      </View>
+                    )}
+                  </View>
+
+                  <View style={styles.notesCard}>
+                    <Text style={styles.detailLabel}>Contract Description</Text>
+                    <Text style={styles.detailValue}>
+                      This contract outlines the terms and conditions for the work to be performed.
+                    </Text>
+                  </View>
                 </View>
               </ScrollView>
             )}
@@ -456,7 +484,7 @@ const styles = StyleSheet.create({
     fontWeight: "700" as const,
     color: Colors.light.primary,
   },
-  dateRow: {
+  contractDateRow: {
     flexDirection: "row",
     alignItems: "center",
     gap: 6,
@@ -495,17 +523,70 @@ const styles = StyleSheet.create({
   modalBody: {
     padding: 20,
   },
-  detailLabel: {
-    fontSize: 16,
+  previewHeader: {
+    alignItems: "center",
+    marginBottom: 24,
+  },
+  previewInfoCard: {
+    backgroundColor: Colors.light.background,
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 12,
+  },
+  previewAmountCard: {
+    backgroundColor: `${Colors.light.primary}10`,
+    borderRadius: 16,
+    padding: 20,
+    marginVertical: 12,
+    alignItems: "center",
+    borderWidth: 2,
+    borderColor: Colors.light.primary,
+  },
+  amountCardLabel: {
+    fontSize: 14,
     fontWeight: "600" as const,
-    color: Colors.light.text,
-    marginTop: 16,
+    color: Colors.light.muted,
+    marginBottom: 8,
+  },
+  amountCardValue: {
+    fontSize: 36,
+    fontWeight: "700" as const,
+    color: Colors.light.primary,
+  },
+  dateRow: {
+    flexDirection: "row",
+    gap: 12,
+    marginVertical: 8,
+  },
+  dateCard: {
+    flex: 1,
+    backgroundColor: Colors.light.background,
+    borderRadius: 12,
+    padding: 16,
+  },
+  notesCard: {
+    backgroundColor: Colors.light.background,
+    borderRadius: 12,
+    padding: 16,
+    marginTop: 12,
+  },
+  detailLabel: {
+    fontSize: 12,
+    fontWeight: "600" as const,
+    color: Colors.light.muted,
+    textTransform: "uppercase" as const,
+    letterSpacing: 0.5,
     marginBottom: 8,
   },
   detailValue: {
     fontSize: 15,
     color: Colors.light.text,
     lineHeight: 22,
+  },
+  detailValueLarge: {
+    fontSize: 22,
+    fontWeight: "700" as const,
+    color: Colors.light.text,
   },
   bulletPoint: {
     fontSize: 14,

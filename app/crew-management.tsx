@@ -31,6 +31,7 @@ import {
   Edit3,
   UserPlus,
   Filter,
+  Search,
 } from "lucide-react-native";
 import { LinearGradient } from "expo-linear-gradient";
 
@@ -73,6 +74,9 @@ export default function CrewManagementScreen() {
   const [selectedMember, setSelectedMember] = useState<CrewMember | null>(null);
   const [showMemberModal, setShowMemberModal] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editingMember, setEditingMember] = useState<CrewMember | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
   const [formData, setFormData] = useState({
     name: "",
     title: "",
@@ -262,6 +266,25 @@ export default function CrewManagementScreen() {
     return crews.flatMap(crew => crew.members);
   }, [crews]);
 
+  const filteredMembers = useMemo(() => {
+    if (!searchQuery.trim()) return allMembers;
+    const query = searchQuery.toLowerCase();
+    return allMembers.filter(member => 
+      member.name.toLowerCase().includes(query) ||
+      member.title.toLowerCase().includes(query) ||
+      member.skills.some(skill => skill.toLowerCase().includes(query))
+    );
+  }, [allMembers, searchQuery]);
+
+  const filteredCrews = useMemo(() => {
+    if (!searchQuery.trim()) return crews;
+    const query = searchQuery.toLowerCase();
+    return crews.filter(crew => 
+      crew.name.toLowerCase().includes(query) ||
+      crew.members.some(member => member.name.toLowerCase().includes(query))
+    );
+  }, [crews, searchQuery]);
+
   const getAvailabilityColor = (availability: CrewMember["availability"]) => {
     switch (availability) {
       case "available":
@@ -301,6 +324,52 @@ export default function CrewManagementScreen() {
     }
   };
 
+  const handleEditMember = (member: CrewMember) => {
+    setEditingMember(member);
+    setFormData({
+      name: member.name,
+      title: member.title,
+      role: member.role,
+      phone: member.phone || "",
+      email: member.email || "",
+      hourlyRate: member.hourlyRate.toString(),
+      skills: member.skills.join(", "),
+      certifications: member.certifications.join(", "),
+    });
+    setShowEditModal(true);
+  };
+
+  const handleSaveEdit = () => {
+    if (!formData.name || !formData.title) {
+      Alert.alert("Missing Information", "Please fill in name and job title.");
+      return;
+    }
+
+    Alert.alert(
+      "Success",
+      `${formData.name} has been updated!`,
+      [
+        {
+          text: "OK",
+          onPress: () => {
+            setShowEditModal(false);
+            setEditingMember(null);
+            setFormData({
+              name: "",
+              title: "",
+              role: "worker",
+              phone: "",
+              email: "",
+              hourlyRate: "",
+              skills: "",
+              certifications: "",
+            });
+          },
+        },
+      ]
+    );
+  };
+
   const totalJobs = crews.reduce((sum, crew) => sum + crew.jobsToday, 0);
   const totalMembers = allMembers.length;
   const avgRating = allMembers.reduce((sum, m) => sum + m.avgRating, 0) / totalMembers;
@@ -328,6 +397,22 @@ export default function CrewManagementScreen() {
             >
               <Plus color="#FFF" size={18} />
             </TouchableOpacity>
+          </View>
+
+          <View style={styles.searchContainer}>
+            <Search color={Colors.light.muted} size={20} />
+            <TextInput
+              style={styles.searchInput}
+              placeholder="Search crews or members..."
+              placeholderTextColor={Colors.light.muted}
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+            />
+            {searchQuery.length > 0 && (
+              <TouchableOpacity onPress={() => setSearchQuery("")}>
+                <X color={Colors.light.muted} size={20} />
+              </TouchableOpacity>
+            )}
           </View>
 
 
@@ -386,7 +471,16 @@ export default function CrewManagementScreen() {
 
           {viewMode === "crews" ? (
             <View style={styles.section}>
-              {crews.map((crew) => (
+              {filteredCrews.length === 0 ? (
+                <View style={styles.emptyState}>
+                  <Users size={48} color={Colors.light.muted} />
+                  <Text style={styles.emptyStateTitle}>No crews found</Text>
+                  <Text style={styles.emptyStateText}>
+                    {searchQuery ? "Try a different search term" : "Create your first crew to get started"}
+                  </Text>
+                </View>
+              ) : null}
+              {filteredCrews.map((crew) => (
                 <View key={crew.id} style={styles.crewCard}>
                   <View style={styles.crewHeader}>
                     <View style={styles.crewHeaderLeft}>
@@ -507,13 +601,22 @@ export default function CrewManagementScreen() {
           ) : (
             <View style={styles.section}>
               <View style={styles.sectionHeader}>
-                <Text style={styles.sectionTitle}>All Team Members ({allMembers.length})</Text>
+                <Text style={styles.sectionTitle}>All Team Members ({filteredMembers.length})</Text>
                 <TouchableOpacity style={styles.filterButton}>
                   <Filter size={18} color={Colors.light.muted} />
                 </TouchableOpacity>
               </View>
 
-              {allMembers.map((member) => (
+              {filteredMembers.length === 0 ? (
+                <View style={styles.emptyState}>
+                  <User size={48} color={Colors.light.muted} />
+                  <Text style={styles.emptyStateTitle}>No members found</Text>
+                  <Text style={styles.emptyStateText}>
+                    {searchQuery ? "Try a different search term" : "Add your first team member"}
+                  </Text>
+                </View>
+              ) : null}
+              {filteredMembers.map((member) => (
                 <TouchableOpacity
                   key={member.id}
                   style={styles.individualCard}
@@ -927,7 +1030,15 @@ export default function CrewManagementScreen() {
               </View>
 
               <View style={styles.actionButtons}>
-                <TouchableOpacity style={styles.editButton}>
+                <TouchableOpacity 
+                  style={styles.editButton}
+                  onPress={() => {
+                    if (selectedMember) {
+                      setShowMemberModal(false);
+                      handleEditMember(selectedMember);
+                    }
+                  }}
+                >
                   <Edit3 size={18} color={Colors.light.primary} />
                   <Text style={styles.editButtonText}>Edit Details</Text>
                 </TouchableOpacity>
@@ -938,6 +1049,190 @@ export default function CrewManagementScreen() {
               </View>
             </ScrollView>
           )}
+        </SafeAreaView>
+      </Modal>
+
+      <Modal
+        visible={showEditModal}
+        animationType="slide"
+        presentationStyle="pageSheet"
+        onRequestClose={() => setShowEditModal(false)}
+      >
+        <SafeAreaView style={styles.modalContainer}>
+          <View style={styles.modalHeader}>
+            <Text style={styles.modalTitle}>Edit Crew Member</Text>
+            <TouchableOpacity onPress={() => {
+              setShowEditModal(false);
+              setEditingMember(null);
+              setFormData({
+                name: "",
+                title: "",
+                role: "worker",
+                phone: "",
+                email: "",
+                hourlyRate: "",
+                skills: "",
+                certifications: "",
+              });
+            }}>
+              <X size={24} color={Colors.light.text} />
+            </TouchableOpacity>
+          </View>
+
+          <ScrollView style={styles.modalContent} showsVerticalScrollIndicator={false}>
+            <View style={styles.formSection}>
+              <Text style={styles.formLabel}>Full Name *</Text>
+              <TextInput
+                style={styles.input}
+                value={formData.name}
+                onChangeText={(text) => setFormData({ ...formData, name: text })}
+                placeholder="John Smith"
+                placeholderTextColor={Colors.light.muted}
+              />
+            </View>
+
+            <View style={styles.formSection}>
+              <Text style={styles.formLabel}>Job Title *</Text>
+              <TextInput
+                style={styles.input}
+                value={formData.title}
+                onChangeText={(text) => setFormData({ ...formData, title: text })}
+                placeholder="Landscaping Technician"
+                placeholderTextColor={Colors.light.muted}
+              />
+            </View>
+
+            <View style={styles.formSection}>
+              <Text style={styles.formLabel}>Role *</Text>
+              <View style={styles.roleSelector}>
+                <TouchableOpacity
+                  style={[
+                    styles.roleOption,
+                    formData.role === "worker" && styles.roleOptionSelected,
+                  ]}
+                  onPress={() => setFormData({ ...formData, role: "worker" })}
+                >
+                  <Text
+                    style={[
+                      styles.roleOptionText,
+                      formData.role === "worker" && styles.roleOptionTextSelected,
+                    ]}
+                  >
+                    Worker
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[
+                    styles.roleOption,
+                    formData.role === "lead" && styles.roleOptionSelected,
+                  ]}
+                  onPress={() => setFormData({ ...formData, role: "lead" })}
+                >
+                  <Text
+                    style={[
+                      styles.roleOptionText,
+                      formData.role === "lead" && styles.roleOptionTextSelected,
+                    ]}
+                  >
+                    Lead
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[
+                    styles.roleOption,
+                    formData.role === "specialist" && styles.roleOptionSelected,
+                  ]}
+                  onPress={() => setFormData({ ...formData, role: "specialist" })}
+                >
+                  <Text
+                    style={[
+                      styles.roleOptionText,
+                      formData.role === "specialist" && styles.roleOptionTextSelected,
+                    ]}
+                  >
+                    Specialist
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+
+            <View style={styles.formSection}>
+              <Text style={styles.formLabel}>Phone</Text>
+              <TextInput
+                style={styles.input}
+                value={formData.phone}
+                onChangeText={(text) => setFormData({ ...formData, phone: text })}
+                placeholder="(512) 555-0123"
+                placeholderTextColor={Colors.light.muted}
+                keyboardType="phone-pad"
+              />
+            </View>
+
+            <View style={styles.formSection}>
+              <Text style={styles.formLabel}>Email</Text>
+              <TextInput
+                style={styles.input}
+                value={formData.email}
+                onChangeText={(text) => setFormData({ ...formData, email: text })}
+                placeholder="john@contractoros.com"
+                placeholderTextColor={Colors.light.muted}
+                keyboardType="email-address"
+                autoCapitalize="none"
+              />
+            </View>
+
+            <View style={styles.formSection}>
+              <Text style={styles.formLabel}>Hourly Rate ($)</Text>
+              <TextInput
+                style={styles.input}
+                value={formData.hourlyRate}
+                onChangeText={(text) => setFormData({ ...formData, hourlyRate: text })}
+                placeholder="25"
+                placeholderTextColor={Colors.light.muted}
+                keyboardType="numeric"
+              />
+            </View>
+
+            <View style={styles.formSection}>
+              <Text style={styles.formLabel}>Skills (comma separated)</Text>
+              <TextInput
+                style={[styles.input, styles.textArea]}
+                value={formData.skills}
+                onChangeText={(text) => setFormData({ ...formData, skills: text })}
+                placeholder="Lawn Maintenance, Edging, Trimming"
+                placeholderTextColor={Colors.light.muted}
+                multiline
+                numberOfLines={3}
+              />
+            </View>
+
+            <View style={styles.formSection}>
+              <Text style={styles.formLabel}>Certifications (comma separated)</Text>
+              <TextInput
+                style={[styles.input, styles.textArea]}
+                value={formData.certifications}
+                onChangeText={(text) => setFormData({ ...formData, certifications: text })}
+                placeholder="Pesticide License, First Aid"
+                placeholderTextColor={Colors.light.muted}
+                multiline
+                numberOfLines={3}
+              />
+            </View>
+
+            <TouchableOpacity
+              style={[
+                styles.createButton,
+                (!formData.name || !formData.title) && styles.createButtonDisabled,
+              ]}
+              onPress={handleSaveEdit}
+              disabled={!formData.name || !formData.title}
+            >
+              <Edit3 size={18} color="#FFF" />
+              <Text style={styles.createButtonText}>Save Changes</Text>
+            </TouchableOpacity>
+
+            <View style={{ height: 40 }} />
+          </ScrollView>
         </SafeAreaView>
       </Modal>
     </SafeAreaView>
@@ -1625,5 +1920,41 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600" as const,
     color: "#FFF",
+  },
+  searchContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: Colors.light.card,
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    marginBottom: 20,
+    borderWidth: 1,
+    borderColor: Colors.light.border,
+    gap: 12,
+  },
+  searchInput: {
+    flex: 1,
+    fontSize: 16,
+    color: Colors.light.text,
+  },
+  emptyState: {
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 60,
+    paddingHorizontal: 40,
+  },
+  emptyStateTitle: {
+    fontSize: 20,
+    fontWeight: "700" as const,
+    color: Colors.light.text,
+    marginTop: 16,
+    marginBottom: 8,
+  },
+  emptyStateText: {
+    fontSize: 14,
+    color: Colors.light.muted,
+    textAlign: "center",
+    lineHeight: 20,
   },
 });
