@@ -68,6 +68,13 @@ import {
 import { contractsRouter } from "./routes/contracts/route";
 import { smartContractsRouter } from "./routes/smart-contracts/route";
 import { commercialRouter } from "./routes/commercial/route";
+import {
+  getCrewListRoute,
+  getCrewByIdRoute,
+  createCrewRoute,
+  updateCrewRoute,
+  deleteCrewRoute,
+} from "./routes/crew/route";
 
 console.log("[AppRouter] Initializing tRPC router");
 console.log("[AppRouter] Auth routes:", {
@@ -149,6 +156,13 @@ export const appRouter = createTRPCRouter({
   contracts: contractsRouter,
   smartContracts: smartContractsRouter,
   commercial: commercialRouter,
+  crew: createTRPCRouter({
+    getCrewList: getCrewListRoute,
+    getCrewById: getCrewByIdRoute,
+    createCrew: createCrewRoute,
+    updateCrew: updateCrewRoute,
+    deleteCrew: deleteCrewRoute,
+  }),
 });
 
 console.log("[AppRouter] Router created successfully");

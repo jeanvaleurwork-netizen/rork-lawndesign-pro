@@ -13,6 +13,7 @@ import { TradeProvider } from "@/contexts/TradeContext";
 import { PagosAIProvider } from "@/contexts/PagosAIContext";
 import { OnboardingProvider } from "@/contexts/OnboardingContext";
 import { SubscriptionProvider } from "@/contexts/SubscriptionContext";
+import { CrewProvider } from "@/contexts/CrewContext";
 import { trpc, trpcClient } from "@/lib/trpc";
 
 SplashScreen.preventAutoHideAsync();
@@ -86,16 +87,18 @@ export default function RootLayout() {
             <OnboardingProvider>
               <TradeProvider>
                 <DataProvider>
-                  <PagosAIProvider>
-                    <AIChatProvider>
-                      <LanguageProvider>
-                        <GestureHandlerRootView style={{ flex: 1 }}>
-                          <StatusBar style="dark" />
-                          <RootLayoutNav />
-                        </GestureHandlerRootView>
-                      </LanguageProvider>
-                    </AIChatProvider>
-                  </PagosAIProvider>
+                  <CrewProvider>
+                    <PagosAIProvider>
+                      <AIChatProvider>
+                        <LanguageProvider>
+                          <GestureHandlerRootView style={{ flex: 1 }}>
+                            <StatusBar style="dark" />
+                            <RootLayoutNav />
+                          </GestureHandlerRootView>
+                        </LanguageProvider>
+                      </AIChatProvider>
+                    </PagosAIProvider>
+                  </CrewProvider>
                 </DataProvider>
               </TradeProvider>
             </OnboardingProvider>

@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { publicProcedure, createTRPCRouter } from "../../create-context";
 import { generateId } from "@/utils/id-generator";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { 
   MSA_TEMPLATE, 
   PROJECT_CONTRACT_TEMPLATE, 
@@ -10,6 +11,28 @@ import {
 } from "@/constants/contract-templates";
 
 console.log("[Contracts Route] Loading contracts router module");
+
+const CONTRACTS_STORAGE_KEY = "@contractoros_contracts";
+
+async function getContracts() {
+  try {
+    const stored = await AsyncStorage.getItem(CONTRACTS_STORAGE_KEY);
+    return stored ? JSON.parse(stored) : [];
+  } catch (error) {
+    console.error("[Contracts] Failed to get contracts:", error);
+    return [];
+  }
+}
+
+async function saveContracts(contracts: any[]) {
+  try {
+    await AsyncStorage.setItem(CONTRACTS_STORAGE_KEY, JSON.stringify(contracts));
+    console.log("[Contracts] Saved contracts:", contracts.length);
+  } catch (error) {
+    console.error("[Contracts] Failed to save contracts:", error);
+    throw new Error("Failed to save contracts");
+  }
+}
 
 function replaceTemplateVariables(template: string, variables: Record<string, string>): string {
   let result = template;
@@ -120,8 +143,81 @@ export const contractsRouter = createTRPCRouter({
         updatedAt: new Date().toISOString(),
       };
 
+      const allContracts = await getContracts();
+      allContracts.push(contract);
+      await saveContracts(allContracts);
+
       console.log("[Contract] Created:", contractId);
       return contract;
+    }),
+
+  getAllContracts: publicProcedure
+    .query(async () => {
+      console.log("[Contract] Fetching all contracts");
+      return await getContracts();
+    }),
+
+  getContractById: publicProcedure
+    .input(z.object({ id: z.string() }))
+    .query(async ({ input }) => {
+      console.log("[Contract] Fetching contract:", input.id);
+      const contracts = await getContracts();
+      const contract = contracts.find((c: any) => c.id === input.id);
+      if (!contract) {
+        throw new Error("Contract not found");
+      }
+      return contract;
+    }),
+
+  updateContract: publicProcedure
+    .input(
+      z.object({
+        id: z.string(),
+        title: z.string().optional(),
+        status: z.enum(["DRAFT", "SENT", "VIEWED", "SIGNED", "DECLINED", "CANCELLED"]).optional(),
+        totalAmount: z.number().optional(),
+        startDateEstimated: z.string().optional(),
+        endDateEstimated: z.string().optional(),
+        bodyHtml: z.string().optional(),
+      })
+    )
+    .mutation(async ({ input }) => {
+      console.log("[Contract] Updating contract:", input.id);
+      const contracts = await getContracts();
+      const index = contracts.findIndex((c: any) => c.id === input.id);
+      
+      if (index === -1) {
+        throw new Error("Contract not found");
+      }
+      
+      const { id, ...updateData } = input;
+      contracts[index] = {
+        ...contracts[index],
+        ...updateData,
+        updatedAt: new Date().toISOString(),
+      };
+      
+      await saveContracts(contracts);
+      console.log("[Contract] Updated:", contracts[index].id);
+      
+      return contracts[index];
+    }),
+
+  deleteContract: publicProcedure
+    .input(z.object({ id: z.string() }))
+    .mutation(async ({ input }) => {
+      console.log("[Contract] Deleting contract:", input.id);
+      const contracts = await getContracts();
+      const filtered = contracts.filter((c: any) => c.id !== input.id);
+      
+      if (filtered.length === contracts.length) {
+        throw new Error("Contract not found");
+      }
+      
+      await saveContracts(filtered);
+      console.log("[Contract] Deleted:", input.id);
+      
+      return { success: true, id: input.id };
     }),
 
   getContractsByCompany: publicProcedure

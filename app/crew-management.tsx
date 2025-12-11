@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import {
   View,
   Text,
@@ -36,26 +36,11 @@ import {
 import { LinearGradient } from "expo-linear-gradient";
 
 import Colors from "@/constants/colors";
+import { useCrew, CrewMember as CrewMemberType } from "@/contexts/CrewContext";
 
 const { width } = Dimensions.get("window");
 
-interface CrewMember {
-  id: string;
-  name: string;
-  title: string;
-  role: "lead" | "worker" | "specialist";
-  availability: "available" | "busy" | "off";
-  phone?: string;
-  email?: string;
-  skills: string[];
-  certifications: string[];
-  performanceRating: number;
-  jobsCompleted: number;
-  avgRating: number;
-  joinedDate: string;
-  hourlyRate: number;
-  hoursThisWeek: number;
-}
+type CrewMember = CrewMemberType;
 
 interface Crew {
   id: string;
@@ -70,6 +55,7 @@ interface Crew {
 }
 
 export default function CrewManagementScreen() {
+  const { crew: backendCrew, isLoading: isLoadingCrew, createCrewMember, updateCrewMember, deleteCrewMember, isCreating, isUpdating, isDeleting } = useCrew();
   const [viewMode, setViewMode] = useState<"crews" | "individuals">("crews");
   const [selectedMember, setSelectedMember] = useState<CrewMember | null>(null);
   const [showMemberModal, setShowMemberModal] = useState(false);
