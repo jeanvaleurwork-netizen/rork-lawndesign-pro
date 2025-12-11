@@ -1374,48 +1374,56 @@ export default function CrewScreen() {
             </View>
 
             <View style={styles.customNameSection}>
-              <Text style={styles.customNameLabel}>Or add a custom name</Text>
+              <Text style={styles.customNameLabel}>Type any name to add</Text>
               <TextInput
                 style={styles.customNameInput}
                 value={customMemberName}
-                onChangeText={setCustomMemberName}
-                placeholder="Type any name..."
+                onChangeText={(text) => setCustomMemberName(text)}
+                placeholder="Type any name here..."
                 placeholderTextColor={Colors.light.muted}
+                autoFocus
               />
-              {customMemberName.trim() !== "" && (
-                <TouchableOpacity
-                  style={styles.addCustomButton}
-                  onPress={() => {
-                    if (editingCrew && customMemberName.trim()) {
-                      const newMember: CrewMember = {
-                        id: `custom_${Date.now()}`,
-                        name: customMemberName.trim(),
-                        title: "Crew Member",
-                        role: "worker",
-                        availability: "available",
-                        skills: [],
-                        certifications: [],
-                        performanceRating: 0,
-                        jobsCompleted: 0,
-                        avgRating: 0,
-                        joinedDate: new Date().toISOString(),
-                        hourlyRate: 0,
-                        hoursThisWeek: 0,
-                      };
-                      setEditingCrew({
-                        ...editingCrew,
-                        members: [...editingCrew.members, newMember],
-                      });
-                      setCustomMemberName("");
-                      setShowAddMemberModal(false);
-                      Alert.alert("Success", `${newMember.name} has been added to the crew!`);
-                    }
-                  }}
-                >
-                  <Plus size={18} color="#FFF" />
-                  <Text style={styles.addCustomButtonText}>Add &quot;{customMemberName.trim()}&quot;</Text>
-                </TouchableOpacity>
-              )}
+              <TouchableOpacity
+                style={[
+                  styles.addCustomButton,
+                  customMemberName.trim() === "" && styles.addCustomButtonDisabled,
+                ]}
+                onPress={() => {
+                  const trimmedName = customMemberName.trim();
+                  if (editingCrew && trimmedName) {
+                    const newMember: CrewMember = {
+                      id: `custom_${Date.now()}`,
+                      name: trimmedName,
+                      title: "Crew Member",
+                      role: "worker",
+                      availability: "available",
+                      skills: [],
+                      certifications: [],
+                      performanceRating: 0,
+                      jobsCompleted: 0,
+                      avgRating: 0,
+                      joinedDate: new Date().toISOString(),
+                      hourlyRate: 0,
+                      hoursThisWeek: 0,
+                    };
+                    setEditingCrew({
+                      ...editingCrew,
+                      members: [...editingCrew.members, newMember],
+                    });
+                    setCustomMemberName("");
+                    setShowAddMemberModal(false);
+                    Alert.alert("Success", `${trimmedName} has been added to the crew!`);
+                  } else if (!trimmedName) {
+                    Alert.alert("Error", "Please enter a name.");
+                  }
+                }}
+                disabled={customMemberName.trim() === ""}
+              >
+                <Plus size={18} color="#FFF" />
+                <Text style={styles.addCustomButtonText}>
+                  {customMemberName.trim() ? `Add "${customMemberName.trim()}"` : "Add Name"}
+                </Text>
+              </TouchableOpacity>
             </View>
 
             <View style={styles.dividerContainer}>
@@ -2719,6 +2727,10 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: "600" as const,
     color: "#FFF",
+  },
+  addCustomButtonDisabled: {
+    opacity: 0.5,
+    backgroundColor: Colors.light.muted,
   },
   dividerContainer: {
     flexDirection: "row",
