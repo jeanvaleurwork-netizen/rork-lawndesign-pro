@@ -87,6 +87,8 @@ export default function CrewScreen() {
   const [showEditCrewModal, setShowEditCrewModal] = useState(false);
   const [editingCrew, setEditingCrew] = useState<Crew | null>(null);
   const [showAddMemberModal, setShowAddMemberModal] = useState(false);
+  const [memberSearchQuery, setMemberSearchQuery] = useState("");
+  const [customMemberName, setCustomMemberName] = useState("");
 
   const [crews, setCrews] = useState<Crew[]>([
     {
@@ -1340,53 +1342,142 @@ export default function CrewScreen() {
         visible={showAddMemberModal}
         animationType="slide"
         presentationStyle="pageSheet"
-        onRequestClose={() => setShowAddMemberModal(false)}
+        onRequestClose={() => {
+          setShowAddMemberModal(false);
+          setMemberSearchQuery("");
+          setCustomMemberName("");
+        }}
       >
         <SafeAreaView style={styles.modalContainer}>
           <View style={styles.modalHeader}>
             <Text style={styles.modalTitle}>Add Member to Crew</Text>
-            <TouchableOpacity onPress={() => setShowAddMemberModal(false)}>
+            <TouchableOpacity onPress={() => {
+              setShowAddMemberModal(false);
+              setMemberSearchQuery("");
+              setCustomMemberName("");
+            }}>
               <X size={24} color={Colors.light.text} />
             </TouchableOpacity>
           </View>
 
           <ScrollView style={styles.modalContent} showsVerticalScrollIndicator={false}>
-            <Text style={styles.sectionTitle}>Available Members</Text>
-            {allMembers
-              .filter(member => !editingCrew?.members.find(m => m.id === member.id))
-              .map((member) => (
+            <View style={styles.searchSection}>
+              <View style={styles.searchInputContainer}>
+                <TextInput
+                  style={styles.searchInput}
+                  value={memberSearchQuery}
+                  onChangeText={setMemberSearchQuery}
+                  placeholder="Search members..."
+                  placeholderTextColor={Colors.light.muted}
+                />
+              </View>
+            </View>
+
+            <View style={styles.customNameSection}>
+              <Text style={styles.customNameLabel}>Or add a custom name</Text>
+              <TextInput
+                style={styles.customNameInput}
+                value={customMemberName}
+                onChangeText={setCustomMemberName}
+                placeholder="Type any name..."
+                placeholderTextColor={Colors.light.muted}
+              />
+              {customMemberName.trim() !== "" && (
                 <TouchableOpacity
-                  key={member.id}
-                  style={styles.addMemberCard}
+                  style={styles.addCustomButton}
                   onPress={() => {
-                    if (editingCrew) {
+                    if (editingCrew && customMemberName.trim()) {
+                      const newMember: CrewMember = {
+                        id: `custom_${Date.now()}`,
+                        name: customMemberName.trim(),
+                        title: "Crew Member",
+                        role: "worker",
+                        availability: "available",
+                        skills: [],
+                        certifications: [],
+                        performanceRating: 0,
+                        jobsCompleted: 0,
+                        avgRating: 0,
+                        joinedDate: new Date().toISOString(),
+                        hourlyRate: 0,
+                        hoursThisWeek: 0,
+                      };
                       setEditingCrew({
                         ...editingCrew,
-                        members: [...editingCrew.members, member],
+                        members: [...editingCrew.members, newMember],
                       });
+                      setCustomMemberName("");
                       setShowAddMemberModal(false);
+                      Alert.alert("Success", `${newMember.name} has been added to the crew!`);
                     }
                   }}
                 >
-                  <View style={[styles.memberAvatarSmall, { backgroundColor: getRoleColor(member.role) + "20" }]}>
-                    <User size={20} color={getRoleColor(member.role)} />
-                  </View>
-                  <View style={styles.addMemberCardInfo}>
-                    <Text style={styles.addMemberCardName}>{member.name}</Text>
-                    <Text style={styles.addMemberCardTitle}>{member.title}</Text>
-                    <View style={styles.memberStats}>
-                      <Star size={12} color={Colors.light.warning} fill={Colors.light.warning} />
-                      <Text style={styles.memberRating}>{member.avgRating.toFixed(1)}</Text>
-                      <Text style={styles.memberJobs}>• {member.jobsCompleted} jobs</Text>
-                    </View>
-                  </View>
-                  <ChevronRight size={20} color={Colors.light.muted} />
+                  <Plus size={18} color="#FFF" />
+                  <Text style={styles.addCustomButtonText}>Add &quot;{customMemberName.trim()}&quot;</Text>
                 </TouchableOpacity>
-              ))}
+              )}
+            </View>
+
+            <View style={styles.dividerContainer}>
+              <View style={styles.dividerLine} />
+              <Text style={styles.dividerText}>Available Members</Text>
+              <View style={styles.dividerLine} />
+            </View>
+
+            {(() => {
+              const availableMembers = allMembers
+                .filter(member => !editingCrew?.members.find(m => m.id === member.id))
+                .filter(member => 
+                  memberSearchQuery === "" || 
+                  member.name.toLowerCase().includes(memberSearchQuery.toLowerCase()) ||
+                  member.title.toLowerCase().includes(memberSearchQuery.toLowerCase())
+                );
+              
+              return availableMembers.length > 0 ? (
+                availableMembers.map((member) => (
+                  <TouchableOpacity
+                    key={member.id}
+                    style={styles.addMemberCard}
+                    onPress={() => {
+                      if (editingCrew) {
+                        setEditingCrew({
+                          ...editingCrew,
+                          members: [...editingCrew.members, member],
+                        });
+                        setShowAddMemberModal(false);
+                        setMemberSearchQuery("");
+                        setCustomMemberName("");
+                        Alert.alert("Success", `${member.name} has been added to the crew!`);
+                      }
+                    }}
+                  >
+                    <View style={[styles.memberAvatarSmall, { backgroundColor: getRoleColor(member.role) + "20" }]}>
+                      <User size={20} color={getRoleColor(member.role)} />
+                    </View>
+                    <View style={styles.addMemberCardInfo}>
+                      <Text style={styles.addMemberCardName}>{member.name}</Text>
+                      <Text style={styles.addMemberCardTitle}>{member.title}</Text>
+                      <View style={styles.memberStats}>
+                        <Star size={12} color={Colors.light.warning} fill={Colors.light.warning} />
+                        <Text style={styles.memberRating}>{member.avgRating.toFixed(1)}</Text>
+                        <Text style={styles.memberJobs}>• {member.jobsCompleted} jobs</Text>
+                      </View>
+                    </View>
+                    <ChevronRight size={20} color={Colors.light.muted} />
+                  </TouchableOpacity>
+                ))
+              ) : (
+                <View style={styles.emptyStateContainer}>
+                  {memberSearchQuery !== "" ? (
+                    <Text style={styles.emptyText}>No members match your search</Text>
+                  ) : (
+                    <Text style={styles.emptyText}>All members are already in this crew</Text>
+                  )}
+                </View>
+              );
+            })()}
             
-            {allMembers.filter(member => !editingCrew?.members.find(m => m.id === member.id)).length === 0 && (
-              <Text style={styles.emptyText}>All members are already in this crew</Text>
-            )}
+            <View style={{ height: 40 }} />
           </ScrollView>
         </SafeAreaView>
       </Modal>
@@ -2571,5 +2662,82 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: Colors.light.muted,
     marginBottom: 4,
+  },
+  searchSection: {
+    marginBottom: 20,
+    marginTop: 20,
+  },
+  searchInputContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: Colors.light.card,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: Colors.light.border,
+  },
+  searchInput: {
+    flex: 1,
+    padding: 16,
+    fontSize: 15,
+    color: Colors.light.text,
+  },
+  customNameSection: {
+    marginBottom: 24,
+    backgroundColor: Colors.light.card,
+    borderRadius: 16,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: Colors.light.border,
+  },
+  customNameLabel: {
+    fontSize: 14,
+    fontWeight: "600" as const,
+    color: Colors.light.text,
+    marginBottom: 12,
+  },
+  customNameInput: {
+    backgroundColor: Colors.light.background,
+    borderRadius: 12,
+    padding: 16,
+    fontSize: 15,
+    color: Colors.light.text,
+    borderWidth: 1,
+    borderColor: Colors.light.border,
+    marginBottom: 12,
+  },
+  addCustomButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    backgroundColor: Colors.light.primary,
+    paddingVertical: 14,
+    paddingHorizontal: 20,
+    borderRadius: 12,
+  },
+  addCustomButtonText: {
+    fontSize: 15,
+    fontWeight: "600" as const,
+    color: "#FFF",
+  },
+  dividerContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 20,
+    gap: 12,
+  },
+  dividerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: Colors.light.border,
+  },
+  dividerText: {
+    fontSize: 13,
+    fontWeight: "600" as const,
+    color: Colors.light.muted,
+  },
+  emptyStateContainer: {
+    paddingVertical: 32,
+    alignItems: "center",
   },
 });
