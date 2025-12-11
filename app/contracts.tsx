@@ -125,7 +125,7 @@ export default function ContractsScreen() {
         <View>
           <Text style={styles.title}>Contracts</Text>
           <Text style={styles.subtitle}>
-            {filteredContracts.length} of {contracts.length} contracts {storedContracts.length > 0 && `(${storedContracts.length} saved)`}
+            {filteredContracts.length} of {contracts.length} contracts {storedContracts.length > 0 ? `(${storedContracts.length} saved)` : ''}
           </Text>
         </View>
         <TouchableOpacity 
