@@ -1,7 +1,7 @@
 import app from "./backend/hono";
 
 console.log("\n" + "=".repeat(70));
-console.log("  ContractorOS Backend v9 - STARTING WITH CREW ROUTES");
+console.log("  ContractorOS Backend v10 - CREW ROUTES ACTIVE");
 console.log("=".repeat(70));
 console.log("[Backend] Time:", new Date().toISOString());
 console.log("[Backend] Environment:", process.env.NODE_ENV || "development");
