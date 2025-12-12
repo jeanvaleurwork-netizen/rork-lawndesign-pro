@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo } from "react";
 import {
   View,
   Text,
@@ -55,13 +55,12 @@ interface Crew {
 }
 
 export default function CrewManagementScreen() {
-  const { crew: backendCrew, isLoading: isLoadingCrew, createCrewMember, updateCrewMember, deleteCrewMember, isCreating, isUpdating, isDeleting } = useCrew();
+  useCrew();
   const [viewMode, setViewMode] = useState<"crews" | "individuals">("crews");
   const [selectedMember, setSelectedMember] = useState<CrewMember | null>(null);
   const [showMemberModal, setShowMemberModal] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
-  const [editingMember, setEditingMember] = useState<CrewMember | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [formData, setFormData] = useState({
     name: "",
@@ -335,7 +334,6 @@ export default function CrewManagementScreen() {
   };
 
   const handleEditMember = (member: CrewMember) => {
-    setEditingMember(member);
     setFormData({
       name: member.name,
       title: member.title,
@@ -363,7 +361,6 @@ export default function CrewManagementScreen() {
           text: "OK",
           onPress: () => {
             setShowEditModal(false);
-            setEditingMember(null);
             setFormData({
               name: "",
               title: "",
@@ -1073,7 +1070,6 @@ export default function CrewManagementScreen() {
             <Text style={styles.modalTitle}>Edit Crew Member</Text>
             <TouchableOpacity onPress={() => {
               setShowEditModal(false);
-              setEditingMember(null);
               setFormData({
                 name: "",
                 title: "",

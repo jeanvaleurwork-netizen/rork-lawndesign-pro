@@ -1,5 +1,7 @@
 import { z } from "zod";
-import { publicProcedure } from "../../create-context";
+import { publicProcedure, createTRPCRouter } from "../../create-context";
+
+console.log("[Crew Route] Loading crew router module");
 
 export interface CrewMember {
   id: string;
@@ -24,7 +26,8 @@ export interface CrewMember {
 
 const crewMembers: CrewMember[] = [];
 
-export const getCrewListRoute = publicProcedure
+export const crewRouter = createTRPCRouter({
+  getCrewList: publicProcedure
   .input(
     z
       .object({
@@ -40,9 +43,9 @@ export const getCrewListRoute = publicProcedure
     }
     
     return crewMembers;
-  });
+  }),
 
-export const getCrewByIdRoute = publicProcedure
+  getCrewById: publicProcedure
   .input(
     z.object({
       id: z.string(),
@@ -57,9 +60,9 @@ export const getCrewByIdRoute = publicProcedure
     }
     
     return member;
-  });
+  }),
 
-export const createCrewRoute = publicProcedure
+  createCrew: publicProcedure
   .input(
     z.object({
       companyId: z.string().default("default"),
@@ -105,9 +108,9 @@ export const createCrewRoute = publicProcedure
     crewMembers.push(newMember);
     console.log("[Crew] Created crew member:", newMember.id);
     return newMember;
-  });
+  }),
 
-export const updateCrewRoute = publicProcedure
+  updateCrew: publicProcedure
   .input(
     z.object({
       id: z.string(),
@@ -143,9 +146,9 @@ export const updateCrewRoute = publicProcedure
     
     console.log("[Crew] Updated crew member:", crewMembers[index].id);
     return crewMembers[index];
-  });
+  }),
 
-export const deleteCrewRoute = publicProcedure
+  deleteCrew: publicProcedure
   .input(
     z.object({
       id: z.string(),
@@ -163,4 +166,7 @@ export const deleteCrewRoute = publicProcedure
     console.log("[Crew] Deleted crew member:", input.id);
     
     return { success: true, id: input.id };
-  });
+  }),
+});
+
+console.log("[Crew Route] crewRouter created with procedures:", Object.keys(crewRouter._def.procedures));
