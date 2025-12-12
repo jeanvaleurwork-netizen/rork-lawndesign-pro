@@ -5,7 +5,7 @@ import { appRouter } from "./trpc/app-router";
 import { createContext } from "./trpc/create-context";
 
 console.log("\n" + "=".repeat(60));
-console.log("[Hono] Creating Hono app instance v7 - WITH CREW ROUTES");
+console.log("[Hono] Creating Hono app instance v8 - WITH CREW ROUTES ENABLED");
 console.log("[Hono] tRPC Router structure:", Object.keys(appRouter._def.procedures || {}));
 console.log("[Hono] Checking router._def:", Object.keys(appRouter._def));
 console.log("[Hono] Router type:", typeof appRouter);
