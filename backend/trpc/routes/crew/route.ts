@@ -1,8 +1,5 @@
 import { z } from "zod";
 import { publicProcedure } from "../../create-context";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-
-const CREW_STORAGE_KEY = "crew_members_v1";
 
 export interface CrewMember {
   id: string;
@@ -25,24 +22,16 @@ export interface CrewMember {
   updatedAt: string;
 }
 
+let crewMembersStore: CrewMember[] = [];
+
 async function getCrewMembers(): Promise<CrewMember[]> {
-  try {
-    const stored = await AsyncStorage.getItem(CREW_STORAGE_KEY);
-    return stored ? JSON.parse(stored) : [];
-  } catch (error) {
-    console.error("[Crew] Failed to get crew members:", error);
-    return [];
-  }
+  console.log("[Crew] Getting crew members from store:", crewMembersStore.length);
+  return [...crewMembersStore];
 }
 
 async function saveCrewMembers(members: CrewMember[]): Promise<void> {
-  try {
-    await AsyncStorage.setItem(CREW_STORAGE_KEY, JSON.stringify(members));
-    console.log("[Crew] Saved crew members:", members.length);
-  } catch (error) {
-    console.error("[Crew] Failed to save crew members:", error);
-    throw new Error("Failed to save crew members");
-  }
+  crewMembersStore = [...members];
+  console.log("[Crew] Saved crew members to store:", crewMembersStore.length);
 }
 
 export const getCrewListRoute = publicProcedure
