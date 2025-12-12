@@ -25,6 +25,8 @@ import { useSubscription } from "@/contexts/SubscriptionContext";
 import { useOnboarding } from "@/contexts/OnboardingContext";
 import { useAuth } from "@/contexts/AuthContext";
 import Colors from "@/constants/colors";
+import { trpc } from "@/lib/trpc";
+import { Platform, Linking } from "react-native";
 
 interface TierFeature {
   text: string;
@@ -165,6 +167,8 @@ export default function PricingScreen() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [selectedTier, setSelectedTier] = useState<string | null>(null);
 
+  const createCheckoutMutation = trpc.stripe.createCheckoutSession.useMutation();
+
   const handleSelectPlan = async (tierId: "starter" | "pro" | "enterprise" | "elite" | "elitePlus") => {
     if (tierId === "elite" || tierId === "elitePlus") {
       Alert.alert(
@@ -182,14 +186,18 @@ export default function PricingScreen() {
       setIsLoading(true);
       setSelectedTier(tierId);
       
+      let userId = session?.user.id;
+      let userEmail = session?.user.email;
+
       if (!session) {
-        const userId = `user_${Date.now()}`;
+        userId = `user_${Date.now()}`;
         const orgId = `org_${Date.now()}`;
+        userEmail = onboardingData.businessEmail || `user${Date.now()}@contractoros.app`;
 
         await login({
           user: {
             id: userId,
-            email: onboardingData.businessEmail || `user${Date.now()}@contractoros.app`,
+            email: userEmail,
             firstName: onboardingData.companyName?.split(" ")[0] || "User",
             lastName: onboardingData.companyName?.split(" ").slice(1).join(" ") || "",
             name: onboardingData.companyName || "User",
@@ -213,17 +221,31 @@ export default function PricingScreen() {
         await completeOnboarding();
       }
       
-      await upgradeTier(tierId, billingCycle);
+      const baseUrl = Platform.OS === "web" 
+        ? window.location.origin 
+        : "contractoros://";
       
-      Alert.alert(
-        "Welcome to ContractorOS!",
-        `Your ${PRICING_TIERS.find(t => t.id === tierId)?.name} plan is now active.`,
-        [{ text: "Get Started", onPress: () => router.replace("/(tabs)" as any) }]
-      );
+      const result = await createCheckoutMutation.mutateAsync({
+        tier: tierId,
+        billingCycle,
+        userId: userId!,
+        userEmail: userEmail!,
+        successUrl: `${baseUrl}/pricing?success=true&tier=${tierId}`,
+        cancelUrl: `${baseUrl}/pricing?canceled=true`,
+      });
+
+      if (result.url) {
+        if (Platform.OS === "web") {
+          window.location.href = result.url;
+        } else {
+          await Linking.openURL(result.url);
+        }
+      } else {
+        throw new Error("No checkout URL returned");
+      }
     } catch (error) {
-      console.error("[Pricing] Failed to activate plan:", error);
-      Alert.alert("Error", "Failed to activate subscription. Please try again.");
-    } finally {
+      console.error("[Pricing] Failed to create checkout:", error);
+      Alert.alert("Error", "Failed to start checkout. Please try again.");
       setIsLoading(false);
       setSelectedTier(null);
     }

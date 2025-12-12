@@ -1,6 +1,7 @@
 import createContextHook from "@nkzw/create-context-hook";
 import { useState, useEffect } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { trpc } from "@/lib/trpc";
 
 export type SubscriptionTier = "starter" | "pro" | "enterprise" | "elite" | "elitePlus" | "none";
 
@@ -11,6 +12,9 @@ export interface SubscriptionDetails {
   subscriptionStartDate?: string;
   subscriptionEndDate?: string;
   autoRenew: boolean;
+  stripeSubscriptionId?: string;
+  stripeCustomerId?: string;
+  status?: "active" | "canceled" | "past_due" | "incomplete" | "trialing";
 }
 
 const SUBSCRIPTION_STORAGE_KEY = "@contractoros_subscription";
@@ -205,13 +209,24 @@ export const [SubscriptionProvider, useSubscription] = createContextHook(() => {
     }
   };
 
-  const upgradeTier = async (tier: SubscriptionTier, billingCycle: "monthly" | "annual") => {
+  const upgradeTier = async (
+    tier: SubscriptionTier,
+    billingCycle: "monthly" | "annual",
+    stripeData?: {
+      subscriptionId: string;
+      customerId: string;
+      status: "active" | "canceled" | "past_due" | "incomplete" | "trialing";
+    }
+  ) => {
     const newSubscription: SubscriptionDetails = {
       tier,
       aiCredits: (tier !== "none" ? TIER_AI_CREDITS[tier] : 0) || 0,
       billingCycle,
       subscriptionStartDate: new Date().toISOString(),
       autoRenew: true,
+      stripeSubscriptionId: stripeData?.subscriptionId,
+      stripeCustomerId: stripeData?.customerId,
+      status: stripeData?.status || "active",
     };
     await saveSubscription(newSubscription);
   };
@@ -277,6 +292,14 @@ export const [SubscriptionProvider, useSubscription] = createContextHook(() => {
     return names[tier] || "None";
   };
 
+  const updateSubscriptionStatus = async (status: "active" | "canceled" | "past_due" | "incomplete" | "trialing") => {
+    const updated = {
+      ...subscription,
+      status,
+    };
+    await saveSubscription(updated);
+  };
+
   return {
     subscription,
     isLoading,
@@ -287,11 +310,13 @@ export const [SubscriptionProvider, useSubscription] = createContextHook(() => {
     canAccessTab,
     getTierPrice,
     getTierName,
+    updateSubscriptionStatus,
     isStarter: subscription.tier === "starter",
     isPro: subscription.tier === "pro",
     isEnterprise: subscription.tier === "enterprise",
     isElite: subscription.tier === "elite",
     isElitePlus: subscription.tier === "elitePlus",
     hasSubscription: subscription.tier !== "none",
+    isActive: subscription.status === "active" || subscription.status === "trialing",
   };
 });
