@@ -1,7 +1,7 @@
 import app from "./backend/hono";
 
 console.log("\n" + "=".repeat(70));
-console.log("  ContractorOS Backend v8 - STARTING");
+console.log("  ContractorOS Backend v9 - STARTING WITH CREW ROUTES");
 console.log("=".repeat(70));
 console.log("[Backend] Time:", new Date().toISOString());
 console.log("[Backend] Environment:", process.env.NODE_ENV || "development");
@@ -71,7 +71,15 @@ const routes = [
     "contracts.createSubcontractorAgreement (mutation) ✓",
     "contracts.createLienWaiver (mutation) ✓"
   ] },
-  { group: "Smart Contracts", items: ["Smart contract management"] }
+  { group: "Smart Contracts", items: ["Smart contract management"] },
+  { group: "Crew", items: [
+    "crew.getCrewList (query) ✓",
+    "crew.getCrewById (query) ✓",
+    "crew.createCrew (mutation) ✓",
+    "crew.updateCrew (mutation) ✓",
+    "crew.deleteCrew (mutation) ✓"
+  ] },
+  { group: "Commercial", items: ["Commercial property management"] }
 ];
 
 routes.forEach(({ group, items }) => {

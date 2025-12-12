@@ -5,7 +5,7 @@ import { appRouter } from "./trpc/app-router";
 import { createContext } from "./trpc/create-context";
 
 console.log("\n" + "=".repeat(60));
-console.log("[Hono] Creating Hono app instance v6");
+console.log("[Hono] Creating Hono app instance v7 - WITH CREW ROUTES");
 console.log("[Hono] tRPC Router structure:", Object.keys(appRouter._def.procedures || {}));
 console.log("[Hono] Checking router._def:", Object.keys(appRouter._def));
 console.log("[Hono] Router type:", typeof appRouter);
@@ -47,6 +47,12 @@ try {
     console.log("[Hono] smartContracts procedures:", Object.keys(router.smartContracts._def?.procedures || {}));
   } else {
     console.log("[Hono] ✗ smartContracts router NOT found");
+  }
+  if (router.crew) {
+    console.log("[Hono] ✓ crew router found");
+    console.log("[Hono] crew procedures:", Object.keys(router.crew._def?.procedures || {}));
+  } else {
+    console.log("[Hono] ✗ crew router NOT found");
   }
 } catch (e) {
   console.error("[Hono] Error inspecting router:", e);
@@ -119,6 +125,7 @@ app.get("/api", (c) => {
     routerInfo.receiptAI = checkRouter('receiptAI');
     routerInfo.contracts = checkRouter('contracts');
     routerInfo.smartContracts = checkRouter('smartContracts');
+    routerInfo.crew = checkRouter('crew');
   } catch (e) {
     console.error("[Hono] Error extracting router info:", e);
   }
@@ -137,6 +144,7 @@ app.get("/api", (c) => {
       hasData: Boolean(router.data),
       hasContracts: Boolean(router.contracts),
       hasSmartContracts: Boolean(router.smartContracts),
+      hasCrew: Boolean(router.crew),
     }
   });
 });
