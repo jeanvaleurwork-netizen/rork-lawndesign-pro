@@ -25,6 +25,7 @@ export interface CrewMember {
 }
 
 export const [CrewProvider, useCrew] = createContextHook(() => {
+  console.log("[CrewContext] Initializing crew context");
   const [localCrew, setLocalCrew] = useState<CrewMember[]>([]);
 
   const {
@@ -32,7 +33,10 @@ export const [CrewProvider, useCrew] = createContextHook(() => {
     isLoading,
     isError,
     refetch,
-  } = trpc.crew.getCrewList.useQuery(undefined);
+  } = trpc.crew.getCrewList.useQuery(undefined, {
+    retry: false,
+    refetchOnWindowFocus: false,
+  });
 
   useEffect(() => {
     if (crewData) {
@@ -43,9 +47,11 @@ export const [CrewProvider, useCrew] = createContextHook(() => {
 
   useEffect(() => {
     if (isError) {
-      console.error("[CrewContext] Failed to load crew");
+      console.error("[CrewContext] Failed to load crew (this is normal if backend isn't used yet)");
     }
   }, [isError]);
+
+  console.log("[CrewContext] Context initialized", { isLoading, isError, crewCount: (crewData || localCrew).length });
 
   const utils = trpc.useUtils();
 

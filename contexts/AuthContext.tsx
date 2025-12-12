@@ -15,6 +15,7 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
 
   const loadSession = async () => {
     try {
+      console.log("[Auth] Loading session...");
       const stored = await AsyncStorage.getItem(AUTH_STORAGE_KEY);
       if (stored) {
         const parsedSession = JSON.parse(stored) as AuthSession;
@@ -26,6 +27,7 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
     } catch (error) {
       console.error("[Auth] Failed to load session:", error);
     } finally {
+      console.log("[Auth] Loading complete");
       setIsLoading(false);
     }
   };

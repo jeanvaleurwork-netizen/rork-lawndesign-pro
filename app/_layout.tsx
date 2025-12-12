@@ -33,17 +33,24 @@ function RootLayoutNav() {
   const hasNavigatedRef = React.useRef(false);
 
   useEffect(() => {
+    console.log("[RootLayout] Auth state:", { isLoading, isAuthenticated });
     if (!isLoading && !hasNavigatedRef.current) {
       if (!isAuthenticated) {
+        console.log("[RootLayout] Not authenticated, redirecting to welcome");
         hasNavigatedRef.current = true;
         router.replace("/welcome");
+      } else {
+        console.log("[RootLayout] User is authenticated");
       }
     }
   }, [isLoading, isAuthenticated, router]);
 
   if (isLoading) {
+    console.log("[RootLayout] Still loading auth...");
     return null;
   }
+
+  console.log("[RootLayout] Rendering navigation");
 
   return (
     <Stack
@@ -63,22 +70,40 @@ function RootLayoutNav() {
       <Stack.Screen name="property-scan" options={{ headerShown: false }} />
       <Stack.Screen name="photo-analysis" options={{ headerShown: false }} />
       <Stack.Screen name="job-detail" options={{ headerShown: true }} />
+      <Stack.Screen name="estimate-detail" options={{ headerShown: true }} />
+      <Stack.Screen name="client-detail" options={{ headerShown: true }} />
+      <Stack.Screen name="crew-management" options={{ headerShown: true }} />
       <Stack.Screen name="daily-schedule" options={{ headerShown: false, presentation: "card" }} />
       <Stack.Screen name="customer-intake" options={{ headerShown: false }} />
       <Stack.Screen name="intake-summary" options={{ headerShown: true, title: "Intake Summary" }} />
       <Stack.Screen name="ai-intake-dashboard" options={{ headerShown: true, title: "AI Intake" }} />
       <Stack.Screen name="dispatch-assignment" options={{ headerShown: true, title: "Dispatch" }} />
       <Stack.Screen name="pricing" options={{ headerShown: false }} />
+      <Stack.Screen name="notifications" options={{ headerShown: true }} />
+      <Stack.Screen name="admin-dashboard" options={{ headerShown: true }} />
+      <Stack.Screen name="pagos-ai-dashboard" options={{ headerShown: true }} />
+      <Stack.Screen name="backyard-measure" options={{ headerShown: true }} />
+      <Stack.Screen name="damage-inspection" options={{ headerShown: true }} />
+      <Stack.Screen name="ai-cost-analyzer" options={{ headerShown: true }} />
+      <Stack.Screen name="ai-office" options={{ headerShown: true }} />
+      <Stack.Screen name="analytics" options={{ headerShown: true }} />
+      <Stack.Screen name="contracts" options={{ headerShown: true }} />
+      <Stack.Screen name="time-cards" options={{ headerShown: true }} />
       <Stack.Screen name="+not-found" />
     </Stack>
   );
 }
 
 export default function RootLayout() {
+  console.log("[RootLayout] Root layout rendering");
+  
   useEffect(() => {
+    console.log("[RootLayout] Hiding splash screen");
     SplashScreen.hideAsync();
   }, []);
 
+  console.log("[RootLayout] Rendering provider tree");
+  
   return (
     <trpc.Provider client={trpcClient} queryClient={queryClient}>
       <QueryClientProvider client={queryClient}>

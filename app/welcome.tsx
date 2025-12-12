@@ -9,6 +9,8 @@ const { height } = Dimensions.get("window");
 
 export default function WelcomeScreen() {
   const router = useRouter();
+  
+  console.log("[Welcome] Welcome screen rendered");
 
   return (
     <LinearGradient
