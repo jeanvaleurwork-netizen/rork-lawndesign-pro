@@ -1,8 +1,5 @@
 import { z } from "zod";
 import { publicProcedure } from "../../create-context";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-
-const CREW_STORAGE_KEY = "crew_members_v1";
 
 export interface CrewMember {
   id: string;
@@ -25,25 +22,7 @@ export interface CrewMember {
   updatedAt: string;
 }
 
-async function getCrewMembers(): Promise<CrewMember[]> {
-  try {
-    const stored = await AsyncStorage.getItem(CREW_STORAGE_KEY);
-    return stored ? JSON.parse(stored) : [];
-  } catch (error) {
-    console.error("[Crew] Failed to get crew members:", error);
-    return [];
-  }
-}
-
-async function saveCrewMembers(members: CrewMember[]): Promise<void> {
-  try {
-    await AsyncStorage.setItem(CREW_STORAGE_KEY, JSON.stringify(members));
-    console.log("[Crew] Saved crew members:", members.length);
-  } catch (error) {
-    console.error("[Crew] Failed to save crew members:", error);
-    throw new Error("Failed to save crew members");
-  }
-}
+const crewMembers: CrewMember[] = [];
 
 export const getCrewListRoute = publicProcedure
   .input(
@@ -53,15 +32,14 @@ export const getCrewListRoute = publicProcedure
       })
       .optional()
   )
-  .query(async ({ input }) => {
+  .query(({ input }) => {
     console.log("[Crew] Getting crew list for:", input?.companyId || "all");
-    const members = await getCrewMembers();
     
     if (input?.companyId) {
-      return members.filter((m) => m.companyId === input.companyId);
+      return crewMembers.filter((m) => m.companyId === input.companyId);
     }
     
-    return members;
+    return crewMembers;
   });
 
 export const getCrewByIdRoute = publicProcedure
@@ -70,10 +48,9 @@ export const getCrewByIdRoute = publicProcedure
       id: z.string(),
     })
   )
-  .query(async ({ input }) => {
+  .query(({ input }) => {
     console.log("[Crew] Getting crew member:", input.id);
-    const members = await getCrewMembers();
-    const member = members.find((m) => m.id === input.id);
+    const member = crewMembers.find((m) => m.id === input.id);
     
     if (!member) {
       throw new Error("Crew member not found");
@@ -101,9 +78,8 @@ export const createCrewRoute = publicProcedure
       hoursThisWeek: z.number().default(0),
     })
   )
-  .mutation(async ({ input }) => {
+  .mutation(({ input }) => {
     console.log("[Crew] Creating crew member:", input.name);
-    const members = await getCrewMembers();
     
     const newMember: CrewMember = {
       id: `crew_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
@@ -126,9 +102,7 @@ export const createCrewRoute = publicProcedure
       updatedAt: new Date().toISOString(),
     };
     
-    members.push(newMember);
-    await saveCrewMembers(members);
-    
+    crewMembers.push(newMember);
     console.log("[Crew] Created crew member:", newMember.id);
     return newMember;
   });
@@ -152,26 +126,23 @@ export const updateCrewRoute = publicProcedure
       hoursThisWeek: z.number().optional(),
     })
   )
-  .mutation(async ({ input }) => {
+  .mutation(({ input }) => {
     console.log("[Crew] Updating crew member:", input.id);
-    const members = await getCrewMembers();
-    const index = members.findIndex((m) => m.id === input.id);
+    const index = crewMembers.findIndex((m) => m.id === input.id);
     
     if (index === -1) {
       throw new Error("Crew member not found");
     }
     
     const { id, ...updateData } = input;
-    members[index] = {
-      ...members[index],
+    crewMembers[index] = {
+      ...crewMembers[index],
       ...updateData,
       updatedAt: new Date().toISOString(),
     };
     
-    await saveCrewMembers(members);
-    console.log("[Crew] Updated crew member:", members[index].id);
-    
-    return members[index];
+    console.log("[Crew] Updated crew member:", crewMembers[index].id);
+    return crewMembers[index];
   });
 
 export const deleteCrewRoute = publicProcedure
@@ -180,16 +151,15 @@ export const deleteCrewRoute = publicProcedure
       id: z.string(),
     })
   )
-  .mutation(async ({ input }) => {
+  .mutation(({ input }) => {
     console.log("[Crew] Deleting crew member:", input.id);
-    const members = await getCrewMembers();
-    const filtered = members.filter((m) => m.id !== input.id);
+    const index = crewMembers.findIndex((m) => m.id === input.id);
     
-    if (filtered.length === members.length) {
+    if (index === -1) {
       throw new Error("Crew member not found");
     }
     
-    await saveCrewMembers(filtered);
+    crewMembers.splice(index, 1);
     console.log("[Crew] Deleted crew member:", input.id);
     
     return { success: true, id: input.id };
