@@ -483,11 +483,12 @@ export default function CrewManagementScreen() {
                   <Users size={48} color={Colors.light.muted} />
                   <Text style={styles.emptyStateTitle}>No crews found</Text>
                   <Text style={styles.emptyStateText}>
-                    {searchQuery ? "Try a different search term" : "Create your first crew to get started"}
+                    {searchQuery ? <Text>Try a different search term</Text> : <Text>Create your first crew to get started</Text>}
                   </Text>
                 </View>
-              ) : null}
-              {filteredCrews.map((crew) => (
+              ) : (
+                <>
+                {filteredCrews.map((crew) => (
                 <View key={crew.id} style={styles.crewCard}>
                   <View style={styles.crewHeader}>
                     <View style={styles.crewHeaderLeft}>
@@ -604,6 +605,8 @@ export default function CrewManagementScreen() {
                   </TouchableOpacity>
                 </View>
               ))}
+                </>
+              )}
             </View>
           ) : (
             <View style={styles.section}>
@@ -619,11 +622,12 @@ export default function CrewManagementScreen() {
                   <User size={48} color={Colors.light.muted} />
                   <Text style={styles.emptyStateTitle}>No members found</Text>
                   <Text style={styles.emptyStateText}>
-                    {searchQuery ? "Try a different search term" : "Add your first team member"}
+                    {searchQuery ? <Text>Try a different search term</Text> : <Text>Add your first team member</Text>}
                   </Text>
                 </View>
-              ) : null}
-              {filteredMembers.map((member) => (
+              ) : (
+                <>
+                {filteredMembers.map((member) => (
                 <TouchableOpacity
                   key={member.id}
                   style={styles.individualCard}
@@ -686,6 +690,8 @@ export default function CrewManagementScreen() {
                   </View>
                 </TouchableOpacity>
               ))}
+                </>
+              )}
             </View>
           )}
 
