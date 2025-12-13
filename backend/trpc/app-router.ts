@@ -69,7 +69,6 @@ import { contractsRouter } from "./routes/contracts/route";
 import { smartContractsRouter } from "./routes/smart-contracts/route";
 import { commercialRouter } from "./routes/commercial/route";
 import { crewRouter } from "./routes/crew/route";
-import { stripeRouter } from "./routes/stripe/route";
 
 console.log("[AppRouter] Initializing tRPC router");
 console.log("[AppRouter] Auth routes:", {
@@ -152,7 +151,6 @@ export const appRouter = createTRPCRouter({
   smartContracts: smartContractsRouter,
   commercial: commercialRouter,
   crew: crewRouter,
-  stripe: stripeRouter,
 });
 
 console.log("[AppRouter] Router created successfully");
