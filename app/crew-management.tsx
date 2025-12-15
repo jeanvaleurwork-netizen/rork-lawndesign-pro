@@ -483,7 +483,7 @@ export default function CrewManagementScreen() {
                   <Users size={48} color={Colors.light.muted} />
                   <Text style={styles.emptyStateTitle}>No crews found</Text>
                   <Text style={styles.emptyStateText}>
-                    {searchQuery ? <Text>Try a different search term</Text> : <Text>Create your first crew to get started</Text>}
+                    {searchQuery ? "Try a different search term" : "Create your first crew to get started"}
                   </Text>
                 </View>
               ) : (
@@ -622,7 +622,7 @@ export default function CrewManagementScreen() {
                   <User size={48} color={Colors.light.muted} />
                   <Text style={styles.emptyStateTitle}>No members found</Text>
                   <Text style={styles.emptyStateText}>
-                    {searchQuery ? <Text>Try a different search term</Text> : <Text>Add your first team member</Text>}
+                    {searchQuery ? "Try a different search term" : "Add your first team member"}
                   </Text>
                 </View>
               ) : (
