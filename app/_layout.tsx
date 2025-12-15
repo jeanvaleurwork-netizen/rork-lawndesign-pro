@@ -14,6 +14,7 @@ import { PagosAIProvider } from "@/contexts/PagosAIContext";
 import { OnboardingProvider } from "@/contexts/OnboardingContext";
 import { SubscriptionProvider } from "@/contexts/SubscriptionContext";
 import { CrewProvider } from "@/contexts/CrewContext";
+import { VoiceCallProvider } from "@/contexts/VoiceCallContext";
 import { trpc, trpcClient } from "@/lib/trpc";
 
 SplashScreen.preventAutoHideAsync();
@@ -78,6 +79,8 @@ function RootLayoutNav() {
       <Stack.Screen name="intake-summary" options={{ headerShown: true, title: "Intake Summary" }} />
       <Stack.Screen name="ai-intake-dashboard" options={{ headerShown: true, title: "AI Intake" }} />
       <Stack.Screen name="dispatch-assignment" options={{ headerShown: true, title: "Dispatch" }} />
+      <Stack.Screen name="voice-assistant" options={{ headerShown: false }} />
+      <Stack.Screen name="phone-intake-dashboard" options={{ headerShown: true }} />
       <Stack.Screen name="pricing" options={{ headerShown: false }} />
       <Stack.Screen name="notifications" options={{ headerShown: true }} />
       <Stack.Screen name="admin-dashboard" options={{ headerShown: true }} />
@@ -113,16 +116,18 @@ export default function RootLayout() {
               <TradeProvider>
                 <DataProvider>
                   <CrewProvider>
-                    <PagosAIProvider>
-                      <AIChatProvider>
-                        <LanguageProvider>
-                          <GestureHandlerRootView style={{ flex: 1 }}>
-                            <StatusBar style="dark" />
-                            <RootLayoutNav />
-                          </GestureHandlerRootView>
-                        </LanguageProvider>
-                      </AIChatProvider>
-                    </PagosAIProvider>
+                    <VoiceCallProvider>
+                      <PagosAIProvider>
+                        <AIChatProvider>
+                          <LanguageProvider>
+                            <GestureHandlerRootView style={{ flex: 1 }}>
+                              <StatusBar style="dark" />
+                              <RootLayoutNav />
+                            </GestureHandlerRootView>
+                          </LanguageProvider>
+                        </AIChatProvider>
+                      </PagosAIProvider>
+                    </VoiceCallProvider>
                   </CrewProvider>
                 </DataProvider>
               </TradeProvider>
